@@ -1,0 +1,20 @@
+{
+  "name":              "jonahgeorge/jaeger-client-php",
+  "license":           "MIT",
+  "minimum-stability": "dev",
+  "require":           {
+    "php": ">=7.0",
+    "packaged/thrift" : "0.10.0",
+    "opentracing/opentracing" : "dev-master",
+    "monolog/monolog": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.4"
+  },
+  "autoload":          {
+    "psr-4": {
+      "Jaeger\\": "src\\Jaeger"
+    },
+    "files": ["./src/Jaeger/Constants.php"]
+  }
+}
