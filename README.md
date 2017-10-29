@@ -1,4 +1,4 @@
-[![Build Status][ci-img]][ci]
+[![Build Status][ci-img]][ci] [![PHP version][packagist-img]][packagist]
 
 # Jaegar Bindings for PHP OpenTracing API
 
@@ -13,7 +13,6 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ```sh
 {
   "require": {
-    "opentracing/opentracing": "1.0-beta1",
     "jonahgeorge/jaeger-client-php": "dev-master"
   }
 }
@@ -52,3 +51,5 @@ $tracer->flush();
 
 [ci-img]: https://travis-ci.org/jonahgeorge/jaeger-client-php.svg?branch=travis  
 [ci]: https://travis-ci.org/jonahgeorge/jaeger-client-php
+[packagist-img]: https://badge.fury.io/ph/jonahgeorge%2Fjaeger-client-php.svg
+[packagist]: https://badge.fury.io/ph/jonahgeorge%2Fjaeger-client-php
