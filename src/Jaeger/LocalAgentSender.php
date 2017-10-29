@@ -9,6 +9,7 @@ use Jaeger\ThriftGen\Endpoint;
 use Jaeger\ThriftGen\Span;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
+use Thrift\Transport\TSocket;
 
 class LocalAgentSender
 {
@@ -33,10 +34,10 @@ class LocalAgentSender
         $this->port = $port;
         $this->batchSize = $batchSize;
 
-         $udp = new TUDPTransport($this->host, $this->port);
-         $transport = new TBufferedTransport($udp);
-         $transport->open();
-         $protocol = new TCompactProtocol($transport);
+        $udp = new TUDPTransport($this->host, $this->port);
+        $transport = new TBufferedTransport($udp, 4096, 4096);
+        $transport->open();
+        $protocol = new TCompactProtocol($transport);
 
         // Create client
         $this->client = new AgentClient($protocol);
