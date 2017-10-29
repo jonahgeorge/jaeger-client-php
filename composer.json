@@ -2,6 +2,7 @@
   "name":              "jonahgeorge/jaeger-client-php",
   "license":           "MIT",
   "minimum-stability": "dev",
+  "prefer-stable":     true,
   "require":           {
     "php": ">=7.0",
     "packaged/thrift" : "0.10.0",
