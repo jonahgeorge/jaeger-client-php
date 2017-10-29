@@ -8,6 +8,7 @@ use Jaeger\Reporter\LoggingReporter;
 use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\ConstSampler;
+use Jaeger\Sampler\ProbabilisticSampler;
 use Jaeger\Sampler\SamplerInterface;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -124,9 +125,9 @@ class Config
             return null;
         } elseif ($samplerType === SAMPLER_TYPE_CONST) {
             return new ConstSampler($samplerParam ?? false);
+        } elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
+            return new ProbabilisticSampler((float) $samplerParam);
         }
-//        elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
-//            return new ProbabilisticSampler(rate=float(sampler_param))
 //        } elseif (in_array($samplerType, [SAMPLER_TYPE_RATE_LIMITING, 'rate_limiting'])) {
 //            return RateLimitingSampler(max_traces_per_second=float(sampler_param))
 //        }
