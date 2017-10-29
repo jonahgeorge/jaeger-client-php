@@ -69,6 +69,10 @@ class TUDPTransport extends TTransport
      */
     public function write($buf)
     {
+        if (!$this->isOpen()) {
+            throw new TTransportException('transport is closed');
+        }
+
         $ok = socket_write($this->socket, $buf);
         if ($ok === FALSE) {
             throw new TTransportException('socket_write failed');
