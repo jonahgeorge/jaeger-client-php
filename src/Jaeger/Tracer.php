@@ -13,6 +13,8 @@ use OpenTracing\Exceptions\InvalidSpanOption;
 use OpenTracing\Exceptions\SpanContextNotFound;
 use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing;
+use const OpenTracing\Ext\Tags\SPAN_KIND;
+use const OpenTracing\Ext\Tags\SPAN_KIND_RPC_SERVER;
 use const OpenTracing\Propagation\Formats\BINARY;
 use const OpenTracing\Propagation\Formats\HTTP_HEADERS;
 use const OpenTracing\Propagation\Formats\TEXT_MAP;
@@ -139,10 +141,10 @@ class Tracer implements OpenTracing\Tracer
            $parent = $parent->getContext();
         }
 
-//        rpc_server = tags and \
-//            tags.get(ext_tags.SPAN_KIND) == ext_tags.SPAN_KIND_RPC_SERVER
+        $rpcServer = ($tags !== null) && 
+            ($tags[SPAN_KIND] ?? null) == SPAN_KIND_RPC_SERVER;
 
-        if ($parent === null /* TODO || $parent->isDebugIdContainerOnly */) {
+        if ($parent === null || $parent->isDebugIdContainerOnly()) {
             $traceId = $this->randomId();
             $spanId = $traceId;
             $parentId = null;
@@ -164,15 +166,14 @@ class Tracer implements OpenTracing\Tracer
             }
         } else {
             $traceId = $parent->getTraceId();
-            // TODO if rpc_server and self.one_span_per_rpc:
-//            if ($this->oneSpanPerRpc) {
-//                // Zipkin-style one-span-per-RPC
-//                $spanId = $parent->getSpanId();
-//                $parentId = $parent->getParentId();
-//            } else {
+            if ($rpcServer && $this->oneSpanPerRpc) {
+                // Zipkin-style one-span-per-RPC
+                $spanId = $parent->getSpanId();
+                $parentId = $parent->getParentId();
+            } else {
                 $spanId = $this->randomId();
                 $parentId = $parent->getSpanId();
-//            }
+            }
 
             $flags = $parent->getFlags();
             $baggage = $parent->getBaggage();
@@ -194,8 +195,7 @@ class Tracer implements OpenTracing\Tracer
             $startTime
         );
 
-        # if (rpc_server or not parent_id) and (flags & SAMPLED_FLAG):
-        if ($parentId === null && $flags & SAMPLED_FLAG) {
+        if (($rpcServer || $parentId === null) && ($flags & SAMPLED_FLAG)) {
             // this is a first-in-process span, and is sampled
             $span->setTags($this->tags);
         }

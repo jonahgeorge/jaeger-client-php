@@ -99,4 +99,9 @@ class SpanContext implements OpenTracing\SpanContext
     {
         return $this->debugId;
     }
+
+    public function isDebugIdContainerOnly(): bool
+    {
+        return ($this->traceId === null) && ($this->debugId !== null);
+    }
 }
