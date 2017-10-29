@@ -1,6 +1,11 @@
 #!/bin/sh
 
-pushd idl
+set -e
+
+cd "$(dirname "$0")/.."
+
+git clone https://github.com/uber/jaeger-idl
+pushd jaeger-idl
 
 rm -rf ../src/Jaeger/ThriftGen
 
@@ -13,3 +18,4 @@ rm -rf ../src/Jaeger/ThriftGen/
 mv gen-php/Jaeger/ThriftGen ../src/Jaeger/ThriftGen
 
 popd
+rm -rf jaeger-idl
