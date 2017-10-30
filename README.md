@@ -47,10 +47,10 @@ $tracer->flush();
 
 ## Roadmap
 
-- [#1 Support Span logging](https://github.com/jonahgeorge/jaeger-client-php/issues/1)
-- [#5 Support Span baggage](https://github.com/jonahgeorge/jaeger-client-php/issues/5)
-- [#12 Support Tracer metrics](https://github.com/jonahgeorge/jaeger-client-php/issues/12)
-- [#13 Support Tracer error reporting](https://github.com/jonahgeorge/jaeger-client-php/issues/13)
+- [Support Span logging](https://github.com/jonahgeorge/jaeger-client-php/issues/1)
+- [Support Span baggage](https://github.com/jonahgeorge/jaeger-client-php/issues/5)
+- [Support Tracer metrics](https://github.com/jonahgeorge/jaeger-client-php/issues/12)
+- [Support Tracer error reporting](https://github.com/jonahgeorge/jaeger-client-php/issues/13)
 
 ## License
 
