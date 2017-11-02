@@ -23,7 +23,7 @@ const BAGGAGE_HEADER_PREFIX = 'uberctx-';
 // be found in the UI using this value as a correlation ID.
 const DEBUG_ID_HEADER_KEY = 'jaeger-debug-id';
 
-const JAEGER_CLIENT_VERSION = 'PHP';
+const JAEGER_CLIENT_VERSION = 'PHP-' . PHP_VERSION;
 
 // Tracer-scoped tag that tells the version of Jaeger client library
 const JAEGER_VERSION_TAG_KEY = 'jaeger.version';
