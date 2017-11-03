@@ -16,7 +16,10 @@ class InMemoryReporter implements ReporterInterface
         $this->spans[] = $span;
     }
 
-    public function getSpans(): array
+    /**
+     * @return array
+     */
+    public function getSpans()
     {
         return $this->spans;
     }

@@ -69,7 +69,7 @@ class Tracer implements OpenTracing\Tracer
         $this->reporter = $reporter;
         $this->sampler = $sampler;
         $this->oneSpanPerRpc = $oneSpanPerRpc;
-        $this->logger = $logger ?? new Logger('jaeger_tracing');
+        $this->logger = $logger ?: new Logger('jaeger_tracing');
 
         $this->ipAddress = getHostByName(getHostName());
 
@@ -107,7 +107,10 @@ class Tracer implements OpenTracing\Tracer
         }
     }
 
-    public function getServiceName(): string
+    /**
+     * @return string
+     */
+    public function getServiceName()
     {
         return $this->serviceName;
     }
@@ -125,9 +128,9 @@ class Tracer implements OpenTracing\Tracer
      */
     public function startSpan($operationName, $options = [])
     {
-        $parent = $options['child_of'] ?? null;
-        $tags = $options['tags'] ?? null;
-        $startTime = $options['startTime'] ?? null;
+        $parent = array_key_exists('child_of', $options) ? $options['child_of'] : null;
+        $tags = array_key_exists('child_of', $options) ? $options['child_of'] : null;
+        $startTime = array_key_exists('startTime', $options) ? $options['startTime'] : null;
 
 //        if ($options['references']) {
 //            if (is_array($options['references'])) {
@@ -142,7 +145,7 @@ class Tracer implements OpenTracing\Tracer
         }
 
         $rpcServer = ($tags !== null) && 
-            ($tags[SPAN_KIND] ?? null) == SPAN_KIND_RPC_SERVER;
+            ($tags[SPAN_KIND] ?: null) == SPAN_KIND_RPC_SERVER;
 
         if ($parent === null || $parent->isDebugIdContainerOnly()) {
             $traceId = $this->randomId();
@@ -154,14 +157,14 @@ class Tracer implements OpenTracing\Tracer
                 list($sampled, $samplerTags) = $this->sampler->isSampled($traceId, $operationName);
                 if ($sampled) {
                     $flags = SAMPLED_FLAG;
-                    $tags = $tags ?? [];
+                    $tags = $tags ?: [];
                     foreach ($samplerTags as $key => $value) {
                         $tags[$key] = $value;
                     }
                 }
             } else {  // have debug id
                 $flags = SAMPLED_FLAG | DEBUG_FLAG;
-                $tags = $tags ?? [];
+                $tags = $tags ?: [];
                 $tags[$this->debugIdHeader] = $parent->getDebugId();
             }
         } else {
@@ -191,7 +194,7 @@ class Tracer implements OpenTracing\Tracer
             $spanContext,
             $this,
             $operationName,
-            $tags ?? [],
+            $tags ?: [],
             $startTime
         );
 
@@ -212,7 +215,7 @@ class Tracer implements OpenTracing\Tracer
      */
     public function inject(OpenTracing\SpanContext $spanContext, $format, Writer $carrier)
     {
-        $codec = $this->codecs[$format] ?? null;
+        $codec = array_key_exists($format, $this->codecs) ? $this->codecs[$format] : null;
         if ($codec === null) {
             throw new UnsupportedFormat($format);
         }
@@ -230,7 +233,7 @@ class Tracer implements OpenTracing\Tracer
      */
     public function extract($format, Reader $carrier)
     {
-        $codec = $this->codecs[$format] ?? null;
+        $codec = array_key_exists($format, $this->codecs) ? $this->codecs[$format] : null;
         if ($codec === null) {
             throw new UnsupportedFormat($format);
         }
@@ -265,12 +268,18 @@ class Tracer implements OpenTracing\Tracer
         $this->reporter->reportSpan($span);
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return 'Tracer';
     }
 
-    private function randomId(): int
+    /**
+     * @return int
+     */
+    private function randomId()
     {
         return random_int(0, PHP_INT_MAX);
     }

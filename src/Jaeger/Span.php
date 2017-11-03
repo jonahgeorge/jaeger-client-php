@@ -48,16 +48,16 @@ class Span implements OpenTracing\Span
     public function __construct(
         SpanContext $context,
         Tracer $tracer,
-        string $operationName,
+        $operationName,
         array $tags = [],
-        float $startTime = null
+        $startTime = null
     )
     {
         $this->context = $context;
         $this->tracer = $tracer;
 
         $this->operationName = $operationName;
-        $this->startTime = $startTime ?? $this->timestampMicro();
+        $this->startTime = $startTime ?: $this->timestampMicro();
         $this->endTime = null;
         $this->kind = null;
         $this->peer = null;
@@ -70,12 +70,18 @@ class Span implements OpenTracing\Span
         }
     }
 
-    public function getTracer(): Tracer
+    /**
+     * @return Tracer
+     */
+    public function getTracer()
     {
         return $this->tracer;
     }
 
-    public function isDebug(): bool
+    /**
+     * @return bool
+     */
+    public function isDebug()
     {
         return $this->debug;
     }
@@ -92,7 +98,10 @@ class Span implements OpenTracing\Span
         return $this->endTime;
     }
 
-    public function getOperationName(): string
+    /**
+     * @return string
+     */
+    public function getOperationName()
     {
         return $this->operationName;
     }
@@ -111,7 +120,7 @@ class Span implements OpenTracing\Span
      *
      * @return OpenTracing\SpanContext
      */
-    public function getContext(): SpanContext
+    public function getContext()
     {
         return $this->context;
     }
@@ -139,11 +148,14 @@ class Span implements OpenTracing\Span
             $this->log($logRecord);
         }
 
-        $this->endTime = $finishTime ?? $this->timestampMicro();
+        $this->endTime = $finishTime ?: $this->timestampMicro();
         $this->tracer->reportSpan($this);
     }
 
-    public function isSampled(): bool
+    /**
+     * @return bool
+     */
+    public function isSampled()
     {
         return $this->getContext()->getFlags() & SAMPLED_FLAG == SAMPLED_FLAG;
     }
@@ -182,7 +194,7 @@ class Span implements OpenTracing\Span
 //        }
 
         if ($this->isSampled()) {
-            $special = self::SPECIAL_TAGS[$key] ?? null;
+            $special = array_key_exists($key, self::SPECIAL_TAGS) ? self::SPECIAL_TAGS[$key] : null;
             $handled = False;
 
             if ($special !== null && is_callable($special)) {
@@ -206,13 +218,21 @@ class Span implements OpenTracing\Span
         COMPONENT => 'setComponent',
     ];
 
-    private function setComponent($value): bool
+    /**
+     * @param $value
+     * @return bool
+     */
+    private function setComponent($value)
     {
         $this->component = $value;
         return true;
     }
 
-    private function setSpanKind($value): bool
+    /**
+     * @param $value
+     * @return bool
+     */
+    private function setSpanKind($value)
     {
         if ($value === null || $value === SPAN_KIND_RPC_CLIENT || $value === SPAN_KIND_RPC_SERVER) {
             $this->kind = $value;
@@ -221,7 +241,11 @@ class Span implements OpenTracing\Span
         return false;
     }
 
-    private function setPeerPort($value): bool
+    /**
+     * @param $value
+     * @return bool
+     */
+    private function setPeerPort($value)
     {
         if ($this->peer === null) {
             $this->peer = ['port' => $value];
@@ -231,7 +255,11 @@ class Span implements OpenTracing\Span
         return true;
     }
 
-    private function setPeerHostIpv4($value): bool
+    /**
+     * @param $value
+     * @return bool
+     */
+    private function setPeerHostIpv4($value)
     {
         if ($this->peer === null) {
             $this->peer = ['ipv4' => $value];
@@ -241,7 +269,11 @@ class Span implements OpenTracing\Span
         return true;
     }
 
-    private function setPeerService($value): bool
+    /**
+     * @param $value
+     * @return bool
+     */
+    private function setPeerService($value)
     {
         if ($this->peer === null) {
             $this->peer = ['service_name' => $value];
@@ -287,7 +319,10 @@ class Span implements OpenTracing\Span
         // TODO: Implement getBaggageItem() method.
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return sprintf(
             'Span(operationName=%s startTime=%s endTime=%s)',
@@ -302,12 +337,20 @@ class Span implements OpenTracing\Span
         return $this->tags;
     }
 
-    private function timestampMicro(): int
+    /**
+     * @return int
+     */
+    private function timestampMicro()
     {
         return round(microtime(true) * 1000000);
     }
 
-    private function makeStringTag(string $key, string $value): BinaryAnnotation
+    /**
+     * @param string $key
+     * @param string $value
+     * @return BinaryAnnotation
+     */
+    private function makeStringTag($key, $value)
     {
         if (strlen($value) > 256) {
             $value = substr($value, 0, 256);

@@ -31,7 +31,10 @@ class ConstSampler implements SamplerInterface
     {
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return sprintf('ConstSampler(%s)', $this->decision ? 'True' : 'False');
     }

@@ -20,7 +20,7 @@ class SpanContext implements OpenTracing\SpanContext
         $this->spanId = $spanId;
         $this->parentId = $parentId;
         $this->flags = $flags;
-        $this->baggage = $baggage ?? [];
+        $this->baggage = $baggage ?: [];
         $this->debugId = null;
     }
 
