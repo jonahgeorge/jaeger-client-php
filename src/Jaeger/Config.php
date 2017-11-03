@@ -30,14 +30,14 @@ class Config
 
     public function __construct(
         $config,
-        string $serviceName = null,
+        $serviceName = null,
         LoggerInterface $logger = null
 //        $metricsFactory = null
     )
     {
         $this->config = $config;
 
-        $this->serviceName = $config['service_name'] ?? $serviceName;
+        $this->serviceName = array_key_exists('service_name', $config) ? $config['service_name'] : $serviceName;
         if ($this->serviceName === null) {
             throw new Exception('service_name required in the config or param');
         }
@@ -47,7 +47,7 @@ class Config
 //            logger=logger if self.logging else None,
 //        );
 
-        $this->logger = $logger ?? new Logger('jaeger_tracing');
+        $this->logger = $logger ?: new Logger('jaeger_tracing');
     }
 
     /** @return Tracer|null */
@@ -83,7 +83,12 @@ class Config
         return $tracer;
     }
 
-    public function createTracer(ReporterInterface $reporter, SamplerInterface $sampler): Tracer
+    /**
+     * @param ReporterInterface $reporter
+     * @param SamplerInterface $sampler
+     * @return Tracer
+     */
+    public function createTracer(ReporterInterface $reporter, SamplerInterface $sampler)
     {
         return new Tracer(
             $this->serviceName,
@@ -106,9 +111,9 @@ class Config
         );
     }
 
-    private function getLogging(): bool
+    private function getLogging()
     {
-        return (bool)$this->config['logging'] ?? false;
+        return $this->config['logging'] ? true : false;
     }
 
     /**
@@ -117,14 +122,14 @@ class Config
      */
     private function getSampler()
     {
-        $samplerConfig = $this->config['sampler'] ?? [];
-        $samplerType = $samplerConfig['type'] ?? null;
-        $samplerParam = $samplerConfig['param'] ?? null;
+        $samplerConfig = array_key_exists('sampler', $this->config) ? $this->config['sampler'] : [];
+        $samplerType = array_key_exists('type', $samplerConfig) ? $samplerConfig['type'] : null;
+        $samplerParam = array_key_exists('param', $samplerConfig) ? $samplerConfig['param'] : null;
 
         if ($samplerType === null) {
             return null;
         } elseif ($samplerType === SAMPLER_TYPE_CONST) {
-            return new ConstSampler($samplerParam ?? false);
+            return new ConstSampler($samplerParam ?: false);
         } elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
             return new ProbabilisticSampler((float) $samplerParam);
         }
@@ -135,7 +140,10 @@ class Config
         throw new Exception('Unknown sampler type ' . $samplerType);
     }
 
-    private function getBatchSize(): int
+    /**
+     * @return int
+     */
+    private function getBatchSize()
     {
         if (isset($this->config['reporter_batch_size'])) {
             return (int) $this->config['reporter_batch_size'];
@@ -143,7 +151,10 @@ class Config
         return 10;
     }
 
-    private function getLocalAgentSender(): LocalAgentSender
+    /**
+     * @return LocalAgentSender
+     */
+    private function getLocalAgentSender()
     {
         $this->logger->info('Initializing Jaeger Tracer with UDP reporter');
         return new LocalAgentSender(
@@ -155,21 +166,21 @@ class Config
 
     private function getLocalAgentGroup()
     {
-        return $this->config['local_agent'] ?? null;
+        return array_key_exists('local_agent', $this->config) ? $this->config['local_agent'] : null;
     }
 
-    private function getLocalAgentReportingHost(): string
+    private function getLocalAgentReportingHost()
     {
-        return $this->getLocalAgentGroup()['reporting_host'] ?? DEFAULT_REPORTING_HOST;
+        return $this->getLocalAgentGroup()['reporting_host'] ?: DEFAULT_REPORTING_HOST;
     }
 
-    private function getLocalAgentSamplingPort(): int
+    private function getLocalAgentSamplingPort()
     {
-        return $this->getLocalAgentGroup()['sampling_port'] ?? DEFAULT_SAMPLING_PORT;
+        return $this->getLocalAgentGroup()['sampling_port'] ?: DEFAULT_SAMPLING_PORT;
     }
 
-    private function getLocalAgentReportingPort(): int
+    private function getLocalAgentReportingPort()
     {
-        return $this->getLocalAgentGroup()['reporting_port'] ?? DEFAULT_REPORTING_PORT;
+        return $this->getLocalAgentGroup()['reporting_port'] ?: DEFAULT_REPORTING_PORT;
     }
 }

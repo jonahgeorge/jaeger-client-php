@@ -1,4 +1,4 @@
-[![Build Status][ci-img]][ci] [![PHP version][packagist-img]][packagist]
+[![Build Status][ci-img]][ci] [![PHP version][packagist-img]][packagist] [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg)](https://php.net/)
 
 # Jaegar Bindings for PHP OpenTracing API
 

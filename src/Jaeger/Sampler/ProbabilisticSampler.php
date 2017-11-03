@@ -18,7 +18,12 @@ class ProbabilisticSampler implements SamplerInterface
     private $tags = [];
     private $boundary;
 
-    public function __construct(float $rate)
+    /**
+     * ProbabilisticSampler constructor.
+     * @param float $rate
+     * @throws Exception
+     */
+    public function __construct($rate)
     {
         $this->tags = [
             SAMPLER_TYPE_TAG_KEY => SAMPLER_TYPE_PROBABILISTIC,
@@ -42,7 +47,10 @@ class ProbabilisticSampler implements SamplerInterface
     {
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return "ProbabilisticSampler($this->rate)";
     }

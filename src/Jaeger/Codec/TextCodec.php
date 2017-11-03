@@ -105,16 +105,25 @@ class TextCodec implements CodecInterface
 
     private function spanContextToString($traceId, $spanId, $parentId, $flags)
     {
-        $parentId = $parentId ?? 0;
+        $parentId = $parentId ?: 0;
         return sprintf('%x:%x:%x:%x', $traceId, $spanId, $parentId, $flags);
     }
 
-    private function spanContextFromString($value): array
+    /**
+     * @param $value
+     * @return array
+     */
+    private function spanContextFromString($value)
     {
         return [];
     }
 
-    private function startsWith(string $haystack, string $needle): bool
+    /**
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    private function startsWith($haystack, $needle)
     {
         return substr($haystack, 0, strlen($needle)) == $needle;
     }

@@ -4,13 +4,13 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.0",
+        "php": "^5.6||>=7.0",
         "packaged/thrift": "0.10.0",
         "opentracing/opentracing" : "dev-master#88ad53393dd3dff3c1d9698f72ec42a907eb4054",
         "monolog/monolog": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4"
+        "phpunit/phpunit": "~5.7.19"
     },
     "autoload": {
         "psr-4": {

@@ -31,7 +31,7 @@ class RemoteReporter implements ReporterInterface
         $this->transport = $transport;
         $this->serviceName = $serviceName;
         $this->batchSize = $batchSize;
-        $this->logger = $logger ?? new Logger('jaeger_tracing');
+        $this->logger = $logger ?: new Logger('jaeger_tracing');
     }
 
     public function reportSpan(Span $span)

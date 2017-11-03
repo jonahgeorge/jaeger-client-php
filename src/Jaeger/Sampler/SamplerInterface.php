@@ -6,5 +6,9 @@ interface SamplerInterface
 {
     public function isSampled($traceId, $operation);
     public function close();
-    public function __toString(): string;
+
+    /**
+     * @return string
+     */
+    public function __toString();
 }
