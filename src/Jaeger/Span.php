@@ -2,8 +2,8 @@
 
 namespace Jaeger;
 
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
 use OpenTracing;
 use const OpenTracing\Ext\Tags\COMPONENT;
 use const OpenTracing\Ext\Tags\PEER_HOST_IPV4;
