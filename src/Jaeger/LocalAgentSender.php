@@ -2,14 +2,13 @@
 
 namespace Jaeger;
 
-use Jaeger\ThriftGen\AgentClient;
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
-use Jaeger\ThriftGen\Endpoint;
-use Jaeger\ThriftGen\Span;
+use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\Endpoint;
+use Jaeger\Thrift\Agent\Zipkin\Span;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
-use Thrift\Transport\TSocket;
 
 class LocalAgentSender
 {
@@ -86,11 +85,11 @@ class LocalAgentSender
 
     /**
      * @param \Jaeger\Span[] $spans
-     * @return \Jaeger\ThriftGen\Span[]
+     * @return Span[]
      */
     private function makeZipkinBatch(array $spans): array
     {
-        /** @var \Jaeger\ThriftGen\Span[] */
+        /** @var Span[] */
         $zipkinSpans = [];
 
         foreach ($spans as $span) {
