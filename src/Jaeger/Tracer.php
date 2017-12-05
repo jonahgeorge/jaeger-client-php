@@ -15,9 +15,9 @@ use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing;
 use const OpenTracing\Ext\Tags\SPAN_KIND;
 use const OpenTracing\Ext\Tags\SPAN_KIND_RPC_SERVER;
-use const OpenTracing\Propagation\Formats\BINARY;
-use const OpenTracing\Propagation\Formats\HTTP_HEADERS;
-use const OpenTracing\Propagation\Formats\TEXT_MAP;
+use const OpenTracing\Formats\BINARY;
+use const OpenTracing\Formats\HTTP_HEADERS;
+use const OpenTracing\Formats\TEXT_MAP;
 use OpenTracing\Propagation\Reader;
 use OpenTracing\Propagation\Writer;
 use Psr\Log\LoggerInterface;
@@ -107,6 +107,13 @@ class Tracer implements OpenTracing\Tracer
         }
     }
 
+    public function setSampler(SamplerInterface $sampler)
+    {
+        $this->sampler = $sampler;
+
+        return $this;
+    }
+
     public function getServiceName(): string
     {
         return $this->serviceName;
@@ -141,7 +148,7 @@ class Tracer implements OpenTracing\Tracer
            $parent = $parent->getContext();
         }
 
-        $rpcServer = ($tags !== null) && 
+        $rpcServer = ($tags !== null) &&
             ($tags[SPAN_KIND] ?? null) == SPAN_KIND_RPC_SERVER;
 
         if ($parent === null || $parent->isDebugIdContainerOnly()) {
@@ -210,7 +217,7 @@ class Tracer implements OpenTracing\Tracer
      * @throws UnsupportedFormat when the format is not recognized by the tracer
      * implementation
      */
-    public function inject(OpenTracing\SpanContext $spanContext, $format, Writer $carrier)
+    public function inject(OpenTracing\SpanContext $spanContext, $format, &$carrier)
     {
         $codec = $this->codecs[$format] ?? null;
         if ($codec === null) {
@@ -228,7 +235,7 @@ class Tracer implements OpenTracing\Tracer
      * @throws UnsupportedFormat when the format is not recognized by the tracer
      * implementation
      */
-    public function extract($format, Reader $carrier)
+    public function extract($format, $carrier)
     {
         $codec = $this->codecs[$format] ?? null;
         if ($codec === null) {

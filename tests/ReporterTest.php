@@ -5,7 +5,7 @@ use Jaeger\Reporter\LoggingReporter;
 use Jaeger\Reporter\NullReporter;
 use Jaeger\Span;
 use \PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class ReporterTest extends TestCase
 {
@@ -32,12 +32,13 @@ class ReporterTest extends TestCase
 
     public function testLoggingReporter()
     {
-        $logger = $this->createMock(LoggerInterface::class);
+        $logger = $this->createMock(NullLogger::class);
         $span = $this->createMock(Span::class);
         $reporter = new LoggingReporter($logger);
 
         $logger->method('info')
             ->with($this->stringStartsWith('Reporting span'));
+
         $reporter->reportSpan($span);
     }
 }

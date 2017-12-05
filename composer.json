@@ -6,7 +6,7 @@
     "require": {
         "php": ">=7.0",
         "packaged/thrift": "0.10.0",
-        "opentracing/opentracing" : "dev-master#88ad53393dd3dff3c1d9698f72ec42a907eb4054",
+        "opentracing/opentracing" : "1.0.0-beta2",
         "monolog/monolog": "^1.0"
     },
     "require-dev": {
