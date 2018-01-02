@@ -6,7 +6,7 @@ use Jaeger\SpanContext;
 
 class ZipkinCodec implements CodecInterface
 {
-    public function inject(SpanContext $spanContext, $carrier)
+    public function inject(SpanContext $spanContext, &$carrier)
     {
         $carrier['trace_id'] = $spanContext->getTraceId();
         $carrier['span_id'] = $spanContext->getSpanId();
