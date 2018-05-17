@@ -7,12 +7,16 @@ use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
 use Jaeger\ThriftGen\Endpoint;
 use Jaeger\ThriftGen\Span;
+use const OpenTracing\Ext\Tags\COMPONENT;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
 use Thrift\Transport\TSocket;
 
 class LocalAgentSender
 {
+    const CLIENT_ADDR = "ca";
+    const SERVER_ADDR = "sa";
+
     /** @var Span[] */
     private $spans = [];
 
@@ -131,12 +135,28 @@ class LocalAgentSender
 
     private function addZipkinAnnotations(\Jaeger\Span $span, $endpoint)
     {
-        $tag = $this->makeLocalComponentTag(
-            $span->getComponent() ?? $span->getTracer()->getServiceName(),
-            $endpoint
-        );
+        if ($span->isRpc()) {
+            $isClient = $span->isRpcClient();
 
-        $span->tags[] = $tag;
+            if ($span->peer) {
+                $host = $this->makeEndpoint(
+                    $span->peer['ipv4'] ?? 0,
+                    $span->peer['port'] ?? 0,
+                    $span->peer['service_name'] ?? '');
+
+                $key = ($isClient) ? self::SERVER_ADDR : self::CLIENT_ADDR;
+
+                $peer = $this->makePeerAddressTag($key, $host);
+                $span->tags[$key] = $peer;
+            }
+        } else {
+            $tag = $this->makeLocalComponentTag(
+                $span->getComponent() ?? $span->getTracer()->getServiceName(),
+                $endpoint
+            );
+
+            $span->tags[COMPONENT] = $tag;
+        }
     }
 
     private function makeLocalComponentTag(string $componentName, $endpoint): BinaryAnnotation
@@ -169,5 +189,17 @@ class LocalAgentSender
         }
 
         return ip2long($ipv4);
+    }
+
+    // Used for Zipkin binary annotations like CA/SA (client/server address).
+    // They are modeled as Boolean type with '0x01' as the value.
+    private function makePeerAddressTag($key, $host)
+    {
+        return new BinaryAnnotation([
+            "key" => $key,
+            "value" => '0x01',
+            "annotation_type" => AnnotationType::BOOL,
+            "host" => $host
+        ]);
     }
 }

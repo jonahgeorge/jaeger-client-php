@@ -14,13 +14,13 @@ class SpanContext implements OpenTracing\SpanContext
     private $baggage;
     private $debugId;
 
-    public function __construct($traceId, $spanId, $parentId, $flags, $baggage = null)
+    public function __construct($traceId, $spanId, $parentId, $flags, $baggage = [])
     {
         $this->traceId = $traceId;
         $this->spanId = $spanId;
         $this->parentId = $parentId;
         $this->flags = $flags;
-        $this->baggage = $baggage ?? [];
+        $this->baggage = $baggage;
         $this->debugId = null;
     }
 

@@ -30,17 +30,21 @@ class Span implements OpenTracing\Span
     /** @var float */
     private $endTime;
 
+    /**
+     * SPAN_RPC_CLIENT
+     * @var null|string
+     */
     private $kind;
 
     /** @var array|null */
-    private $peer;
+    public $peer;
 
     private $component;
 
     private $logs;
 
     /** @var BinaryAnnotation[] */
-    public $tags;
+    public $tags = [];
 
     /** @var bool */
     private $debug = false;
@@ -63,7 +67,6 @@ class Span implements OpenTracing\Span
         $this->peer = null;
         $this->component = null;
 
-        $this->tags = [];
         $this->logs = [];
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
@@ -176,22 +179,22 @@ class Span implements OpenTracing\Span
         }
     }
 
-    public function setTag($key, $value)
+    public function setTag($key, $value): Span
     {
 //        if ($key == SAMPLING_PRIORITY) {
 //        }
 
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
-            $handled = False;
+            $handled = false;
 
-            if ($special !== null && is_callable($special)) {
+            if ($special !== null && is_callable([$this, $special])) {
                 $handled = $this->$special($value);
             }
 
             if (!$handled) {
                 $tag = $this->makeStringTag($key, (string) $value);
-                $this->tags[] = $tag;
+                $this->tags[$key] = $tag;
             }
         }
 
@@ -251,6 +254,16 @@ class Span implements OpenTracing\Span
         return true;
     }
 
+    public function isRpc(): bool
+    {
+        return $this->kind == SPAN_KIND_RPC_CLIENT || $this->kind == SPAN_KIND_RPC_SERVER;
+    }
+
+    public function isRpcClient(): bool
+    {
+        return $this->kind == SPAN_KIND_RPC_CLIENT;
+    }
+
     /**
      * Adds a log record to the span
      *
@@ -297,7 +310,7 @@ class Span implements OpenTracing\Span
         );
     }
 
-    public function getTags()
+    public function getTags(): array
     {
         return $this->tags;
     }
