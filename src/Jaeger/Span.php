@@ -30,10 +30,14 @@ class Span implements OpenTracing\Span
     /** @var float */
     private $endTime;
 
+    /**
+     * SPAN_RPC_CLIENT
+     * @var null|string
+     */
     private $kind;
 
     /** @var array|null */
-    private $peer;
+    public $peer;
 
     private $component;
 
@@ -182,9 +186,9 @@ class Span implements OpenTracing\Span
 
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
-            $handled = False;
+            $handled = false;
 
-            if ($special !== null && is_callable($special)) {
+            if ($special !== null && is_callable([$this, $special])) {
                 $handled = $this->$special($value);
             }
 
@@ -248,6 +252,16 @@ class Span implements OpenTracing\Span
             $this->peer['service_name'] = $value;
         }
         return true;
+    }
+
+    public function isRpc(): bool
+    {
+        return $this->kind == SPAN_KIND_RPC_CLIENT || $this->kind == SPAN_KIND_RPC_SERVER;
+    }
+
+    public function isRpcClient(): bool
+    {
+        return $this->kind == SPAN_KIND_RPC_CLIENT;
     }
 
     /**
