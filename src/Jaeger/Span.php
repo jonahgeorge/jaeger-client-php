@@ -40,7 +40,7 @@ class Span implements OpenTracing\Span
     private $logs;
 
     /** @var BinaryAnnotation[] */
-    public $tags;
+    public $tags = [];
 
     /** @var bool */
     private $debug = false;
@@ -63,7 +63,6 @@ class Span implements OpenTracing\Span
         $this->peer = null;
         $this->component = null;
 
-        $this->tags = [];
         $this->logs = [];
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
@@ -176,7 +175,7 @@ class Span implements OpenTracing\Span
         }
     }
 
-    public function setTag($key, $value)
+    public function setTag($key, $value): Span
     {
 //        if ($key == SAMPLING_PRIORITY) {
 //        }
@@ -191,7 +190,7 @@ class Span implements OpenTracing\Span
 
             if (!$handled) {
                 $tag = $this->makeStringTag($key, (string) $value);
-                $this->tags[] = $tag;
+                $this->tags[$key] = $tag;
             }
         }
 
@@ -297,7 +296,7 @@ class Span implements OpenTracing\Span
         );
     }
 
-    public function getTags()
+    public function getTags(): array
     {
         return $this->tags;
     }

@@ -7,6 +7,7 @@ use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
 use Jaeger\ThriftGen\Endpoint;
 use Jaeger\ThriftGen\Span;
+use const OpenTracing\Ext\Tags\COMPONENT;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
 use Thrift\Transport\TSocket;
@@ -136,7 +137,7 @@ class LocalAgentSender
             $endpoint
         );
 
-        $span->tags[] = $tag;
+        $span->tags[COMPONENT] = $tag;
     }
 
     private function makeLocalComponentTag(string $componentName, $endpoint): BinaryAnnotation
