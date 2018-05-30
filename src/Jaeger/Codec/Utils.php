@@ -2,38 +2,47 @@
 
 namespace Jaeger\Codec;
 
-// TODO Can these be done without the bcmath extension?
+/**
+ * Error produced by invalid inputs to `gmp_init` are [uncatchable errors](https://bugs.php.net/bug.php?id=68002)
+ * Because of this, we suppress the function and explicitly check the output.
+ */
 class Utils
 {
     /**
-     * http://php.net/manual/en/ref.bc.php#99130
      * @param string $hex
-     * @return string
+     * @return string|null
      */
-    public static function hexToHeader(string $hex)
+    public static function hexdec(string $hex)
     {
-        if (strlen($hex) == 1) {
-            return hexdec($hex);
-        } else {
-            $remain = substr($hex, 0, -1);
-            $last = substr($hex, -1);
-            return bcadd(bcmul(16, self::hexToHeader($remain)), hexdec($last));
+        $gmp = @gmp_init($hex, 16);
+        if ($gmp === false) {
+            return null;
         }
+
+        $dec = gmp_strval($gmp, 10);
+        if ($dec === false) {
+            return null;
+        }
+
+        return $dec;
     }
 
     /**
-     * http://php.net/manual/en/ref.bc.php#99130
      * @param string $dec
-     * @return string
+     * @return string|null
      */
-    public static function headerToHex(string $dec)
+    public static function dechex(string $dec)
     {
-        $last = bcmod($dec, 16);
-        $remain = bcdiv(bcsub($dec, $last), 16);
-        if ($remain == 0) {
-            return dechex($last);
-        } else {
-            return self::headerToHex($remain) . dechex($last);
+        $gmp = @gmp_init($dec, 10);
+        if ($gmp === false) {
+            return null;
         }
+
+        $hex =  gmp_strval($gmp, 16);
+        if ($hex === false) {
+            return null;
+        }
+
+        return $hex;
     }
 }

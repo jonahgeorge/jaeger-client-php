@@ -63,4 +63,41 @@ class B3CodecTest extends TestCase
             DEBUG_FLAG
         ), $spanContext);
     }
+
+    function testExtractWithoutParentSpanId()
+    {
+        // Given
+        $carrier = array(
+            'x-b3-traceid' => '463ac35c9f6413ad48485a3953bb6124',
+            'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
+            'x-b3-flags' => '1',
+        );
+
+        // When
+        $spanContext = $this->codec->extract($carrier);
+
+        // Then
+        $this->assertEquals(new SpanContext(
+            '93351075330931896558786731617803788580',
+            '93351075330931896558786731617803788580',
+            '0',
+            DEBUG_FLAG
+        ), $spanContext);
+    }
+
+    function testExtractInvalidHeader()
+    {
+        // Given
+        $carrier = array(
+            'x-b3-traceid' => 'zzzz',
+            'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
+            'x-b3-flags' => '1',
+        );
+
+        // When
+        $spanContext = $this->codec->extract($carrier);
+
+        // Then
+        $this->assertEquals(null, $spanContext);
+    }
 }

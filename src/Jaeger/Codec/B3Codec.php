@@ -14,17 +14,24 @@ class B3Codec implements CodecInterface
     const PARENT_ID_NAME = 'X-B3-ParentSpanId';
     const FLAGS_NAME = 'X-B3-Flags';
 
+    /**
+     * @param SpanContext $spanContext
+     * @param array $carrier
+     */
     public function inject(SpanContext $spanContext, &$carrier)
     {
-        $carrier[self::TRACE_ID_NAME] = Utils::headerToHex($spanContext->getTraceId());
-        $carrier[self::SPAN_ID_NAME] = Utils::headerToHex($spanContext->getSpanId());
+        $carrier[self::TRACE_ID_NAME] = Utils::dechex($spanContext->getTraceId());
+        $carrier[self::SPAN_ID_NAME] = Utils::dechex($spanContext->getSpanId());
         if ($spanContext->getParentId() != null) {
-            $carrier[self::PARENT_ID_NAME] = Utils::headerToHex($spanContext->getParentId());
+            $carrier[self::PARENT_ID_NAME] = Utils::dechex($spanContext->getParentId());
         }
         $carrier[self::FLAGS_NAME] = (int) $spanContext->getFlags();
     }
 
-    /** @return SpanContext|null */
+    /**
+     * @param array $carrier
+     * @return SpanContext|null
+     */
     public function extract($carrier)
     {
         $traceId = null;
@@ -39,15 +46,15 @@ class B3Codec implements CodecInterface
         }
 
         if (isset($carrier[strtolower(self::TRACE_ID_NAME)])) {
-            $traceId = Utils::hexToHeader($carrier[strtolower(self::TRACE_ID_NAME)]);
+            $traceId = Utils::hexdec($carrier[strtolower(self::TRACE_ID_NAME)]);
         }
 
         if (isset($carrier[strtolower(self::PARENT_ID_NAME)])) {
-            $parentId = Utils::hexToHeader($carrier[strtolower(self::PARENT_ID_NAME)]);
+            $parentId = Utils::hexdec($carrier[strtolower(self::PARENT_ID_NAME)]);
         }
 
         if (isset($carrier[strtolower(self::SPAN_ID_NAME)])) {
-            $spanId = Utils::hexToHeader($carrier[strtolower(self::SPAN_ID_NAME)]);
+            $spanId = Utils::hexdec($carrier[strtolower(self::SPAN_ID_NAME)]);
         }
 
         if (isset($carrier[strtolower(self::FLAGS_NAME)])) {

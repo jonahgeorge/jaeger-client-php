@@ -12,7 +12,7 @@ class UtilsTest extends TestCase
         $traceId = '93351075330931896558786731617803788580';
 
         // When
-        $traceIdHeader = Utils::headerToHex($traceId);
+        $traceIdHeader = Utils::dechex($traceId);
 
         // Then
         $this->assertEquals('463ac35c9f6413ad48485a3953bb6124', $traceIdHeader);
@@ -24,9 +24,21 @@ class UtilsTest extends TestCase
         $traceIdHeader = '463ac35c9f6413ad48485a3953bb6124';
 
         // When
-        $traceId = Utils::hexToHeader($traceIdHeader);
+        $traceId = Utils::hexdec($traceIdHeader);
 
         // Then
         $this->assertEquals('93351075330931896558786731617803788580', $traceId);
+    }
+
+    function testInvalidHexToHeader()
+    {
+        // Given
+        $traceIdHeader = 'zzzz';
+
+        // When
+        $traceId = Utils::hexdec($traceIdHeader);
+
+        // Then
+        $this->assertEquals(null, $traceId);
     }
 }
