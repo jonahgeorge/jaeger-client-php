@@ -2,15 +2,19 @@
 
 namespace Jaeger;
 
+use Exception;
 use Jaeger\ThriftGen\AgentClient;
 use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
 use Jaeger\ThriftGen\Endpoint;
 use Jaeger\ThriftGen\Span;
-use const OpenTracing\Ext\Tags\COMPONENT;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
-use Thrift\Transport\TSocket;
+
+use const OpenTracing\Ext\Tags\COMPONENT;
 
 class LocalAgentSender
 {
@@ -32,15 +36,22 @@ class LocalAgentSender
     /** @var AgentClient */
     private $client;
 
-    public function __construct(string $host, int $port, int $batchSize = 10)
+    public function __construct(string $host, int $port, int $batchSize = 10, LoggerInterface $logger = null)
     {
         $this->host = $host;
         $this->port = $port;
         $this->batchSize = $batchSize;
+        $this->logger = $logger ?? new NullLogger();
 
-        $udp = new TUDPTransport($this->host, $this->port);
+        $udp = new TUDPTransport($this->host, $this->port, $this->logger);
+
         $transport = new TBufferedTransport($udp, 4096, 4096);
-        $transport->open();
+        try {
+            $transport->open();
+        } catch (TTransportException $e) {
+            $this->logger->warning($e->getMessage());
+        }
+
         $protocol = new TCompactProtocol($transport);
 
         // Create client
@@ -73,7 +84,12 @@ class LocalAgentSender
 
         $zipkinSpans = $this->makeZipkinBatch($this->spans);
 
-        $this->send($zipkinSpans);
+        try {
+            $this->send($zipkinSpans);
+        } catch (Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
+
         $this->spans = [];
 
         return $count;
