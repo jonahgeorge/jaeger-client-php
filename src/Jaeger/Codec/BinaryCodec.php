@@ -7,7 +7,7 @@ use OpenTracing\Exceptions\UnsupportedFormat;
 
 class BinaryCodec implements CodecInterface
 {
-    public function inject(SpanContext $spanContext, $carrier)
+    public function inject(SpanContext $spanContext, &$carrier)
     {
         throw new UnsupportedFormat('Binary encoding not implemented');
     }

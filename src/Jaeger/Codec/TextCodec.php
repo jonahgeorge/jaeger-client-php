@@ -30,7 +30,7 @@ class TextCodec implements CodecInterface
         $this->prefixLength = strlen($baggageHeaderPrefix);
     }
 
-    public function inject(SpanContext $spanContext, $carrier)
+    public function inject(SpanContext $spanContext, &$carrier)
     {
         $carrier[$this->traceIdHeader] = $this->spanContextToString(
             $spanContext->getTraceId(),
