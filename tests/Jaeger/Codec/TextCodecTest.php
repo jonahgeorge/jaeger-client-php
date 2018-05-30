@@ -1,20 +1,22 @@
 <?php
 
+namespace Jaeger\Codec;
+
 use Jaeger\SpanContext;
-use Jaeger\Codec\ZipkinCodec;
 use PHPUnit\Framework\TestCase;
 
-class ZipkinCodecTest extends TestCase
+class TextCodecTest extends TestCase
 {
-    /**
-     * @var TextCodec
-     */
+    /** @var TextCodec */
     private $textCodec;
+
+    /** @var SpanContext */
+    private $ctx;
 
     public function setUp()
     {
         $this->ctx = new SpanContext('trace-id', 'span-id', null, null);
-        $this->textCodec = new ZipkinCodec();
+        $this->textCodec = new TextCodec();
     }
 
     public function testCanInjectContextInCarrier()
