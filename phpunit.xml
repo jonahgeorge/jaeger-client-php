@@ -16,8 +16,8 @@
     </filter>
 
     <testsuites>
-        <testsuite name="Jaegar Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Jaeger Test Suite">
+            <directory>tests/Jaeger</directory>
         </testsuite>
     </testsuites>
 </phpunit>
