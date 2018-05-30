@@ -2,20 +2,30 @@
 
 namespace Jaeger;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
 
 class TUDPTransport extends TTransport
 {
     private $socket;
+
+    /** @var string */
     private $host;
+
+    /** @var int */
     private $port;
 
-    public function __construct($host, $port)
+    /** @var LoggerInterface */
+    private $logger;
+
+    public function __construct($host, $port, LoggerInterface $logger = null)
     {
         $this->host = $host;
         $this->port = $port;
-        $this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -35,7 +45,7 @@ class TUDPTransport extends TTransport
      */
     public function open()
     {
-        $ok = socket_connect($this->socket, $this->host, $this->port);
+        $ok = @socket_connect($this->socket, $this->host, $this->port);
         if ($ok === FALSE) {
             throw new TTransportException('socket_connect failed');
         }
@@ -46,7 +56,7 @@ class TUDPTransport extends TTransport
      */
     public function close()
     {
-        socket_close($this->socket);
+        @socket_close($this->socket);
         $this->socket = null;
     }
 
@@ -73,7 +83,7 @@ class TUDPTransport extends TTransport
             throw new TTransportException('transport is closed');
         }
 
-        $ok = socket_write($this->socket, $buf);
+        $ok = @socket_write($this->socket, $buf);
         if ($ok === FALSE) {
             throw new TTransportException('socket_write failed');
         }
