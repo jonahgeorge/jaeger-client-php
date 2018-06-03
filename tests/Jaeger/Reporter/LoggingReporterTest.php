@@ -8,7 +8,7 @@ use Psr\Log\NullLogger;
 
 class LoggingReporterTest extends TestCase
 {
-    public function testReportSpan()
+    public function testLoggingReporter()
     {
         $logger = $this->createMock(NullLogger::class);
         $span = $this->createMock(Span::class);
