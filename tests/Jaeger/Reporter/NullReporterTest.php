@@ -12,7 +12,8 @@ class NullReporterTest extends TestCase
         $span = $this->createMock(Span::class);
 
         $reporter = new NullReporter();
-        $reporter->reportSpan($span);
-        $reporter->close();
+        
+        $this->assertNull($reporter->reportSpan($span));
+        $this->assertNull($reporter->close());
     }
 }
