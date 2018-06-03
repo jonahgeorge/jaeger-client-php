@@ -8,10 +8,14 @@ use PHPUnit\Framework\TestCase;
 
 class SpanTest extends TestCase
 {
-    /** @var Tracer */
+    /**
+     * @var Tracer
+     */
     private $tracer;
 
-    /** @var SpanContext */
+    /**
+     * @var SpanContext
+     */
     private $context;
 
     function setUp()

@@ -12,7 +12,9 @@ class BinaryCodec implements CodecInterface
         throw new UnsupportedFormat('Binary encoding not implemented');
     }
 
-    /** @return SpanContext|null */
+    /** 
+     * @return SpanContext|null 
+     */
     public function extract($carrier)
     {
         throw new UnsupportedFormat('Binary encoding not implemented');

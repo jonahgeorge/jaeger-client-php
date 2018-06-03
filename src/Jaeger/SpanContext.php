@@ -3,17 +3,33 @@
 namespace Jaeger;
 
 use ArrayIterator;
-use OpenTracing;
+use OpenTracing\SpanContext as OTSpanContext;
 
-class SpanContext implements OpenTracing\SpanContext
+class SpanContext implements OTSpanContext
 {
     private $traceId;
+
     private $spanId;
+
     private $parentId;
+
     private $flags;
+
+    /**
+     * @var array
+     */
     private $baggage;
+
     private $debugId;
 
+    /**
+     * SpanContext constructor.
+     * @param string $traceId
+     * @param string $spanId
+     * @param string $parentId
+     * @param $flags
+     * @param array $baggage
+     */
     public function __construct($traceId, $spanId, $parentId, $flags, $baggage = [])
     {
         $this->traceId = $traceId;
@@ -24,6 +40,12 @@ class SpanContext implements OpenTracing\SpanContext
         $this->debugId = null;
     }
 
+    /**
+     * TODO
+     * @deprecated
+     * @param $debugId
+     * @return SpanContext
+     */
     public static function withDebugId($debugId)
     {
         $ctx = new SpanContext(null, null, null, null);
@@ -32,54 +54,40 @@ class SpanContext implements OpenTracing\SpanContext
         return $ctx;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getIterator()
     {
         return new ArrayIterator($this->baggage);
     }
 
     /**
-     * @param string $key
-     * @return string
+     * {@inheritdoc}
      */
-    public function getBaggageItem($key): string
+    public function getBaggageItem($key)
     {
-        return $this->baggage[$key];
+        return array_key_exists($key, $this->baggage) ? $this->baggage[$key] : null;
     }
 
     /**
-     * Creates a new SpanContext out of the existing one and the new key:value pair.
-     *
-     * @param string $key
-     * @param string $value
-     * @return \OpenTracing\SpanContext
+     * {@inheritdoc}
      */
     public function withBaggageItem($key, $value)
     {
-        $baggage = $this->baggage;
-        $baggage[$key] = $value;
-
-        return new SpanContext(
-            $this->traceId,
-            $this->spanId,
-            $this->parentId,
-            $this->flags,
-            $baggage
-        );
+        return new self($this->traceId, $this->spanId, $this->parentId, $this->flags, [$key => $value] + $this->baggage);
     }
 
-    /** @return int */
     public function getTraceId()
     {
         return $this->traceId;
     }
 
-    /** @return int|null */
     public function getParentId()
     {
         return $this->parentId;
     }
 
-    /** @return int */
     public function getSpanId()
     {
         return $this->spanId;

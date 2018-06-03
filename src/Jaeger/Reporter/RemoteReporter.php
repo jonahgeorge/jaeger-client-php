@@ -2,27 +2,42 @@
 
 namespace Jaeger\Reporter;
 
-use Jaeger\LocalAgentSender;
+use Jaeger\Sender\UdpSender;
 use Jaeger\Span;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class RemoteReporter implements ReporterInterface
 {
-    /** @var LocalAgentSender */
+    /**
+     * @var UdpSender
+     */
     private $transport;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $serviceName;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $batchSize;
 
+    /**
+     * RemoteReporter constructor.
+     * @param UdpSender $transport
+     * @param string $serviceName
+     * @param int $batchSize
+     * @param LoggerInterface|null $logger
+     */
     public function __construct(
-        $transport,
+        UdpSender $transport,
         string $serviceName,
         int $batchSize = 10,
         LoggerInterface $logger = null
@@ -31,9 +46,12 @@ class RemoteReporter implements ReporterInterface
         $this->transport = $transport;
         $this->serviceName = $serviceName;
         $this->batchSize = $batchSize;
-        $this->logger = $logger ?? new Logger('jaeger_tracing');
+        $this->logger = $logger ?? new NullLogger();
     }
 
+    /**
+     * @param Span $span
+     */
     public function reportSpan(Span $span)
     {
         $this->transport->append($span);

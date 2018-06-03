@@ -6,9 +6,12 @@
     "require": {
         "php": ">=7.0",
         "packaged/thrift": "0.10.0",
-        "opentracing/opentracing" : "1.0.0-beta2",
-        "monolog/monolog": "^1.0",
-        "ext-gmp": "*"
+        "opentracing/opentracing" : "1.0.0-beta5",
+        "phlib/base_convert": "^1.0",
+        "psr/log": "1.0.2"
+    },
+    "provide": {
+        "opentracing/opentracing": "1.0.0-beta5"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.4"

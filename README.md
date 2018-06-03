@@ -13,7 +13,7 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ```sh
 {
   "require": {
-    "jonahgeorge/jaeger-client-php": "0.2.0"
+    "jonahgeorge/jaeger-client-php": "0.3.0"
   }
 }
 ```
@@ -30,7 +30,10 @@ use OpenTracing\GlobalTracer;
 
 $config = new Config(
     [
-        'sampler' => ['type' => 'const', 'param' => true],
+        'sampler' => [
+            'type' => 'const', 
+            'param' => true,
+        ],
         'logging' => true,
     ],
     'your-app-name'
@@ -39,8 +42,8 @@ $config->initializeTracer();
 
 $tracer = GlobalTracer::get();
 
-$span = $tracer->startSpan('TestSpan', []);
-$span->finish();
+$scope = $tracer->startActiveSpan('TestSpan', []);
+$scope->close();
 
 $tracer->flush();
 ```

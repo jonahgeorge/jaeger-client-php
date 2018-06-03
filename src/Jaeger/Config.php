@@ -11,35 +11,48 @@ use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
 use Jaeger\Sampler\SamplerInterface;
 use Psr\Log\LoggerInterface;
-use OpenTracing\GlobalTracer;
 use Psr\Log\NullLogger;
+use OpenTracing\GlobalTracer;
+use Thrift\Exception\TTransportException;
+use Thrift\Transport\TTransport;
+use Thrift\Protocol\TCompactProtocol;
+use Thrift\Transport\TBufferedTransport;
+use Jaeger\ThriftGen\AgentClient;
+use Jaeger\Sender\UdpSender;
 
 class Config
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     private $config;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $serviceName;
 
     private $errorReporter;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $initialized = false;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
     /**
      * Config constructor.
-     *
-     * @param $config
+     * @param array $config
      * @param string|null $serviceName
      * @param LoggerInterface|null $logger
      * @throws Exception
      */
     public function __construct(
-        $config,
+        array $config,
         string $serviceName = null,
         LoggerInterface $logger = null
 //        $metricsFactory = null
@@ -77,7 +90,6 @@ class Config
         if ($sampler === null) {
             $sampler = new ConstSampler(true);
         }
-        $this->logger->info('Using sampler ' . $sampler);
 
         $reporter = new RemoteReporter(
             $channel,
@@ -118,13 +130,7 @@ class Config
     private function initializeGlobalTracer(Tracer $tracer)
     {
         GlobalTracer::set($tracer);
-        $this->logger->info(
-            sprintf(
-                'OpenTracing\GlobalTracer initialized to %s[app_name=%s]',
-                $tracer,
-                $this->serviceName
-            )
-        );
+        $this->logger->info('OpenTracing\GlobalTracer initialized to ' . $tracer->getServiceName());
     }
 
     /**
@@ -171,22 +177,40 @@ class Config
     }
 
     /**
-     * @return LocalAgentSender
+     * @return UdpSender
      */
-    private function getLocalAgentSender(): LocalAgentSender
+    private function getLocalAgentSender(): UdpSender
     {
-        $this->logger->info('Initializing Jaeger Tracer with UDP reporter');
-        return new LocalAgentSender(
+        $udp = new ThriftUdpTransport(
             $this->getLocalAgentReportingHost(),
             $this->getLocalAgentReportingPort(),
+            $this->logger
+        );
+
+        $transport = new TBufferedTransport($udp, 4096, 4096);
+        try {
+            $transport->open();
+        } catch (TTransportException $e) {
+            $this->logger->warning($e->getMessage());
+        }
+
+        $protocol = new TCompactProtocol($transport);
+        $client = new AgentClient($protocol);
+
+        $this->logger->info('Initializing Jaeger Tracer with UDP reporter');
+        return new UdpSender(
+            $client,
             $this->getBatchSize(),
             $this->logger
         );
     }
 
-    private function getLocalAgentGroup()
+    /**
+     * @return array
+     */
+    private function getLocalAgentGroup(): array
     {
-        return $this->config['local_agent'] ?? null;
+        return $this->config['local_agent'] ?? [];
     }
 
     /**

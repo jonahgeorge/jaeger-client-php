@@ -1,69 +1,69 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Sender;
 
 use Exception;
 use Jaeger\ThriftGen\AgentClient;
 use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
 use Jaeger\ThriftGen\Endpoint;
-use Jaeger\ThriftGen\Span;
+use Jaeger\ThriftGen\Span as ThriftSpan;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
+use Jaeger\Span as JaegerSpan;
 
-use const OpenTracing\Ext\Tags\COMPONENT;
+use const OpenTracing\Tags\COMPONENT;
 
-class LocalAgentSender
+class UdpSender
 {
     const CLIENT_ADDR = "ca";
     const SERVER_ADDR = "sa";
 
-    /** @var Span[] */
+    /**
+     * @var JaegerSpan[]
+     */
     private $spans = [];
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $batchSize;
 
-    /** @var string */
-    private $host;
-
-    /** @var int */
-    private $port;
-
-    /** @var AgentClient */
+    /**
+     * @var AgentClient
+     */
     private $client;
 
-    public function __construct(string $host, int $port, int $batchSize = 10, LoggerInterface $logger = null)
-    {
-        $this->host = $host;
-        $this->port = $port;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * UdpSender constructor.
+     * @param AgentClient $client
+     * @param int $batchSize
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        AgentClient $client,
+        int $batchSize = 10,
+        LoggerInterface $logger = null
+    ) {
+        $this->client = $client;
         $this->batchSize = $batchSize;
         $this->logger = $logger ?? new NullLogger();
-
-        $udp = new TUDPTransport($this->host, $this->port, $this->logger);
-
-        $transport = new TBufferedTransport($udp, 4096, 4096);
-        try {
-            $transport->open();
-        } catch (TTransportException $e) {
-            $this->logger->warning($e->getMessage());
-        }
-
-        $protocol = new TCompactProtocol($transport);
-
-        // Create client
-        $this->client = new AgentClient($protocol);
     }
 
     /**
-     * @param \Jaeger\Span $span
+     * @param JaegerSpan $span
      *
      * @return int the number of flushed spans
      */
-    public function append(\Jaeger\Span $span): int
+    public function append(JaegerSpan $span): int
     {
         $this->spans[] = $span;
 
@@ -74,7 +74,9 @@ class LocalAgentSender
         return 0;
     }
 
-    /** @return int the number of flushed spans */
+    /**
+     * @return int the number of flushed spans
+     */
     public function flush(): int
     {
         $count = count($this->spans);
@@ -105,16 +107,16 @@ class LocalAgentSender
     }
 
     /**
-     * @param \Jaeger\Span[] $spans
-     * @return \Jaeger\ThriftGen\Span[]
+     * @param JaegerSpan[] $spans
+     * @return ThriftSpan[]
      */
     private function makeZipkinBatch(array $spans): array
     {
-        /** @var \Jaeger\ThriftGen\Span[] */
+        /** @var ThriftSpan[] */
         $zipkinSpans = [];
 
         foreach ($spans as $span) {
-            /** @var \Jaeger\Span $span */
+            /** @var JaegerSpan $span */
 
             $endpoint = $this->makeEndpoint(
                 $span->getTracer()->getIpAddress(),
@@ -131,7 +133,7 @@ class LocalAgentSender
 
             $this->addZipkinAnnotations($span, $endpoint);
 
-            $zipkinSpan = new Span([
+            $zipkinSpan = new ThriftSpan([
                 'name' => $span->getOperationName(),
                 'id' => $span->getContext()->getSpanId(),
                 'parent_id' => $span->getContext()->getParentId() ?? null,
@@ -149,7 +151,7 @@ class LocalAgentSender
         return $zipkinSpans;
     }
 
-    private function addZipkinAnnotations(\Jaeger\Span $span, $endpoint)
+    private function addZipkinAnnotations(JaegerSpan $span, Endpoint $endpoint)
     {
         if ($span->isRpc()) {
             $isClient = $span->isRpcClient();
@@ -175,7 +177,7 @@ class LocalAgentSender
         }
     }
 
-    private function makeLocalComponentTag(string $componentName, $endpoint): BinaryAnnotation
+    private function makeLocalComponentTag(string $componentName, Endpoint $endpoint): BinaryAnnotation
     {
         return new BinaryAnnotation([
             'key' => "lc",
@@ -196,7 +198,7 @@ class LocalAgentSender
         ]);
     }
 
-    private function ipv4ToInt($ipv4): int
+    private function ipv4ToInt(string $ipv4): int
     {
         if ($ipv4 == 'localhost') {
             $ipv4 = '127.0.0.1';
@@ -209,13 +211,13 @@ class LocalAgentSender
 
     // Used for Zipkin binary annotations like CA/SA (client/server address).
     // They are modeled as Boolean type with '0x01' as the value.
-    private function makePeerAddressTag($key, $host)
+    private function makePeerAddressTag(string $key, Endpoint $host): BinaryAnnotation
     {
         return new BinaryAnnotation([
             "key" => $key,
             "value" => '0x01',
             "annotation_type" => AnnotationType::BOOL,
-            "host" => $host
+            "host" => $host,
         ]);
     }
 }

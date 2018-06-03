@@ -5,14 +5,16 @@ namespace Jaeger;
 use Thrift\Exception\TTransportException;
 use PHPUnit\Framework\TestCase;
 
-class TUDPTransportTest extends TestCase
+class ThriftUdpTransportTest extends TestCase
 {
-    /** @var TUDPTransport */
+    /**
+     * @var ThriftUdpTransport
+     */
     private $transport;
 
     public function setUp()
     {
-        $this->transport = new TUDPTransport('127.0.0.1', 12345);
+        $this->transport = new ThriftUdpTransport('127.0.0.1', 12345);
     }
 
     public function testisOpenWhenOpen()

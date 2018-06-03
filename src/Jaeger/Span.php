@@ -4,30 +4,43 @@ namespace Jaeger;
 
 use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
-use OpenTracing;
-use const OpenTracing\Ext\Tags\COMPONENT;
-use const OpenTracing\Ext\Tags\PEER_HOST_IPV4;
-use const OpenTracing\Ext\Tags\PEER_PORT;
-use const OpenTracing\Ext\Tags\PEER_SERVICE;
-use const OpenTracing\Ext\Tags\SPAN_KIND;
-use const OpenTracing\Ext\Tags\SPAN_KIND_RPC_CLIENT;
-use const OpenTracing\Ext\Tags\SPAN_KIND_RPC_SERVER;
+use OpenTracing\Span as OTSpan;
+use DateTime;
+use DateTimeInterface;
 
-class Span implements OpenTracing\Span
+use const OpenTracing\Tags\COMPONENT;
+use const OpenTracing\Tags\PEER_HOST_IPV4;
+use const OpenTracing\Tags\PEER_PORT;
+use const OpenTracing\Tags\PEER_SERVICE;
+use const OpenTracing\Tags\SPAN_KIND;
+use const OpenTracing\Tags\SPAN_KIND_RPC_CLIENT;
+use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
+
+class Span implements OTSpan
 {
-    /** @var Tracer */
+    /**
+     * @var Tracer
+     */
     private $tracer;
 
-    /** @var SpanContext */
+    /**
+     * @var SpanContext
+     */
     private $context;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $operationName;
 
-    /** @var float */
+    /**
+     * @var int|float|DateTime|null
+     */
     private $startTime;
 
-    /** @var float */
+    /**
+     * @var int|float|DateTime|null
+     */
     private $endTime;
 
     /**
@@ -36,25 +49,39 @@ class Span implements OpenTracing\Span
      */
     private $kind;
 
-    /** @var array|null */
+    /**
+     * @var array|null
+     */
     public $peer;
 
     private $component;
 
     private $logs;
 
-    /** @var BinaryAnnotation[] */
+    /**
+     * @var BinaryAnnotation[]
+     */
     public $tags = [];
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $debug = false;
 
+    /**
+     * Span constructor.
+     * @param SpanContext $context
+     * @param Tracer $tracer
+     * @param string $operationName
+     * @param array $tags
+     * @param int|float|DateTime|null $startTime
+     */
     public function __construct(
         SpanContext $context,
         Tracer $tracer,
         string $operationName,
         array $tags = [],
-        float $startTime = null
+        $startTime = null
     )
     {
         $this->context = $context;
@@ -73,34 +100,49 @@ class Span implements OpenTracing\Span
         }
     }
 
+    /**
+     * @return Tracer
+     */
     public function getTracer(): Tracer
     {
         return $this->tracer;
     }
 
+    /**
+     * @return bool
+     */
     public function isDebug(): bool
     {
         return $this->debug;
     }
 
-    /** @return float|null */
+    /**
+     * @return DateTime|float|int|null
+     */
     public function getStartTime()
     {
         return $this->startTime;
     }
 
-    /** @return float|null */
+    /**
+     * @return DateTime|float|int|null
+     */
     public function getEndTime()
     {
         return $this->endTime;
     }
 
+    /**
+     * @return string
+     */
     public function getOperationName(): string
     {
         return $this->operationName;
     }
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     */
     public function getComponent()
     {
         // TODO
@@ -108,29 +150,15 @@ class Span implements OpenTracing\Span
     }
 
     /**
-     * Yields the SpanContext for this Span. Note that the return value of
-     * Span::getContext() is still valid after a call to Span::finish(), as is
-     * a call to Span::getContext() after a call to Span::finish().
-     *
-     * @return OpenTracing\SpanContext
+     * {@inheritdoc}
      */
-    public function getContext(): SpanContext
+    public function getContext()
     {
         return $this->context;
     }
 
     /**
-     * Sets the end timestamp and finalizes Span state.
-     *
-     * With the exception of calls to Context() (which are always allowed),
-     * finish() must be the last call made to any span instance, and to do
-     * otherwise leads to undefined behavior
-     *
-     * If the span is already finished, a warning should be logged.
-     *
-     * @param float|int|\DateTimeInterface|null $finishTime if passing float or int
-     * it should represent the timestamp (including as many decimal places as you need)
-     * @param array $logRecords
+     * {@inheritdoc}
      */
     public function finish($finishTime = null, array $logRecords = [])
     {
@@ -146,15 +174,21 @@ class Span implements OpenTracing\Span
         $this->tracer->reportSpan($this);
     }
 
+    /**
+     * @return bool
+     */
     public function isSampled(): bool
     {
-        return $this->getContext()->getFlags() & SAMPLED_FLAG == SAMPLED_FLAG;
+        $context = $this->getContext();
+        if ($context instanceof SpanContext) {
+            return $context->getFlags() & SAMPLED_FLAG == SAMPLED_FLAG;
+        }
+
+        return false;
     }
 
     /**
-     * If the span is already finished, a warning should be logged.
-     *
-     * @param string $newOperationName
+     * {@inheritdoc}
      */
     public function overwriteOperationName($newOperationName)
     {
@@ -163,23 +197,19 @@ class Span implements OpenTracing\Span
     }
 
     /**
-     * Sets tags to the Span in key:value format, key must be a string and tag must be either
-     * a string, a boolean value, or a numeric type.
-     *
-     * As an implementor, consider using "standard tags" listed in {@see \OpenTracing\Ext\Tags}
-     *
-     * If the span is already finished, a warning should be logged.
-     *
-     * @param array $tags
+     * {@inheritdoc}
      */
-    public function setTags(array $tags)
+    public function setTags($tags)
     {
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
         }
     }
 
-    public function setTag($key, $value): Span
+    /**
+     * {@inheritdoc}
+     */
+    public function setTag($key, $value)
     {
 //        if ($key == SAMPLING_PRIORITY) {
 //        }
@@ -209,12 +239,18 @@ class Span implements OpenTracing\Span
         COMPONENT => 'setComponent',
     ];
 
+    /**
+     * @return bool
+     */
     private function setComponent($value): bool
     {
         $this->component = $value;
         return true;
     }
 
+    /**
+     * @return bool
+     */
     private function setSpanKind($value): bool
     {
         if ($value === null || $value === SPAN_KIND_RPC_CLIENT || $value === SPAN_KIND_RPC_SERVER) {
@@ -224,6 +260,9 @@ class Span implements OpenTracing\Span
         return false;
     }
 
+    /**
+     * @return bool
+     */
     private function setPeerPort($value): bool
     {
         if ($this->peer === null) {
@@ -234,6 +273,9 @@ class Span implements OpenTracing\Span
         return true;
     }
 
+    /**
+     * @return bool
+     */
     private function setPeerHostIpv4($value): bool
     {
         if ($this->peer === null) {
@@ -244,6 +286,9 @@ class Span implements OpenTracing\Span
         return true;
     }
 
+    /**
+     * @return bool
+     */
     private function setPeerService($value): bool
     {
         if ($this->peer === null) {
@@ -254,23 +299,24 @@ class Span implements OpenTracing\Span
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function isRpc(): bool
     {
         return $this->kind == SPAN_KIND_RPC_CLIENT || $this->kind == SPAN_KIND_RPC_SERVER;
     }
 
+    /**
+     * @return bool
+     */
     public function isRpcClient(): bool
     {
         return $this->kind == SPAN_KIND_RPC_CLIENT;
     }
 
     /**
-     * Adds a log record to the span
-     *
-     * If the span is already finished, a warning should be logged.
-     *
-     * @param array $fields
-     * @param int|float|\DateTimeInterface $timestamp
+     * {@inheritdoc}
      */
     public function log(array $fields = [], $timestamp = null)
     {
@@ -278,48 +324,42 @@ class Span implements OpenTracing\Span
     }
 
     /**
-     * Adds a baggage item to the SpanContext which is immutable so it is required to use SpanContext::withBaggageItem
-     * to get a new one.
-     *
-     * If the span is already finished, a warning should be logged.
-     *
-     * @param string $key
-     * @param string $value
+     * {@inheritdoc}
      */
     public function addBaggageItem($key, $value)
     {
-        // TODO: Implement addBaggageItem() method.
+        $this->context = $this->context->withBaggageItem($key, $value);
     }
 
     /**
-     * @param string $key
-     * @return string
+     * {@inheritdoc}
      */
     public function getBaggageItem($key)
     {
-        // TODO: Implement getBaggageItem() method.
+        return $this->context->getBaggageItem($key);
     }
 
-    public function __toString(): string
-    {
-        return sprintf(
-            'Span(operationName=%s startTime=%s endTime=%s)',
-            $this->operationName,
-            $this->startTime,
-            $this->endTime
-        );
-    }
-
+    /**
+     * @return array
+     */
     public function getTags(): array
     {
         return $this->tags;
     }
 
+    /**
+     * @return int
+     */
     private function timestampMicro(): int
     {
         return round(microtime(true) * 1000000);
     }
 
+    /**
+     * @param string $key
+     * @param string $value
+     * @return BinaryAnnotation
+     */
     private function makeStringTag(string $key, string $value): BinaryAnnotation
     {
         if (strlen($value) > 256) {

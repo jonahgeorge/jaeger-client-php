@@ -7,20 +7,32 @@ use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
 
-class TUDPTransport extends TTransport
+class ThriftUdpTransport extends TTransport
 {
     private $socket;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $host;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $port;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
-    public function __construct($host, $port, LoggerInterface $logger = null)
+    /**
+     * ThriftUdpTransport constructor.
+     * @param string $host
+     * @param int $port
+     * @param LoggerInterface $logger
+     */
+    public function __construct(string $host, int $port, LoggerInterface $logger = null)
     {
         $this->host = $host;
         $this->port = $port;
