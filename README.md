@@ -1,6 +1,6 @@
 [![Build Status][ci-img]][ci] [![PHP version][packagist-img]][packagist]
 
-# Jaegar Bindings for PHP OpenTracing API
+# Jaeger Bindings for PHP OpenTracing API
 
 This is a client-side library that can be used to instrument PHP apps for distributed trace collection, and to send those traces to Jaeger. See the [OpenTracing PHP API](https://github.com/opentracing/opentracing-php) for additional detail.
 
