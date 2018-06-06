@@ -111,7 +111,63 @@ class TextCodec implements CodecInterface
 
     private function spanContextFromString($value): array
     {
-        return [];
+        $parts = explode(':', $value);
+
+        if (count($parts) != 4) {
+            throw new \Exception('Malformed tracer state string');
+        }
+
+        return [
+            $this->baseConvert($parts[0]),
+            $this->baseConvert($parts[1]),
+            $this->baseConvert($parts[2]),
+            $parts[3],
+        ];
+    }
+
+    /**
+     * Converts any string of any base to any other base without PHP native
+     * method base_convert's double and float limitations.
+     *
+     * @url https://github.com/credomane/php_baseconvert
+     *
+     * @param string $numstring
+     * @param int $frombase
+     * @param int $tobase
+     *
+     * @return string
+     */
+    private function baseConvert($numstring, $frombase = 16, $tobase = 10)
+    {
+        $chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+        $tostring = substr($chars, 0, $tobase);
+        $length = strlen($numstring);
+        $number = '';
+        $result = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $number[$i] = strpos($chars, $numstring{$i});
+        }
+
+        do {
+            $divide = 0;
+            $newlen = 0;
+
+            for ($i = 0; $i < $length; $i++) {
+                $divide = $divide * $frombase + $number[$i];
+
+                if ($divide >= $tobase) {
+                    $number[$newlen++] = (int)($divide / $tobase);
+                    $divide = $divide % $tobase;
+                } elseif ($newlen > 0) {
+                    $number[$newlen++] = 0;
+                }
+            }
+            $length = $newlen;
+            $result = $tostring{$divide} . $result;
+        } while ($newlen != 0);
+
+        return $result;
     }
 
     private function startsWith(string $haystack, string $needle): bool
