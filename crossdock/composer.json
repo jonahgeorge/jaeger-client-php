@@ -1,0 +1,7 @@
+{
+    "name": "crossdock",
+    "dependencies": {
+	"zendframework/zend-diactoros": "1.7.2",
+	"zendframework/zend-stratigility": "2.2.2"
+    }
+}
