@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+	crossdock:
+		image: crossdock/crossdock
+		environment:
+
+	php:
+		image: jaegertracing/xdock-php
+
+
+	test_driver:
+		image: jaegertracing/test-driver
+		depends_on:
+			- jaeger-query
+			- jaeger-collector
+			- jaeger-agent
+		ports:
+			- "8080"
