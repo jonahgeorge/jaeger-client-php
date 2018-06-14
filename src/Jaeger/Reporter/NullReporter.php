@@ -9,6 +9,9 @@ use Jaeger\Span;
  */
 class NullReporter implements ReporterInterface
 {
+    /**
+     * @param Span $span
+     */
     public function reportSpan(Span $span)
     {
     }

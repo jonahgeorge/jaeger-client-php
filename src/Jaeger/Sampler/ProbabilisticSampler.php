@@ -13,11 +13,26 @@ use const Jaeger\SAMPLER_TYPE_TAG_KEY;
  */
 class ProbabilisticSampler implements SamplerInterface
 {
-    /** @var float */
+    /**
+     * @var float
+     */
     private $rate;
+
+    /**
+     * @var array
+     */
     private $tags = [];
+
+    /**
+     * @var float|int
+     */
     private $boundary;
 
+    /**
+     * ProbabilisticSampler constructor.
+     * @param float $rate
+     * @throws Exception
+     */
     public function __construct(float $rate)
     {
         $this->tags = [
@@ -33,17 +48,17 @@ class ProbabilisticSampler implements SamplerInterface
         $this->boundary = $rate * PHP_INT_MAX;
     }
 
-    public function isSampled($traceId, $operation = '')
+    /**
+     * @param string $traceId
+     * @param string $operation
+     * @return array
+     */
+    public function isSampled(string $traceId, string $operation = ''): array
     {
         return [($traceId < $this->boundary), $this->tags];
     }
 
     public function close()
     {
-    }
-
-    public function __toString(): string
-    {
-        return "ProbabilisticSampler($this->rate)";
     }
 }

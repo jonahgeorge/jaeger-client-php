@@ -25,6 +25,5 @@ class ProbablisticSamplerTest extends TestCase
         list($sampled, $tags) = $sampler->isSampled(PHP_INT_MAX - 10);
         $this->assertFalse($sampled);
         $sampler->close();
-        $this->assertEquals($sampler->__toString(), 'ProbabilisticSampler(0.5)');
     }
 }

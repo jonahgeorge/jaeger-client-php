@@ -34,9 +34,9 @@ class TextCodecTest extends TestCase
 
         $spanContext = $this->textCodec->extract($carrier);
 
-        self::assertEquals("1717370599544170", $spanContext->getTraceId());
-        self::assertEquals("641546560935337", $spanContext->getSpanId());
-        self::assertEquals("1717370599544170", $spanContext->getParentId());
+        self::assertEquals("3639838965278119798", $spanContext->getTraceId());
+        self::assertEquals("1114643325879075213", $spanContext->getSpanId());
+        self::assertEquals("3639838965278119798", $spanContext->getParentId());
         self::assertEquals(1, $spanContext->getFlags());
     }
 

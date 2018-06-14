@@ -30,6 +30,5 @@ class ConstSamplerTest extends TestCase
         list($sampled, $tags) = $sampler->isSampled(PHP_INT_MAX);
         $this->assertFalse($sampled);
         $this->assertEquals($tags, $this->getTags('const', False));
-        $this->assertEquals('ConstSampler(False)', $sampler->__toString());
     }
 }

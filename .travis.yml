@@ -2,9 +2,11 @@ language: php
 php:
   - '7.0'
   - '7.1'
+  - '7.2'
+  - nightly
 
-install: 
+install:
 - composer install
 
-script: 
+script:
 - vendor/bin/phpunit

@@ -10,10 +10,21 @@ use const Jaeger\SAMPLER_TYPE_TAG_KEY;
  */
 class ConstSampler implements SamplerInterface
 {
+    /**
+     * @var bool
+     */
     private $decision;
+
+    /**
+     * @var array
+     */
     private $tags = [];
 
-    public function __construct($decision = true)
+    /**
+     * ConstSampler constructor.
+     * @param bool $decision
+     */
+    public function __construct(bool $decision = true)
     {
         $this->tags = [
             SAMPLER_TYPE_TAG_KEY => SAMPLER_TYPE_CONST,
@@ -22,17 +33,17 @@ class ConstSampler implements SamplerInterface
         $this->decision = $decision;
     }
 
-    public function isSampled($traceId, $operation = '')
+    /**
+     * @param string $traceId
+     * @param string $operation
+     * @return array
+     */
+    public function isSampled(string $traceId, string $operation = ''): array
     {
         return array($this->decision, $this->tags);
     }
 
     public function close()
     {
-    }
-
-    public function __toString(): string
-    {
-        return sprintf('ConstSampler(%s)', $this->decision ? 'True' : 'False');
     }
 }

@@ -9,14 +9,23 @@ use Jaeger\Span;
  */
 class CompositeReporter implements ReporterInterface
 {
-    /** @var ReporterInterface[] */
+    /**
+     * @var ReporterInterface[]
+     */
     private $reporters;
 
+    /**
+     * CompositeReporter constructor.
+     * @param ReporterInterface ...$reporters
+     */
     public function __construct(ReporterInterface ...$reporters)
     {
         $this->reporters = $reporters;
     }
 
+    /**
+     * @param Span $span
+     */
     public function reportSpan(Span $span)
     {
         foreach ($this->reporters as $reporter) {
