@@ -3,7 +3,7 @@
 namespace Jaeger\Sender;
 
 use PHPUnit\Framework\TestCase;
-use Jaeger\ThriftGen\AgentClient;
+use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Tracer;
 use Jaeger\SpanContext;
 use Jaeger\Span;

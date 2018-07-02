@@ -2,8 +2,8 @@
 
 namespace Jaeger;
 
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
 use OpenTracing\Span as OTSpan;
 use DateTime;
 use DateTimeInterface;
