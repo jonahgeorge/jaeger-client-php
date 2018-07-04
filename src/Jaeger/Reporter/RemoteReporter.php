@@ -15,38 +15,13 @@ class RemoteReporter implements ReporterInterface
     private $transport;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var string
-     */
-    private $serviceName;
-
-    /**
-     * @var int
-     */
-    private $batchSize;
-
-    /**
      * RemoteReporter constructor.
+     *
      * @param UdpSender $transport
-     * @param string $serviceName
-     * @param int $batchSize
-     * @param LoggerInterface|null $logger
      */
-    public function __construct(
-        UdpSender $transport,
-        string $serviceName,
-        int $batchSize = 10,
-        LoggerInterface $logger = null
-    )
+    public function __construct(UdpSender $transport)
     {
         $this->transport = $transport;
-        $this->serviceName = $serviceName;
-        $this->batchSize = $batchSize;
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
