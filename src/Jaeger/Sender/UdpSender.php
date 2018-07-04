@@ -228,10 +228,10 @@ class UdpSender
     {
         $annotations = [];
 
-        foreach ($span->getLogs() as list('fields' => $fields, 'timestamp' => $timestamp)) {
+        foreach ($span->getLogs() as $values) {
             $annotations[] = new Annotation([
-                'timestamp' => $timestamp,
-                'value' => json_encode($fields),
+                'timestamp' => $values['timestamp'],
+                'value' => json_encode($values['fields']),
                 'host' => $endpoint,
             ]);
         }
