@@ -4,6 +4,7 @@ namespace Jaeger\Sender;
 
 use Exception;
 use Jaeger\ThriftGen\AgentClient;
+use Jaeger\ThriftGen\Annotation;
 use Jaeger\ThriftGen\AnnotationType;
 use Jaeger\ThriftGen\BinaryAnnotation;
 use Jaeger\ThriftGen\Endpoint;
@@ -124,10 +125,6 @@ class UdpSender
                 $span->getTracer()->getServiceName()
             );
 
-//            foreach ($span->getLogs() as $event) {
-//                $event->setHost($endpoint);
-//            }
-
             $timestamp = $span->getStartTime();
             $duration = $span->getEndTime() - $span->getStartTime();
 
@@ -138,7 +135,7 @@ class UdpSender
                 'id' => $span->getContext()->getSpanId(),
                 'parent_id' => $span->getContext()->getParentId() ?? null,
                 'trace_id' => $span->getContext()->getTraceId(),
-                'annotations' => array(), // logs
+                'annotations' => $this->createAnnotations($span, $endpoint),
                 'binary_annotations' => $span->getTags(),
                 'debug' => $span->isDebug(),
                 'timestamp' => $timestamp,
@@ -219,5 +216,26 @@ class UdpSender
             "annotation_type" => AnnotationType::BOOL,
             "host" => $host,
         ]);
+    }
+
+    /**
+     * @param JaegerSpan $span
+     * @param Endpoint   $endpoint
+     *
+     * @return array|Annotation[]
+     */
+    private function createAnnotations(JaegerSpan $span, Endpoint $endpoint): array
+    {
+        $annotations = [];
+
+        foreach ($span->getLogs() as list('fields' => $fields, 'timestamp' => $timestamp)) {
+            $annotations[] = new Annotation([
+                'timestamp' => $timestamp,
+                'value' => json_encode($fields),
+                'host' => $endpoint,
+            ]);
+        }
+
+        return $annotations;
     }
 }
