@@ -8,6 +8,8 @@ apt-get update && apt-get install -y git wget unzip zip
 # install php extensions
 docker-php-ext-install bcmath sockets
 
+cd /tmp
+
 # install composer
 EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -26,7 +28,7 @@ rm composer-setup.php
 cd /usr/app
 
 # install application dependencies
-php composer.phar install
+php /tmp/composer.phar install
 
 # run tests
 vendor/bin/phpunit
