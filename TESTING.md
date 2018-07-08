@@ -7,6 +7,7 @@
 - 7.2
 
 ## Run Tests for Supported Versions
+Install [Docker](https://docs.docker.com/install/)
 ```sh
 $ docker run --rm -it -v $(pwd):/usr/app php:5.6 ./usr/app/scripts/php-test.sh
 
