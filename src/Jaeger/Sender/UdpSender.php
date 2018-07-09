@@ -4,15 +4,13 @@ namespace Jaeger\Sender;
 
 use Exception;
 use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\Zipkin\Annotation;
 use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
 use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
 use Jaeger\Thrift\Agent\Zipkin\Endpoint;
 use Jaeger\Thrift\Agent\Zipkin\Span as ThriftSpan;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Thrift\Exception\TTransportException;
-use Thrift\Protocol\TCompactProtocol;
-use Thrift\Transport\TBufferedTransport;
 use Jaeger\Span as JaegerSpan;
 
 use const OpenTracing\Tags\COMPONENT;
