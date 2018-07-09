@@ -91,14 +91,14 @@ class UdpSenderTest extends TestCase
             ->with($this->callback(function ($spans) use ($logTimeStamp) {
                 $this->assertCount(1, $spans);
 
-                /* @var $annotation \Jaeger\ThriftGen\Span */
+                /* @var $annotation \Jaeger\Thrift\Agent\Zipkin\Span */
                 $span = $spans[0];
-                $this->assertInstanceOf(\Jaeger\ThriftGen\Span::class, $span);
+                $this->assertInstanceOf(\Jaeger\Thrift\Agent\Zipkin\Span::class, $span);
                 $this->assertCount(1, $span->annotations);
 
-                /* @var $annotation \Jaeger\ThriftGen\Annotation */
+                /* @var $annotation \Jaeger\Thrift\Agent\Zipkin\Annotation */
                 $annotation = $span->annotations[0];
-                $this->assertInstanceOf(\Jaeger\ThriftGen\Annotation::class, $annotation);
+                $this->assertInstanceOf(\Jaeger\Thrift\Agent\Zipkin\Annotation::class, $annotation);
                 $this->assertSame($logTimeStamp, $annotation->timestamp);
                 $this->assertSame(
                     json_encode([
