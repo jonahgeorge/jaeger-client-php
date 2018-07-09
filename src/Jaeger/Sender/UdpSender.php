@@ -3,17 +3,16 @@
 namespace Jaeger\Sender;
 
 use Exception;
-use Jaeger\ThriftGen\AgentClient;
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
-use Jaeger\ThriftGen\Endpoint;
-use Jaeger\ThriftGen\Span as ThriftSpan;
+use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\Zipkin\Annotation;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\Endpoint;
+use Jaeger\Thrift\Agent\Zipkin\Span as ThriftSpan;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Base\TBase;
-use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TCompactProtocol;
-use Thrift\Transport\TBufferedTransport;
 use Thrift\Transport\TMemoryBuffer;
 use Jaeger\Span as JaegerSpan;
 
@@ -136,10 +135,6 @@ class UdpSender
                 $span->getTracer()->getServiceName()
             );
 
-//            foreach ($span->getLogs() as $event) {
-//                $event->setHost($endpoint);
-//            }
-
             $timestamp = $span->getStartTime();
             $duration = $span->getEndTime() - $span->getStartTime();
 
@@ -150,7 +145,7 @@ class UdpSender
                 'id' => $span->getContext()->getSpanId(),
                 'parent_id' => $span->getContext()->getParentId() ?? null,
                 'trace_id' => $span->getContext()->getTraceId(),
-                'annotations' => array(), // logs
+                'annotations' => $this->createAnnotations($span, $endpoint),
                 'binary_annotations' => $span->getTags(),
                 'debug' => $span->isDebug(),
                 'timestamp' => $timestamp,
@@ -282,5 +277,26 @@ class UdpSender
         $thrift->write(new TCompactProtocol($memoryBuffer));
 
         return $memoryBuffer->available();
+    }
+
+    /*
+     * @param JaegerSpan $span
+     * @param Endpoint   $endpoint
+     *
+     * @return array|Annotation[]
+     */
+    private function createAnnotations(JaegerSpan $span, Endpoint $endpoint): array
+    {
+        $annotations = [];
+
+        foreach ($span->getLogs() as $values) {
+            $annotations[] = new Annotation([
+                'timestamp' => $values['timestamp'],
+                'value' => json_encode($values['fields']),
+                'host' => $endpoint,
+            ]);
+        }
+
+        return $annotations;
     }
 }

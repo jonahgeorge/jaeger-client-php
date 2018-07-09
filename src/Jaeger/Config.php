@@ -17,7 +17,7 @@ use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
 use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
-use Jaeger\ThriftGen\AgentClient;
+use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Sender\UdpSender;
 
 class Config
