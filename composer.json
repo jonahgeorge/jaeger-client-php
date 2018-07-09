@@ -9,7 +9,8 @@
         "opentracing/opentracing" : "1.0.0-beta5",
         "phlib/base_convert": "^1.0",
         "psr/log": "1.0.2",
-         "ext-sockets": "*"
+        "ext-sockets": "*",
+        "guzzlehttp/guzzle": "6.3.3"
     },
     "provide": {
         "opentracing/opentracing": "1.0.0-beta5"

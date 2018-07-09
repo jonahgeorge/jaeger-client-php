@@ -6,7 +6,9 @@ abstract class ThriftSender implements SenderInterface
 {
     abstract public function send(array $spans);
 
-    protected function serialize()
+    protected function serialize(array $spans)
     {
+        // TODO
+        return $spans;
     }
 }
