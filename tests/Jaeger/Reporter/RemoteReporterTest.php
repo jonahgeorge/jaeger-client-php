@@ -13,15 +13,10 @@ class RemoteReporterTest extends TestCase
      */
     private $reporter;
 
-    /**
-     * @var string
-     */
-    private $serviceName = 'test-service';
-
     function setUp()
     {
         $this->transport = $this->createMock(UdpSender::class);
-        $this->reporter = new RemoteReporter($this->transport, $this->serviceName);
+        $this->reporter = new RemoteReporter($this->transport);
     }
 
     function testReportSpan()

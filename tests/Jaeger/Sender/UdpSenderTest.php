@@ -23,10 +23,10 @@ class UdpSenderTest extends TestCase
     function setUp()
     {
         $this->client = $this->createMock(AgentClient::class);
-        $this->sender = new UdpSender($this->client);
+        $this->sender = new UdpSender($this->client, 64000);
     }
 
-    function testAppendUnderBatchSize()
+    function testMaxBufferLength()
     {
         $tracer = $this->createMock(Tracer::class);
         $tracer->method('getIpAddress')->willReturn('');
@@ -35,29 +35,21 @@ class UdpSenderTest extends TestCase
         $context = $this->createMock(SpanContext::class);
 
         $span = $this->createMock(Span::class);
+        $span->method('getOperationName')->willReturn('dummy-operation');
         $span->method('getTracer')->willReturn($tracer);
         $span->method('getContext')->willReturn($context);
 
-        $sender = new UdpSender($this->client);
+        $sender = new UdpSender($this->client, 100);
 
-        $this->assertEquals(0, $sender->append($span));
-    }
+        $this->client->expects($this->at(0))->method('emitZipkinBatch')->with($this->countOf(2));
+        $this->client->expects($this->at(1))->method('emitZipkinBatch')->with($this->countOf(1));
 
-    function testAppendAboveBatchSize()
-    {
-        $tracer = $this->createMock(Tracer::class);
-        $tracer->method('getIpAddress')->willReturn('');
-        $tracer->method('getServiceName')->willReturn('');
-        $context = $this->createMock(SpanContext::class);
-        $span = $this->createMock(Span::class);
-        $span->method('getTracer')->willReturn($tracer);
-        $span->method('getContext')->willReturn($context);
+        // one span has a length of ~25
+        $sender->append($span); // 30 + 25 < 100 - chunk 1
+        $sender->append($span); // 30 + 25 * 2 < 100 - chunk 1
+        $sender->append($span); // 30 + 25 * 3 > 100 - chunk 2
 
-        $sender = new UdpSender($this->client, 0);
-
-        $this->client->expects($this->once())->method('emitZipkinBatch');
-
-        $this->assertEquals(1, $sender->append($span));
+        $this->assertEquals(3, $sender->flush($span));
     }
 
     function testFlush()
