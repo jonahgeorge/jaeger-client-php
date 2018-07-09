@@ -3,11 +3,11 @@
 namespace Jaeger\Sender;
 
 use Exception;
-use Jaeger\ThriftGen\AgentClient;
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
-use Jaeger\ThriftGen\Endpoint;
-use Jaeger\ThriftGen\Span as ThriftSpan;
+use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\Endpoint;
+use Jaeger\Thrift\Agent\Zipkin\Span as ThriftSpan;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;

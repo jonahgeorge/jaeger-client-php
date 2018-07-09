@@ -4,18 +4,24 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-git clone https://github.com/uber/jaeger-idl
-pushd jaeger-idl
+# checkout jaeger thrift files
+rm -rf jaeger-idl
+git clone https://github.com/jaegertracing/jaeger-idl
 
-rm -rf ../src/Jaeger/ThriftGen
+# define thrift cmd
+THRIFT="docker run -u $(id -u) -v '${PWD}:/data' thrift:0.11.0 thrift -o /data/jaeger-idl"
+THRIFT_CMD="${THRIFT} --gen php:psr4,oop"
 
-FILES=thrift/*.thrift
+# generate php files
+FILES=$(find jaeger-idl/thrift -type f -name \*.thrift)
 for f in ${FILES}; do
-  thrift -r --gen php:psr4,nsglobal=Jaeger\\ThriftGen ${f}
+    echo "${THRIFT_CMD} "/data/${f}""
+  eval $THRIFT_CMD "/data/${f}"
 done
 
-rm -rf ../src/Jaeger/ThriftGen/
-mv gen-php/Jaeger/ThriftGen ../src/Jaeger/ThriftGen
+# move generated files
+rm -rf src/Jaeger/Thrift
+mv jaeger-idl/gen-php/Jaeger/Thrift src/Jaeger/Thrift
 
-popd
+# remove thrift files
 rm -rf jaeger-idl
