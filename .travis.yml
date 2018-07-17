@@ -10,7 +10,7 @@ install:
 - composer install
 
 before_script:
-- vendor/bin/phpcs --standard=ZEND --standard=PSR2 --ignore=*/vendor/*,*/src/Jaeger/ThriftGen/* ./
+- vendor/bin/phpcs --standard=ZEND --standard=PSR2 --ignore=*/vendor/*,*/src/Jaeger/ThriftGen/*,*/src/Jaeger/Thrift/* ./
 
 script:
 - vendor/bin/phpunit
