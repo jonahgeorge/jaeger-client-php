@@ -1,10 +1,12 @@
 # PHP OpenTracing API - PHP Version Testing
 
 ## Current PHP Support
-- 5.6
-- 7.0
-- 7.1
-- 7.2
+| version | status |
+|---------|--------|
+| 5.6     | 𝙓      |
+| 7.0     | ✔      |
+| 7.1     | ✔      |
+| 7.2     | ✔      |
 
 ## Run Tests for Supported Versions
 Install [Docker](https://docs.docker.com/install/)
