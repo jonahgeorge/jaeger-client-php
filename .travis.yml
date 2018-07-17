@@ -1,5 +1,6 @@
 language: php
 php:
+  - '5.6'
   - '7.0'
   - '7.1'
   - '7.2'
@@ -7,6 +8,9 @@ php:
 
 install:
 - composer install
+
+before_script:
+- vendor/bin/phpcs --standard=ZEND --standard=PSR2 --ignore=*/vendor/*,*/src/Jaeger/ThriftGen/* ./
 
 script:
 - vendor/bin/phpunit
