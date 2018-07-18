@@ -41,11 +41,10 @@ class Tracer implements OTTracer
      */
     private $sampler;
 
+    /**
+     * @var string
+     */
     private $ipAddress;
-
-    private $metricsFactory;
-
-    private $metrics;
 
     /**
      * @var string
@@ -108,8 +107,6 @@ class Tracer implements OTTracer
         $this->logger = $logger ?? new NullLogger();
         $this->scopeManager = $scopeManager ?? new ScopeManager();
 
-        $this->ipAddress = gethostbyname(gethostname());
-
         $this->debugIdHeader = $debugIdHeader;
 
         $this->codecs = [
@@ -136,10 +133,10 @@ class Tracer implements OTTracer
             $this->tags = array_merge($this->tags, $tags);
         }
 
-        $hostname = gethostname();
-        if ($hostname === FALSE) {
-            $this->logger->error('Unable to determine host name');
-        } else {
+        $hostname = $this->getHostname();
+        $this->ipAddress = $this->getHostByName($hostname);
+
+        if (empty($hostname) != false) {
             $this->tags[JAEGER_HOSTNAME_TAG_KEY] = $hostname;
         }
     }
@@ -340,6 +337,34 @@ class Tracer implements OTTracer
     private function randomId(): string
     {
         return (string) random_int(0, PHP_INT_MAX);
+    }
+
+    /**
+     * The facade to get the host name.
+     *
+     * @return string
+     */
+    protected function getHostName()
+    {
+        return gethostname();
+    }
+
+    /**
+     * The facade to get IPv4 address corresponding to a given Internet host name.
+     *
+     * NOTE: DNS Resolution may take too long, and during this time your script is NOT being executed.
+     *
+     * @param string|null $hostname
+     * @return string
+     */
+    protected function getHostByName($hostname)
+    {
+        if (empty($hostname)) {
+            $this->logger->error('Unable to determine host name');
+            return '127.0.0.1';
+        }
+
+        return gethostbyname($hostname);
     }
 
     /**

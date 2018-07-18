@@ -126,4 +126,23 @@ class TracerTest extends TestCase
 
         $this->tracer->flush();
     }
+
+    /** @test */
+    public function shouldHandleEmptyHostName()
+    {
+        $tracer = new \ReflectionClass(Tracer::class);
+
+        $getHostByName = $tracer->getMethod('getHostByName');
+        $getHostByName->setAccessible(true);
+
+        $stub = $this->getMockBuilder(Tracer::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+
+        $logger = $tracer->getProperty('logger');
+        $logger->setAccessible(true);
+        $logger->setValue($stub, $this->logger);
+
+        $this->assertEquals('127.0.0.1', $getHostByName->invokeArgs($stub, [null]));
+    }
 }
