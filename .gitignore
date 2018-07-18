@@ -5,3 +5,4 @@
 vendor
 composer.lock
 jaeger-client-php.iml
+phpunit.xml
