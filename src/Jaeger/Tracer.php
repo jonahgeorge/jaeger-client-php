@@ -150,18 +150,7 @@ class Tracer implements OTTracer
             $options = StartSpanOptions::create($options);
         }
 
-        // TODO abstract into private method
-        /** @var SpanContext $parent */
-        $parent = (function ($references) {
-            foreach ($references as $reference) {
-                /** @var Reference $reference */
-                if ($reference->isType(Reference::CHILD_OF)) {
-                    return $reference->getContext();
-                }
-            }
-            return null;
-        })($options->getReferences());
-
+        $parent = $this->getParentSpanContext($options);
         $tags = $options->getTags();
 
         $rpcServer = ($tags[SPAN_KIND] ?? null) == SPAN_KIND_RPC_SERVER;
@@ -303,7 +292,7 @@ class Tracer implements OTTracer
             $options = StartSpanOptions::create($options);
         }
 
-        if (!$this->hasParentInOptions($options) && $this->getActiveSpan() !== null) {
+        if (!$this->getParentSpanContext($options) && $this->getActiveSpan() !== null) {
             $parent = $this->getActiveSpan()->getContext();
             $options = $options->withParent($parent);
         }
@@ -315,10 +304,12 @@ class Tracer implements OTTracer
     }
 
     /**
+     * Gets parent span context (if any).
+     *
      * @param StartSpanOptions $options
-     * @return null|OTSpanContext
+     * @return null|OTSpanContext|SpanContext
      */
-    private function hasParentInOptions(StartSpanOptions $options)
+    private function getParentSpanContext(StartSpanOptions $options)
     {
         $references = $options->getReferences();
         foreach ($references as $ref) {
