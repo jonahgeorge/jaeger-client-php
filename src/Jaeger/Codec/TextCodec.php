@@ -49,20 +49,28 @@ class TextCodec implements CodecInterface
         );
 
         $baggage = $spanContext->getBaggage();
-        if ($baggage) {
-            foreach ($baggage as $key => $value) {
-                if ($this->urlEncoding) {
-                    $encodedValue = urlencode($value);
-                } else {
-                    $encodedValue = $value;
-                }
-                $carrier[$this->baggagePrefix . $key] = $encodedValue;
+        if (empty($baggage)) {
+            return;
+        }
+
+        foreach ($baggage as $key => $value) {
+            $encodedValue = $value;
+
+            if ($this->urlEncoding) {
+                $encodedValue = urlencode($value);
             }
+
+            $carrier[$this->baggagePrefix . $key] = $encodedValue;
         }
     }
 
     /**
+     * Extract a span context from a carrier.
+     *
+     * @param array|\Traversable $carrier
      * @return SpanContext|null
+     *
+     * @throws Exception
      */
     public function extract($carrier)
     {
@@ -114,6 +122,15 @@ class TextCodec implements CodecInterface
         return new SpanContext($traceId, $spanId, $parentId, $flags);
     }
 
+    /**
+     * Store a span context to a string.
+     *
+     * @param int $traceId
+     * @param int $spanId
+     * @param int $parentId
+     * @param int $flags
+     * @return string
+     */
     private function spanContextToString($traceId, $spanId, $parentId, $flags)
     {
         $parentId = $parentId ?? 0;
@@ -121,7 +138,12 @@ class TextCodec implements CodecInterface
     }
 
     /**
+     * Create a span context from a string.
+     *
+     * @param string $value
      * @return array
+     *
+     * @throws Exception
      */
     private function spanContextFromString($value): array
     {
@@ -140,6 +162,8 @@ class TextCodec implements CodecInterface
     }
 
     /**
+     * Checks that a string ($haystack) starts with a given prefix ($needle).
+     *
      * @param string $haystack
      * @param string $needle
      * @return bool
