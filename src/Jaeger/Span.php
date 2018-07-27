@@ -54,6 +54,9 @@ class Span implements OTSpan
      */
     public $peer;
 
+    /**
+     * @var string|null
+     */
     private $component;
 
     /**
@@ -200,6 +203,9 @@ class Span implements OTSpan
 
     /**
      * {@inheritdoc}
+     *
+     * @param array|\Traversable $tags
+     * @return void
      */
     public function setTags($tags)
     {
@@ -213,9 +219,6 @@ class Span implements OTSpan
      */
     public function setTag($key, $value)
     {
-//        if ($key == SAMPLING_PRIORITY) {
-//        }
-
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
             $handled = false;
@@ -242,6 +245,12 @@ class Span implements OTSpan
     ];
 
     /**
+     * Sets a low-cardinality identifier of the module, library,
+     * or package that is generating a span.
+     *
+     * @see Span::setTag()
+     *
+     * @param string $value
      * @return bool
      */
     private function setComponent($value): bool
