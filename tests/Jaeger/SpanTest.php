@@ -18,13 +18,48 @@ class SpanTest extends TestCase
      */
     private $context;
 
-    function setUp()
+    /**
+     * {@inheritdoc}
+     */
+    public function setUp()
     {
         $this->tracer = new Tracer('test-service', new NullReporter, new ConstSampler);
         $this->context = new SpanContext(0, 0,0, SAMPLED_FLAG);
     }
 
-    function testSetTag_TagsKeysAreUnique()
+    /** @test */
+    public function shouldSetComponentThroughTag()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+
+        $span->setTag('component', 'libredis');
+
+        $spanReflection = new \ReflectionClass(Span::class);
+        $component = $spanReflection->getProperty('component');
+        $component->setAccessible(true);
+
+        $this->assertEquals( 0, count($span->getTags()));
+        $this->assertEquals( 'libredis', $component->getValue($span));
+    }
+
+    /** @test */
+    public function shouldSetTags()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+
+        $this->assertEquals( 0, count($span->getTags()));
+
+        $span->setTags([
+            'foo-1' => 'test-component-1',
+            'foo-2' => 'test-component-2',
+            'foo-3' => 'test-component-3',
+        ]);
+
+        $this->assertEquals( 3, count($span->getTags()));
+    }
+
+    /** @test */
+    public function shouldOverwriteTheSameTag()
     {
         // Given
         $span = new Span($this->context, $this->tracer, 'test-operation');
@@ -37,8 +72,8 @@ class SpanTest extends TestCase
         $this->assertEquals( 1, count($span->getTags()));
         $this->assertEquals( 'test-component-2', $span->getTags()['foo']->value);
     }
-
-    public function testLog()
+    /** @test */
+    public function shouldAddLogRecordsToTheSpan()
     {
         $span = new Span($this->context, $this->tracer, 'test-operation');
 
