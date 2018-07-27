@@ -219,9 +219,6 @@ class Span implements OTSpan
      */
     public function setTag($key, $value)
     {
-//        if ($key == SAMPLING_PRIORITY) {
-//        }
-
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
             $handled = false;
