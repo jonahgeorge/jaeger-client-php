@@ -28,6 +28,23 @@ class SpanTest extends TestCase
     }
 
     /** @test */
+    public function shouldProperlyInitializeAtConstructTime()
+    {
+        $tags = [
+            'foo-1' => 'test-component-1',
+            'foo-2' => 'test-component-2',
+            'foo-3' => 'test-component-3',
+        ];
+
+        $span = new Span($this->context, $this->tracer, 'test-operation', $tags);
+
+        $this->assertEquals( 3, count($span->getTags()));
+        $this->assertEquals($this->tracer, $span->getTracer());
+        $this->assertEquals(false, $span->isDebug());
+        $this->assertEquals(null, $span->getEndTime());
+    }
+
+    /** @test */
     public function shouldSetComponentThroughTag()
     {
         $span = new Span($this->context, $this->tracer, 'test-operation');
@@ -40,6 +57,7 @@ class SpanTest extends TestCase
 
         $this->assertEquals( 0, count($span->getTags()));
         $this->assertEquals( 'libredis', $component->getValue($span));
+        $this->assertEquals( 'libredis', $span->getComponent());
     }
 
     /** @test */
