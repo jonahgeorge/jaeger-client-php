@@ -156,6 +156,8 @@ class Span implements OTSpan
 
     /**
      * {@inheritdoc}
+     *
+     * @return SpanContext
      */
     public function getContext()
     {
@@ -180,16 +182,15 @@ class Span implements OTSpan
     }
 
     /**
+     * Returns true if the trace should be measured.
+     *
      * @return bool
      */
     public function isSampled(): bool
     {
         $context = $this->getContext();
-        if ($context instanceof SpanContext) {
-            return $context->getFlags() & SAMPLED_FLAG == SAMPLED_FLAG;
-        }
 
-        return false;
+        return ($context->getFlags() & SAMPLED_FLAG) == SAMPLED_FLAG;
     }
 
     /**

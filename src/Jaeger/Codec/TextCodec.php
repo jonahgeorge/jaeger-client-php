@@ -114,7 +114,7 @@ class TextCodec implements CodecInterface
 
         if ($traceId === null) {
             if ($debugId !== null) {
-                return SpanContext::withDebugId($debugId);
+                return new SpanContext(null, null, null, null, [], $debugId);
             }
             return null;
         }
