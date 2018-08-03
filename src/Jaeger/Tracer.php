@@ -90,15 +90,14 @@ class Tracer implements OTTracer
         $serviceName,
         ReporterInterface $reporter,
         SamplerInterface $sampler,
-        $oneSpanPerRpc = True,
+        $oneSpanPerRpc = true,
         LoggerInterface $logger = null,
         ScopeManager $scopeManager = null,
         $traceIdHeader = TRACE_ID_HEADER,
         $baggageHeaderPrefix = BAGGAGE_HEADER_PREFIX,
         $debugIdHeader = DEBUG_ID_HEADER_KEY,
         $tags = null
-    )
-    {
+    ) {
         $this->serviceName = $serviceName;
         $this->reporter = $reporter;
         $this->sampler = $sampler;
@@ -111,13 +110,13 @@ class Tracer implements OTTracer
 
         $this->codecs = [
             TEXT_MAP => new TextCodec(
-                False,
+                false,
                 $traceIdHeader,
                 $baggageHeaderPrefix,
                 $debugIdHeader
             ),
             HTTP_HEADERS => new TextCodec(
-                True,
+                true,
                 $traceIdHeader,
                 $baggageHeaderPrefix,
                 $debugIdHeader

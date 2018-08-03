@@ -67,7 +67,13 @@ class SpanContext implements OTSpanContext
      */
     public function withBaggageItem($key, $value)
     {
-        return new self($this->traceId, $this->spanId, $this->parentId, $this->flags, [$key => $value] + $this->baggage);
+        return new self(
+            $this->traceId,
+            $this->spanId,
+            $this->parentId,
+            $this->flags,
+            [$key => $value] + $this->baggage
+        );
     }
 
     public function getTraceId()

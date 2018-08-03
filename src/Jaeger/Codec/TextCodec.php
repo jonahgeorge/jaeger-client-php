@@ -30,8 +30,7 @@ class TextCodec implements CodecInterface
         string $traceIdHeader = TRACE_ID_HEADER,
         string $baggageHeaderPrefix = BAGGAGE_HEADER_PREFIX,
         string $debugIdHeader = DEBUG_ID_HEADER_KEY
-    )
-    {
+    ) {
         $this->urlEncoding = $urlEncoding;
         $this->traceIdHeader = str_replace('_', '-', strtolower($traceIdHeader));
         $this->baggagePrefix = str_replace('_', '-', strtolower($baggageHeaderPrefix));

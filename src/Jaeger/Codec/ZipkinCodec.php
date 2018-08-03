@@ -43,7 +43,9 @@ class ZipkinCodec implements CodecInterface
         $flags = 0;
 
         if (isset($carrier[strtolower(self::SAMPLED_NAME)])) {
-            if ($carrier[strtolower(self::SAMPLED_NAME)] === "1" || strtolower($carrier[strtolower(self::SAMPLED_NAME)] === "true")) {
+            if ($carrier[strtolower(self::SAMPLED_NAME)] === "1" ||
+                strtolower($carrier[strtolower(self::SAMPLED_NAME)] === "true")
+            ) {
                 $flags = $flags | SAMPLED_FLAG;
             }
         }

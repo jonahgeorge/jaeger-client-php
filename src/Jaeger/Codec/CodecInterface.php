@@ -8,8 +8,9 @@ interface CodecInterface
 {
     public function inject(SpanContext $spanContext, &$carrier);
 
-    /** 
-     * @return SpanContext|null 
+    /**
+     * @param array $carrier
+     * @return SpanContext|null
      */
     public function extract($carrier);
 }

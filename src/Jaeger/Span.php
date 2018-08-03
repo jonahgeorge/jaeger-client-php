@@ -88,8 +88,7 @@ class Span implements OTSpan
         string $operationName,
         array $tags = [],
         $startTime = null
-    )
-    {
+    ) {
         $this->context = $context;
         $this->tracer = $tracer;
 
