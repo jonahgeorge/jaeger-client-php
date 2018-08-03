@@ -4,5 +4,7 @@
 .idea
 vendor
 composer.lock
+composer.phar
 jaeger-client-php.iml
 phpunit.xml
+phpcs.xml
