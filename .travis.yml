@@ -1,12 +1,43 @@
+sudo: false
+dist: trusty
+
 language: php
+
 php:
+  - '5.6'
   - '7.0'
   - '7.1'
   - '7.2'
   - nightly
 
+git:
+  depth: 1
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: nightly
+
+cache:
+  apt: true
+  timeout: 604800
+  directories:
+    - $HOME/.composer/cache
+
+before_install:
+  # https://stackoverflow.com/a/18029286/1661465
+  - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com $GH_TOKEN; fi;
+
 install:
-- composer install
+  - |
+    composer install \
+        --prefer-dist \
+        --no-interaction \
+        --no-ansi \
+        --no-progress \
+        --optimize-autoloader \
+        --no-suggest
 
 script:
-- vendor/bin/phpunit
+  - vendor/bin/phpcs
+  - vendor/bin/phpunit
