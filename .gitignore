@@ -3,6 +3,7 @@
 .project
 .idea
 vendor
+composer.phar
 composer.lock
 jaeger-client-php.iml
 phpunit.xml

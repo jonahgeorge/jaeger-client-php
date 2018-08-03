@@ -48,10 +48,15 @@ $scope->close();
 $tracer->flush();
 ```
 
+## Testing
+
+[PHP Verstion Testing](./TESTING.md)
+
 ## Roadmap
 
 - [Support Span logging](https://github.com/jonahgeorge/jaeger-client-php/issues/1)
 - [Support Span baggage](https://github.com/jonahgeorge/jaeger-client-php/issues/5)
+- [Support PHP Version 5.6](https://github.com/jonahgeorge/jaeger-client-php/issues/11)
 - [Support Tracer metrics](https://github.com/jonahgeorge/jaeger-client-php/issues/12)
 - [Support Tracer error reporting](https://github.com/jonahgeorge/jaeger-client-php/issues/13)
 
