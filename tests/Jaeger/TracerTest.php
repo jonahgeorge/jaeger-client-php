@@ -1,16 +1,20 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
+use InvalidArgumentException;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\SamplerInterface;
+use Jaeger\Scope;
+use Jaeger\ScopeManager;
+use Jaeger\Span;
+use Jaeger\Tracer;
+use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\NoopSpanContext;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
-use InvalidArgumentException;
-use OpenTracing\NoopSpanContext;
-use OpenTracing\Exceptions\UnsupportedFormat;
+use const Jaeger\ZIPKIN_SPAN_FORMAT;
 
 class TracerTest extends TestCase
 {

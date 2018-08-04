@@ -1,7 +1,8 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
+use Jaeger\SpanContext;
 use PHPUnit\Framework\TestCase;
 
 class SpanContextTest extends TestCase

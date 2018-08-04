@@ -1,10 +1,14 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
 use Jaeger\Reporter\NullReporter;
 use Jaeger\Sampler\ConstSampler;
+use Jaeger\Span;
+use Jaeger\SpanContext;
+use Jaeger\Tracer;
 use PHPUnit\Framework\TestCase;
+use const Jaeger\SAMPLED_FLAG;
 
 class SpanTest extends TestCase
 {

@@ -1,10 +1,12 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
 use Exception;
+use Jaeger\Config;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\SamplerInterface;
+use Jaeger\Tracer;
 use OpenTracing\GlobalTracer;
 use PHPUnit\Framework\TestCase;
 

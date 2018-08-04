@@ -1,17 +1,19 @@
 <?php
 
-namespace Jaeger\Reporter;
+namespace Jaeger\Tests\Reporter;
 
-use Jaeger\Span;
+use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Sender\UdpSender;
+use Jaeger\Span;
 use PHPUnit\Framework\TestCase;
 
 class RemoteReporterTest extends TestCase
 {
-    /**
-     * @var RemoteReporter
-     */
+    /** @var RemoteReporter */
     private $reporter;
+
+    /** @var UdpSender */
+    private $transport;
 
     function setUp()
     {
