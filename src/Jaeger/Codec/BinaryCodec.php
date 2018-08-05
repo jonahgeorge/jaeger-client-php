@@ -7,13 +7,27 @@ use OpenTracing\Exceptions\UnsupportedFormat;
 
 class BinaryCodec implements CodecInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::inject
+     *
+     * @param SpanContext $spanContext
+     * @param mixed $carrier
+     *
+     * @return void
+     */
     public function inject(SpanContext $spanContext, &$carrier)
     {
         throw new UnsupportedFormat('Binary encoding not implemented');
     }
 
     /**
-     * @param array $carrier
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::extract
+     *
+     * @param mixed $carrier
      * @return SpanContext|null
      *
      * @throws UnsupportedFormat

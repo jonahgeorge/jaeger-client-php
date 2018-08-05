@@ -204,7 +204,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      *
-     * @param array|\Traversable $tags
+     * @param array $tags
      * @return void
      */
     public function setTags($tags)

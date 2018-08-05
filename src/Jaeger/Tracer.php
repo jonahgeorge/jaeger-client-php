@@ -215,6 +215,16 @@ class Tracer implements OTTracer
 
     /**
      * {@inheritdoc}
+     *
+     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
+     *       that business code execution isn't affected. If possible, catch implementation specific
+     *       exceptions and log more meaningful information.
+     *
+     * @param SpanContext $spanContext
+     * @param string $format
+     * @param mixed $carrier
+     *
+     * @throws UnsupportedFormat
      * @throws InvalidArgumentException
      */
     public function inject(OTSpanContext $spanContext, $format, &$carrier)
@@ -237,6 +247,15 @@ class Tracer implements OTTracer
 
     /**
      * {@inheritdoc}
+     *
+     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
+     *       that business code execution isn't affected. If possible, catch implementation specific
+     *       exceptions and log more meaningful information.
+     *
+     * @param mixed $carrier
+     * @return SpanContext|null
+     *
+     * @throws UnsupportedFormat
      */
     public function extract($format, $carrier)
     {

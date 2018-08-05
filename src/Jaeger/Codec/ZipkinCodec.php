@@ -18,8 +18,14 @@ class ZipkinCodec implements CodecInterface
     const FLAGS_NAME = 'X-B3-Flags';
 
     /**
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::inject
+     *
      * @param SpanContext $spanContext
-     * @param array $carrier
+     * @param mixed $carrier
+     *
+     * @return void
      */
     public function inject(SpanContext $spanContext, &$carrier)
     {
@@ -32,7 +38,11 @@ class ZipkinCodec implements CodecInterface
     }
 
     /**
-     * @param array $carrier
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::extract
+     *
+     * @param mixed $carrier
      * @return SpanContext|null
      */
     public function extract($carrier)
