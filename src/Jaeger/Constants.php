@@ -86,7 +86,7 @@ const DEFAULT_REPORTING_PORT = 5775;
 
 const DEFAULT_SAMPLING_PORT = 5778;
 
-const LOCAL_AGENT_DEFAULT_ENABLED = True;
+const LOCAL_AGENT_DEFAULT_ENABLED = true;
 
 const ZIPKIN_SPAN_FORMAT = 'zipkin-span-format';
 

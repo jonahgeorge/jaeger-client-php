@@ -1,12 +1,34 @@
+sudo: false
+dist: trusty
+
 language: php
+
 php:
+  - '5.6'
   - '7.0'
   - '7.1'
   - '7.2'
   - nightly
 
+git:
+  depth: 1
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php: '5.6'
+    - php: nightly
+
 install:
-- composer install
+  - |
+    composer install \
+        --prefer-dist \
+        --no-interaction \
+        --no-ansi \
+        --no-progress \
+        --optimize-autoloader \
+        --no-suggest
 
 script:
-- vendor/bin/phpunit
+  - vendor/bin/phpcs
+  - vendor/bin/phpunit

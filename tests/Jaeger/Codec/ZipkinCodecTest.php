@@ -1,10 +1,10 @@
 <?php
 
-namespace Jaeger\Codec;
+namespace Jaeger\Tests\Codec;
 
+use Jaeger\Codec\ZipkinCodec;
 use Jaeger\SpanContext;
 use PHPUnit\Framework\TestCase;
-
 use const Jaeger\DEBUG_FLAG;
 use const Jaeger\SAMPLED_FLAG;
 
@@ -31,7 +31,7 @@ class ZipkinCodecTest extends TestCase
             $parentId,
             SAMPLED_FLAG
         );
-        $carrier = array();
+        $carrier = [];
 
         // When
         $this->codec->inject($spanContext, $carrier);
@@ -46,12 +46,12 @@ class ZipkinCodecTest extends TestCase
     function testExtract()
     {
         // Given
-        $carrier = array(
+        $carrier = [
             'x-b3-traceid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-parentspanid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-flags' => '1',
-        );
+        ];
 
         // When
         $spanContext = $this->codec->extract($carrier);
@@ -68,11 +68,11 @@ class ZipkinCodecTest extends TestCase
     function testExtractWithoutParentSpanId()
     {
         // Given
-        $carrier = array(
+        $carrier = [
             'x-b3-traceid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-flags' => '1',
-        );
+        ];
 
         // When
         $spanContext = $this->codec->extract($carrier);
@@ -89,11 +89,11 @@ class ZipkinCodecTest extends TestCase
     function testExtractInvalidHeader()
     {
         // Given
-        $carrier = array(
+        $carrier = [
             'x-b3-traceid' => 'zzzz',
             'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
             'x-b3-flags' => '1',
-        );
+        ];
 
         // When
         $spanContext = $this->codec->extract($carrier);

@@ -1,9 +1,10 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
-use Thrift\Exception\TTransportException;
+use Jaeger\ThriftUdpTransport;
 use PHPUnit\Framework\TestCase;
+use Thrift\Exception\TTransportException;
 
 class ThriftUdpTransportTest extends TestCase
 {

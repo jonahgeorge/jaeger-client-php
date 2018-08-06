@@ -157,7 +157,11 @@ class Config
      */
     private function getLocalAgentSender(): UdpSender
     {
-        $udp = new ThriftUdpTransport($this->getLocalAgentReportingHost(), $this->getLocalAgentReportingPort(), $this->logger);
+        $udp = new ThriftUdpTransport(
+            $this->getLocalAgentReportingHost(),
+            $this->getLocalAgentReportingPort(),
+            $this->logger
+        );
 
         $transport = new TBufferedTransport($udp, $this->getMaxBufferLength(), $this->getMaxBufferLength());
         try {

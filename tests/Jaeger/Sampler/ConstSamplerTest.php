@@ -1,7 +1,8 @@
 <?php
 
-namespace Jaeger\Sampler;
+namespace Jaeger\Tests\Sampler;
 
+use Jaeger\Sampler\ConstSampler;
 use PHPUnit\Framework\TestCase;
 
 class ConstSamplerTest extends TestCase

@@ -88,8 +88,7 @@ class Span implements OTSpan
         string $operationName,
         array $tags = [],
         $startTime = null
-    )
-    {
+    ) {
         $this->context = $context;
         $this->tracer = $tracer;
 
@@ -205,7 +204,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      *
-     * @param array|\Traversable $tags
+     * @param array $tags
      * @return void
      */
     public function setTags($tags)

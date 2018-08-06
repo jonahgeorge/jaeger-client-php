@@ -1,7 +1,8 @@
 <?php
 
-namespace Jaeger\Reporter;
+namespace Jaeger\Tests\Reporter;
 
+use Jaeger\Reporter\InMemoryReporter;
 use Jaeger\Span;
 use PHPUnit\Framework\TestCase;
 

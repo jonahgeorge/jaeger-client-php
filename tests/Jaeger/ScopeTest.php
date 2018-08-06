@@ -1,7 +1,10 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
+use Jaeger\Scope;
+use Jaeger\ScopeManager;
+use Jaeger\Span;
 use PHPUnit\Framework\TestCase;
 
 class ScopeTest extends TestCase

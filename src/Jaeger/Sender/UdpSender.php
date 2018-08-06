@@ -167,7 +167,8 @@ class UdpSender
                 $host = $this->makeEndpoint(
                     $span->peer['ipv4'] ?? 0,
                     $span->peer['port'] ?? 0,
-                    $span->peer['service_name'] ?? '');
+                    $span->peer['service_name'] ?? ''
+                );
 
                 $key = ($isClient) ? self::SERVER_ADDR : self::CLIENT_ADDR;
 

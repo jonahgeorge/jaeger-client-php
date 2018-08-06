@@ -30,8 +30,7 @@ class TextCodec implements CodecInterface
         string $traceIdHeader = TRACE_ID_HEADER,
         string $baggageHeaderPrefix = BAGGAGE_HEADER_PREFIX,
         string $debugIdHeader = DEBUG_ID_HEADER_KEY
-    )
-    {
+    ) {
         $this->urlEncoding = $urlEncoding;
         $this->traceIdHeader = str_replace('_', '-', strtolower($traceIdHeader));
         $this->baggagePrefix = str_replace('_', '-', strtolower($baggageHeaderPrefix));
@@ -39,6 +38,16 @@ class TextCodec implements CodecInterface
         $this->prefixLength = strlen($baggageHeaderPrefix);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::inject
+     *
+     * @param SpanContext $spanContext
+     * @param mixed $carrier
+     *
+     * @return void
+     */
     public function inject(SpanContext $spanContext, &$carrier)
     {
         $carrier[$this->traceIdHeader] = $this->spanContextToString(
@@ -65,9 +74,11 @@ class TextCodec implements CodecInterface
     }
 
     /**
-     * Extract a span context from a carrier.
+     * {@inheritdoc}
      *
-     * @param array|\Traversable $carrier
+     * @see \Jaeger\Tracer::extract
+     *
+     * @param mixed $carrier
      * @return SpanContext|null
      *
      * @throws Exception

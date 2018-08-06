@@ -1,12 +1,15 @@
 <?php
 
-namespace Jaeger\Sender;
+namespace Jaeger\Tests\Sender;
 
-use PHPUnit\Framework\TestCase;
-use Jaeger\Thrift\Agent\AgentClient;
-use Jaeger\Tracer;
-use Jaeger\SpanContext;
+use Jaeger\Sender\UdpSender;
 use Jaeger\Span;
+use Jaeger\SpanContext;
+use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\Zipkin\Annotation as ZipkinAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\Span as ZipkinSpan;
+use Jaeger\Tracer;
+use PHPUnit\Framework\TestCase;
 
 class UdpSenderTest extends TestCase
 {
@@ -83,14 +86,14 @@ class UdpSenderTest extends TestCase
             ->with($this->callback(function ($spans) use ($logTimeStamp) {
                 $this->assertCount(1, $spans);
 
-                /* @var $annotation \Jaeger\Thrift\Agent\Zipkin\Span */
+                /* @var $annotation ZipkinSpan */
                 $span = $spans[0];
-                $this->assertInstanceOf(\Jaeger\Thrift\Agent\Zipkin\Span::class, $span);
+                $this->assertInstanceOf(ZipkinSpan::class, $span);
                 $this->assertCount(1, $span->annotations);
 
-                /* @var $annotation \Jaeger\Thrift\Agent\Zipkin\Annotation */
+                /* @var $annotation ZipkinAnnotation */
                 $annotation = $span->annotations[0];
-                $this->assertInstanceOf(\Jaeger\Thrift\Agent\Zipkin\Annotation::class, $annotation);
+                $this->assertInstanceOf(ZipkinAnnotation::class, $annotation);
                 $this->assertSame($logTimeStamp, $annotation->timestamp);
                 $this->assertSame(
                     json_encode([
