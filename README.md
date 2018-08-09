@@ -10,7 +10,7 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Installation
 
-```sh
+```json
 {
   "require": {
     "jonahgeorge/jaeger-client-php": "0.3.0"
@@ -48,10 +48,15 @@ $scope->close();
 $tracer->flush();
 ```
 
+## Testing
+
+Tests are located in the `tests` directory. See [tests/README.md](./tests/README.md).
+
 ## Roadmap
 
 - [Support Span logging](https://github.com/jonahgeorge/jaeger-client-php/issues/1)
 - [Support Span baggage](https://github.com/jonahgeorge/jaeger-client-php/issues/5)
+- [Support PHP Version 5.6](https://github.com/jonahgeorge/jaeger-client-php/issues/11)
 - [Support Tracer metrics](https://github.com/jonahgeorge/jaeger-client-php/issues/12)
 - [Support Tracer error reporting](https://github.com/jonahgeorge/jaeger-client-php/issues/13)
 
