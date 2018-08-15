@@ -22,13 +22,11 @@ matrix:
 install:
   - |
     composer install \
-        --prefer-dist \
         --no-interaction \
         --no-ansi \
         --no-progress \
-        --optimize-autoloader \
         --no-suggest
 
 script:
-  - vendor/bin/phpcs
-  - vendor/bin/phpunit
+  - composer lint
+  - composer test
