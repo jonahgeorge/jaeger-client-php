@@ -32,14 +32,15 @@ use function Phlib\base_convert;
  * @param string $hex
  * @return string|int
  */
-function hexToInt64($hex) {
+function hexToInt64($hex)
+{
     // If we're on a 32-bit architecture, fall back to base_convert.
     if (PHP_INT_SIZE === 4) {
         return base_convert($hex, 16, 10);
     }
 
     $hi = intval(substr($hex, -16, -8), 16);
-    $lo = intval(substr($hex,  -8,  8), 16);
+    $lo = intval(substr($hex, -8, 8), 16);
 
     return $hi << 32 | $lo;
 }
