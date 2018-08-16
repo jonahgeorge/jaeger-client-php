@@ -41,11 +41,10 @@ class Tracer implements OTTracer
      */
     private $sampler;
 
+    /**
+     * @var string
+     */
     private $ipAddress;
-
-    private $metricsFactory;
-
-    private $metrics;
 
     /**
      * @var string
@@ -91,15 +90,14 @@ class Tracer implements OTTracer
         $serviceName,
         ReporterInterface $reporter,
         SamplerInterface $sampler,
-        $oneSpanPerRpc = True,
+        $oneSpanPerRpc = true,
         LoggerInterface $logger = null,
         ScopeManager $scopeManager = null,
         $traceIdHeader = TRACE_ID_HEADER,
         $baggageHeaderPrefix = BAGGAGE_HEADER_PREFIX,
         $debugIdHeader = DEBUG_ID_HEADER_KEY,
         $tags = null
-    )
-    {
+    ) {
         $this->serviceName = $serviceName;
         $this->reporter = $reporter;
         $this->sampler = $sampler;
@@ -108,19 +106,17 @@ class Tracer implements OTTracer
         $this->logger = $logger ?? new NullLogger();
         $this->scopeManager = $scopeManager ?? new ScopeManager();
 
-        $this->ipAddress = gethostbyname(gethostname());
-
         $this->debugIdHeader = $debugIdHeader;
 
         $this->codecs = [
             TEXT_MAP => new TextCodec(
-                False,
+                false,
                 $traceIdHeader,
                 $baggageHeaderPrefix,
                 $debugIdHeader
             ),
             HTTP_HEADERS => new TextCodec(
-                True,
+                true,
                 $traceIdHeader,
                 $baggageHeaderPrefix,
                 $debugIdHeader
@@ -136,10 +132,10 @@ class Tracer implements OTTracer
             $this->tags = array_merge($this->tags, $tags);
         }
 
-        $hostname = gethostname();
-        if ($hostname === FALSE) {
-            $this->logger->error('Unable to determine host name');
-        } else {
+        $hostname = $this->getHostname();
+        $this->ipAddress = $this->getHostByName($hostname);
+
+        if (empty($hostname) != false) {
             $this->tags[JAEGER_HOSTNAME_TAG_KEY] = $hostname;
         }
     }
@@ -153,18 +149,7 @@ class Tracer implements OTTracer
             $options = StartSpanOptions::create($options);
         }
 
-        // TODO abstract into private method
-        /** @var SpanContext $parent */
-        $parent = (function ($references) {
-            foreach ($references as $reference) {
-                /** @var Reference $reference */
-                if ($reference->isType(Reference::CHILD_OF)) {
-                    return $reference->getContext();
-                }
-            }
-            return null;
-        })($options->getReferences());
-
+        $parent = $this->getParentSpanContext($options);
         $tags = $options->getTags();
 
         $rpcServer = ($tags[SPAN_KIND] ?? null) == SPAN_KIND_RPC_SERVER;
@@ -230,6 +215,16 @@ class Tracer implements OTTracer
 
     /**
      * {@inheritdoc}
+     *
+     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
+     *       that business code execution isn't affected. If possible, catch implementation specific
+     *       exceptions and log more meaningful information.
+     *
+     * @param SpanContext $spanContext
+     * @param string $format
+     * @param mixed $carrier
+     *
+     * @throws UnsupportedFormat
      * @throws InvalidArgumentException
      */
     public function inject(OTSpanContext $spanContext, $format, &$carrier)
@@ -252,6 +247,15 @@ class Tracer implements OTTracer
 
     /**
      * {@inheritdoc}
+     *
+     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
+     *       that business code execution isn't affected. If possible, catch implementation specific
+     *       exceptions and log more meaningful information.
+     *
+     * @param mixed $carrier
+     * @return SpanContext|null
+     *
+     * @throws UnsupportedFormat
      */
     public function extract($format, $carrier)
     {
@@ -306,7 +310,7 @@ class Tracer implements OTTracer
             $options = StartSpanOptions::create($options);
         }
 
-        if (!$this->hasParentInOptions($options) && $this->getActiveSpan() !== null) {
+        if (!$this->getParentSpanContext($options) && $this->getActiveSpan() !== null) {
             $parent = $this->getActiveSpan()->getContext();
             $options = $options->withParent($parent);
         }
@@ -318,10 +322,12 @@ class Tracer implements OTTracer
     }
 
     /**
+     * Gets parent span context (if any).
+     *
      * @param StartSpanOptions $options
-     * @return null|OTSpanContext
+     * @return null|OTSpanContext|SpanContext
      */
-    private function hasParentInOptions(StartSpanOptions $options)
+    private function getParentSpanContext(StartSpanOptions $options)
     {
         $references = $options->getReferences();
         foreach ($references as $ref) {
@@ -340,6 +346,34 @@ class Tracer implements OTTracer
     private function randomId(): string
     {
         return (string) random_int(0, PHP_INT_MAX);
+    }
+
+    /**
+     * The facade to get the host name.
+     *
+     * @return string
+     */
+    protected function getHostName()
+    {
+        return gethostname();
+    }
+
+    /**
+     * The facade to get IPv4 address corresponding to a given Internet host name.
+     *
+     * NOTE: DNS Resolution may take too long, and during this time your script is NOT being executed.
+     *
+     * @param string|null $hostname
+     * @return string
+     */
+    protected function getHostByName($hostname)
+    {
+        if (empty($hostname)) {
+            $this->logger->error('Unable to determine host name');
+            return '127.0.0.1';
+        }
+
+        return gethostbyname($hostname);
     }
 
     /**

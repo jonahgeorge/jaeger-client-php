@@ -1,16 +1,20 @@
 <?php
 
-namespace Jaeger;
+namespace Jaeger\Tests;
 
+use InvalidArgumentException;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\SamplerInterface;
+use Jaeger\Scope;
+use Jaeger\ScopeManager;
+use Jaeger\Span;
+use Jaeger\Tracer;
+use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\NoopSpanContext;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
-use InvalidArgumentException;
-use OpenTracing\NoopSpanContext;
-use OpenTracing\Exceptions\UnsupportedFormat;
+use const Jaeger\ZIPKIN_SPAN_FORMAT;
 
 class TracerTest extends TestCase
 {
@@ -125,5 +129,24 @@ class TracerTest extends TestCase
         $this->reporter->expects($this->once())->method('close');
 
         $this->tracer->flush();
+    }
+
+    /** @test */
+    public function shouldHandleEmptyHostName()
+    {
+        $tracer = new \ReflectionClass(Tracer::class);
+
+        $getHostByName = $tracer->getMethod('getHostByName');
+        $getHostByName->setAccessible(true);
+
+        $stub = $this->getMockBuilder(Tracer::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+
+        $logger = $tracer->getProperty('logger');
+        $logger->setAccessible(true);
+        $logger->setValue($stub, $this->logger);
+
+        $this->assertEquals('127.0.0.1', $getHostByName->invokeArgs($stub, [null]));
     }
 }

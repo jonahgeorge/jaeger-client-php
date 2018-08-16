@@ -2,8 +2,8 @@
 
 namespace Jaeger;
 
-use Jaeger\ThriftGen\AnnotationType;
-use Jaeger\ThriftGen\BinaryAnnotation;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
+use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
 use OpenTracing\Span as OTSpan;
 use DateTime;
 use DateTimeInterface;
@@ -54,9 +54,15 @@ class Span implements OTSpan
      */
     public $peer;
 
+    /**
+     * @var string|null
+     */
     private $component;
 
-    private $logs;
+    /**
+     * @var array
+     */
+    private $logs = [];
 
     /**
      * @var BinaryAnnotation[]
@@ -82,8 +88,7 @@ class Span implements OTSpan
         string $operationName,
         array $tags = [],
         $startTime = null
-    )
-    {
+    ) {
         $this->context = $context;
         $this->tracer = $tracer;
 
@@ -94,7 +99,6 @@ class Span implements OTSpan
         $this->peer = null;
         $this->component = null;
 
-        $this->logs = [];
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
         }
@@ -151,6 +155,8 @@ class Span implements OTSpan
 
     /**
      * {@inheritdoc}
+     *
+     * @return SpanContext
      */
     public function getContext()
     {
@@ -175,16 +181,15 @@ class Span implements OTSpan
     }
 
     /**
+     * Returns true if the trace should be measured.
+     *
      * @return bool
      */
     public function isSampled(): bool
     {
         $context = $this->getContext();
-        if ($context instanceof SpanContext) {
-            return $context->getFlags() & SAMPLED_FLAG == SAMPLED_FLAG;
-        }
 
-        return false;
+        return ($context->getFlags() & SAMPLED_FLAG) == SAMPLED_FLAG;
     }
 
     /**
@@ -198,6 +203,9 @@ class Span implements OTSpan
 
     /**
      * {@inheritdoc}
+     *
+     * @param array $tags
+     * @return void
      */
     public function setTags($tags)
     {
@@ -211,9 +219,6 @@ class Span implements OTSpan
      */
     public function setTag($key, $value)
     {
-//        if ($key == SAMPLING_PRIORITY) {
-//        }
-
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
             $handled = false;
@@ -240,6 +245,12 @@ class Span implements OTSpan
     ];
 
     /**
+     * Sets a low-cardinality identifier of the module, library,
+     * or package that is generating a span.
+     *
+     * @see Span::setTag()
+     *
+     * @param string $value
      * @return bool
      */
     private function setComponent($value): bool
@@ -320,7 +331,41 @@ class Span implements OTSpan
      */
     public function log(array $fields = [], $timestamp = null)
     {
-        // TODO: Implement log() method.
+        if ($timestamp instanceof \DateTimeInterface || $timestamp instanceof \DateTime) {
+            $timestamp = $timestamp->getTimestamp();
+        }
+
+        if ($timestamp !== null) {
+            $timestamp = (int) ($timestamp * 1000000);
+        }
+
+        if ($timestamp < $this->getStartTime()) {
+            $timestamp = $this->timestampMicro();
+        }
+
+        $this->logs[] = [
+            'fields' => $fields,
+            'timestamp' => $timestamp,
+        ];
+    }
+
+    /**
+     * Returns the logs.
+     *
+     * [
+     *      [
+     *          'timestamp' => timestamp in microsecond,
+     *          'fields' => [
+     *              'error' => 'message',
+     *          ]
+     *      ]
+     * ]
+     *
+     * @return array
+     */
+    public function getLogs(): array
+    {
+        return $this->logs;
     }
 
     /**

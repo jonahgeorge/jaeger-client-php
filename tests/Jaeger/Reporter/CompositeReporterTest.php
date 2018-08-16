@@ -1,7 +1,9 @@
 <?php
 
-namespace Jaeger\Reporter;
+namespace Jaeger\Tests\Reporter;
 
+use Jaeger\Reporter\CompositeReporter;
+use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Span;
 use PHPUnit\Framework\TestCase;
 

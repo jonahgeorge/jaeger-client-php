@@ -1,7 +1,8 @@
 <?php
 
-namespace Jaeger\Sampler;
+namespace Jaeger\Tests\Sampler;
 
+use Jaeger\Sampler\ProbabilisticSampler;
 use PHPUnit\Framework\TestCase;
 
 class ProbablisticSamplerTest extends TestCase

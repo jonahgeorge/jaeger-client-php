@@ -1,27 +1,24 @@
 <?php
 
-namespace Jaeger\Reporter;
+namespace Jaeger\Tests\Reporter;
 
-use Jaeger\Span;
+use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Sender\UdpSender;
+use Jaeger\Span;
 use PHPUnit\Framework\TestCase;
 
 class RemoteReporterTest extends TestCase
 {
-    /**
-     * @var RemoteReporter
-     */
+    /** @var RemoteReporter */
     private $reporter;
 
-    /**
-     * @var string
-     */
-    private $serviceName = 'test-service';
+    /** @var UdpSender */
+    private $transport;
 
     function setUp()
     {
         $this->transport = $this->createMock(UdpSender::class);
-        $this->reporter = new RemoteReporter($this->transport, $this->serviceName);
+        $this->reporter = new RemoteReporter($this->transport);
     }
 
     function testReportSpan()

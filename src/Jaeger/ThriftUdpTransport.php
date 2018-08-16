@@ -58,7 +58,7 @@ class ThriftUdpTransport extends TTransport
     public function open()
     {
         $ok = @socket_connect($this->socket, $this->host, $this->port);
-        if ($ok === FALSE) {
+        if ($ok === false) {
             throw new TTransportException('socket_connect failed');
         }
     }
@@ -75,9 +75,10 @@ class ThriftUdpTransport extends TTransport
     /**
      * Read some data into the array.
      *
+     * @todo
+     *
      * @param int $len How much to read
      * @return string The data that has been read
-     * @throws TTransportException if cannot read any more data
      */
     public function read($len)
     {
@@ -96,7 +97,7 @@ class ThriftUdpTransport extends TTransport
         }
 
         $ok = @socket_write($this->socket, $buf);
-        if ($ok === FALSE) {
+        if ($ok === false) {
             throw new TTransportException('socket_write failed');
         }
     }

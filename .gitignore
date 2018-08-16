@@ -1,7 +1,15 @@
-.settings/
+.settings
 .buildpath
 .project
 .idea
+
+jaeger-idl
 vendor
+
 composer.lock
+composer.phar
+
 jaeger-client-php.iml
+
+phpunit.xml
+phpcs.xml

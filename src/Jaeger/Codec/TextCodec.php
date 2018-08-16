@@ -30,8 +30,7 @@ class TextCodec implements CodecInterface
         string $traceIdHeader = TRACE_ID_HEADER,
         string $baggageHeaderPrefix = BAGGAGE_HEADER_PREFIX,
         string $debugIdHeader = DEBUG_ID_HEADER_KEY
-    )
-    {
+    ) {
         $this->urlEncoding = $urlEncoding;
         $this->traceIdHeader = str_replace('_', '-', strtolower($traceIdHeader));
         $this->baggagePrefix = str_replace('_', '-', strtolower($baggageHeaderPrefix));
@@ -39,6 +38,16 @@ class TextCodec implements CodecInterface
         $this->prefixLength = strlen($baggageHeaderPrefix);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::inject
+     *
+     * @param SpanContext $spanContext
+     * @param mixed $carrier
+     *
+     * @return void
+     */
     public function inject(SpanContext $spanContext, &$carrier)
     {
         $carrier[$this->traceIdHeader] = $this->spanContextToString(
@@ -49,20 +58,30 @@ class TextCodec implements CodecInterface
         );
 
         $baggage = $spanContext->getBaggage();
-        if ($baggage) {
-            foreach ($baggage as $key => $value) {
-                if ($this->urlEncoding) {
-                    $encodedValue = urlencode($value);
-                } else {
-                    $encodedValue = $value;
-                }
-                $carrier[$this->baggagePrefix . $key] = $encodedValue;
+        if (empty($baggage)) {
+            return;
+        }
+
+        foreach ($baggage as $key => $value) {
+            $encodedValue = $value;
+
+            if ($this->urlEncoding) {
+                $encodedValue = urlencode($value);
             }
+
+            $carrier[$this->baggagePrefix . $key] = $encodedValue;
         }
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @see \Jaeger\Tracer::extract
+     *
+     * @param mixed $carrier
      * @return SpanContext|null
+     *
+     * @throws Exception
      */
     public function extract($carrier)
     {
@@ -106,7 +125,7 @@ class TextCodec implements CodecInterface
 
         if ($traceId === null) {
             if ($debugId !== null) {
-                return SpanContext::withDebugId($debugId);
+                return new SpanContext(null, null, null, null, [], $debugId);
             }
             return null;
         }
@@ -114,6 +133,15 @@ class TextCodec implements CodecInterface
         return new SpanContext($traceId, $spanId, $parentId, $flags);
     }
 
+    /**
+     * Store a span context to a string.
+     *
+     * @param int $traceId
+     * @param int $spanId
+     * @param int $parentId
+     * @param int $flags
+     * @return string
+     */
     private function spanContextToString($traceId, $spanId, $parentId, $flags)
     {
         $parentId = $parentId ?? 0;
@@ -121,7 +149,12 @@ class TextCodec implements CodecInterface
     }
 
     /**
+     * Create a span context from a string.
+     *
+     * @param string $value
      * @return array
+     *
+     * @throws Exception
      */
     private function spanContextFromString($value): array
     {
@@ -140,6 +173,8 @@ class TextCodec implements CodecInterface
     }
 
     /**
+     * Checks that a string ($haystack) starts with a given prefix ($needle).
+     *
      * @param string $haystack
      * @param string $needle
      * @return bool

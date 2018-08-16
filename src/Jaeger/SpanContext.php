@@ -24,34 +24,22 @@ class SpanContext implements OTSpanContext
 
     /**
      * SpanContext constructor.
+     *
      * @param string $traceId
      * @param string $spanId
      * @param string $parentId
-     * @param $flags
+     * @param int|null $flags
      * @param array $baggage
+     * @param int|null $debugId
      */
-    public function __construct($traceId, $spanId, $parentId, $flags, $baggage = [])
+    public function __construct($traceId, $spanId, $parentId, $flags = null, $baggage = [], $debugId = null)
     {
         $this->traceId = $traceId;
         $this->spanId = $spanId;
         $this->parentId = $parentId;
         $this->flags = $flags;
         $this->baggage = $baggage;
-        $this->debugId = null;
-    }
-
-    /**
-     * TODO
-     * @deprecated
-     * @param $debugId
-     * @return SpanContext
-     */
-    public static function withDebugId($debugId)
-    {
-        $ctx = new SpanContext(null, null, null, null);
-        $ctx->debugId = $debugId;
-
-        return $ctx;
+        $this->debugId = $debugId;
     }
 
     /**
@@ -72,10 +60,20 @@ class SpanContext implements OTSpanContext
 
     /**
      * {@inheritdoc}
+     *
+     * @param string $key
+     * @param string $value
+     * @return SpanContext
      */
     public function withBaggageItem($key, $value)
     {
-        return new self($this->traceId, $this->spanId, $this->parentId, $this->flags, [$key => $value] + $this->baggage);
+        return new self(
+            $this->traceId,
+            $this->spanId,
+            $this->parentId,
+            $this->flags,
+            [$key => $value] + $this->baggage
+        );
     }
 
     public function getTraceId()
@@ -93,6 +91,11 @@ class SpanContext implements OTSpanContext
         return $this->spanId;
     }
 
+    /**
+     * Get the span context flags.
+     *
+     * @return int|null
+     */
     public function getFlags()
     {
         return $this->flags;

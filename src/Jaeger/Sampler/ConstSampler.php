@@ -1,6 +1,7 @@
 <?php
 
 namespace Jaeger\Sampler;
+
 use const Jaeger\SAMPLER_PARAM_TAG_KEY;
 use const Jaeger\SAMPLER_TYPE_CONST;
 use const Jaeger\SAMPLER_TYPE_TAG_KEY;

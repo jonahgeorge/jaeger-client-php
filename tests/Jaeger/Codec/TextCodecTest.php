@@ -1,7 +1,8 @@
 <?php
 
-namespace Jaeger\Codec;
+namespace Jaeger\Tests\Codec;
 
+use Jaeger\Codec\TextCodec;
 use Jaeger\SpanContext;
 use PHPUnit\Framework\TestCase;
 
