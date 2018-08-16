@@ -214,7 +214,11 @@ class UdpSender
             $ipv4 = '127.0.0.1';
         }
 
-        return ip2long($ipv4);
+        $long = ip2long($ipv4);
+        if (PHP_INT_SIZE === 8) {
+            return $long >> 31 ? $long - (1 << 32) : $long;
+        }
+        return $long;
     }
 
     // Used for Zipkin binary annotations like CA/SA (client/server address).
