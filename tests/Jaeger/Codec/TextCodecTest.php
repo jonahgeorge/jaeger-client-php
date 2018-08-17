@@ -31,13 +31,13 @@ class TextCodecTest extends TestCase
 
     public function testSpanContextParsingFromHeader()
     {
-        $carrier = ['uber-trace-id' => '32834e4115071776:f7802330248418d:32834e4115071776:1'];
+        $carrier = ['uber-trace-id' => '32834e4115071776:f7802330248418d:f123456789012345:1'];
 
         $spanContext = $this->textCodec->extract($carrier);
 
         self::assertEquals("3639838965278119798", $spanContext->getTraceId());
         self::assertEquals("1114643325879075213", $spanContext->getSpanId());
-        self::assertEquals("3639838965278119798", $spanContext->getParentId());
+        self::assertEquals("-1070935975401544891", $spanContext->getParentId());
         self::assertEquals(1, $spanContext->getFlags());
     }
 
