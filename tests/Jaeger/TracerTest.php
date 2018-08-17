@@ -8,23 +8,24 @@ use Jaeger\Sampler\SamplerInterface;
 use Jaeger\Scope;
 use Jaeger\ScopeManager;
 use Jaeger\Span;
+use Jaeger\SpanContext;
 use Jaeger\Tracer;
-use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing\NoopSpanContext;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use const Jaeger\ZIPKIN_SPAN_FORMAT;
+use const OpenTracing\Formats\TEXT_MAP;
 
 class TracerTest extends TestCase
 {
     /**
-     * @var ReporterInterface
+     * @var ReporterInterface|\PHPUnit\Framework\MockObject\MockObject
      */
     private $reporter;
 
     /**
-     * @var SamplerInterface
+     * @var SamplerInterface|\PHPUnit\Framework\MockObject\MockObject
      */
     private $sampler;
 
@@ -34,7 +35,7 @@ class TracerTest extends TestCase
     private $logger;
 
     /**
-     * @var ScopeManager
+     * @var ScopeManager|\PHPUnit\Framework\MockObject\MockObject
      */
     private $scopeManager;
 
@@ -94,11 +95,23 @@ class TracerTest extends TestCase
         $this->tracer->inject($spanContext, ZIPKIN_SPAN_FORMAT, $carrier);
     }
 
-    function testExtractInvalidFormat()
+    /**
+     * @test
+     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
+     * @expectedExceptionMessage Unsupported format: bad-format
+     */
+    public function shouldThrowUnsupportedFormatExceptionOnExtractInvalidFormat()
     {
-        $this->expectException(UnsupportedFormat::class);
+        $this->tracer->extract('bad-format', []);
+    }
 
-        $spanContext = $this->tracer->extract("bad-format", []);
+    /** @test */
+    public function shouldExtractInformationFromCarrier()
+    {
+        $carrier = ['uber-trace-id' => '32834e4115071776:f7802330248418d:f123456789012345:1'];
+        $ctx = $this->tracer->extract(TEXT_MAP, $carrier);
+
+        $this->assertInstanceOf(SpanContext::class, $ctx);
     }
 
     function testGetScopeManager()

@@ -10,12 +10,12 @@ use PHPUnit\Framework\TestCase;
 class ScopeTest extends TestCase
 {
     /**
-     * @var ScopeManager
+     * @var ScopeManager|\PHPUnit\Framework\MockObject\MockObject
      */
     private $scopeManager;
 
     /**
-     * @var Span
+     * @var Span|\PHPUnit\Framework\MockObject\MockObject
      */
     private $span;
 
