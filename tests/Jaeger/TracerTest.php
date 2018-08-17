@@ -95,23 +95,24 @@ class TracerTest extends TestCase
         $this->tracer->inject($spanContext, ZIPKIN_SPAN_FORMAT, $carrier);
     }
 
-    /**
-     * @test
-     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
-     * @expectedExceptionMessage Unsupported format: bad-format
-     */
-    public function shouldThrowUnsupportedFormatExceptionOnExtractInvalidFormat()
+    /** @test */
+    public function shouldNotThrowExceptionOnExtractInvalidFormat()
     {
-        $this->tracer->extract('bad-format', []);
+        $this->assertNull($this->tracer->extract('bad-format', []));
     }
 
     /** @test */
-    public function shouldExtractInformationFromCarrier()
+    public function shouldNotThrowExceptionOnExtractFromMalformedState()
+    {
+        $this->assertNull(null, $this->tracer->extract(TEXT_MAP, ['uber-trace-id' => '']));
+    }
+
+    /** @test */
+    public function shouldExtractSpanContextFromCarrier()
     {
         $carrier = ['uber-trace-id' => '32834e4115071776:f7802330248418d:f123456789012345:1'];
-        $ctx = $this->tracer->extract(TEXT_MAP, $carrier);
 
-        $this->assertInstanceOf(SpanContext::class, $ctx);
+        $this->assertInstanceOf(SpanContext::class, $this->tracer->extract(TEXT_MAP, $carrier));
     }
 
     function testGetScopeManager()

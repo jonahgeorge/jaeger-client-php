@@ -248,23 +248,24 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      *
-     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
-     *       that business code execution isn't affected. If possible, catch implementation specific
-     *       exceptions and log more meaningful information.
-     *
      * @param mixed $carrier
      * @return SpanContext|null
-     *
-     * @throws UnsupportedFormat
      */
     public function extract($format, $carrier)
     {
         $codec = $this->codecs[$format] ?? null;
+
         if ($codec == null) {
-            throw new UnsupportedFormat('Unsupported format: ' . $format);
+            $this->logger->warning('Unsupported format: ' . $format);
         }
 
-        return $codec->extract($carrier);
+        try {
+            return $codec->extract($carrier);
+        } catch (\Throwable $e) {
+            $this->logger->warning($e->getMessage());
+
+            return null;
+        }
     }
 
     /**
