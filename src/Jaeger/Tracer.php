@@ -15,9 +15,6 @@ use OpenTracing\Tracer as OTTracer;
 use OpenTracing\SpanContext as OTSpanContext;
 use OpenTracing\Reference;
 use OpenTracing\StartSpanOptions;
-use InvalidArgumentException;
-use OpenTracing\Exceptions\UnsupportedFormat;
-
 use const OpenTracing\Formats\BINARY;
 use const OpenTracing\Formats\HTTP_HEADERS;
 use const OpenTracing\Formats\TEXT_MAP;
@@ -216,33 +213,32 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      *
-     * @todo All exceptions thrown from this method should be caught and logged on WARN level so
-     *       that business code execution isn't affected. If possible, catch implementation specific
-     *       exceptions and log more meaningful information.
-     *
      * @param SpanContext $spanContext
      * @param string $format
      * @param mixed $carrier
-     *
-     * @throws UnsupportedFormat
-     * @throws InvalidArgumentException
+     * @return void
      */
     public function inject(OTSpanContext $spanContext, $format, &$carrier)
     {
         if ($spanContext instanceof SpanContext) {
             $codec = $this->codecs[$format] ?? null;
+
             if ($codec == null) {
-                throw new UnsupportedFormat('Unsupported format: %s', $format);
+                $this->logger->warning('Unsupported format: ' . $format);
+                return;
             }
+
 
             $codec->inject($spanContext, $carrier);
             return;
         }
 
-        throw new InvalidArgumentException(sprintf(
+        $message = sprintf(
             'Invalid span context. Expected Jaeger\SpanContext, got %s.',
             is_object($spanContext) ? get_class($spanContext) : gettype($spanContext)
-        ));
+        );
+
+        $this->logger->warning($message);
     }
 
     /**
