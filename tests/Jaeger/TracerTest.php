@@ -85,6 +85,20 @@ class TracerTest extends TestCase
         $this->assertEquals('test-operation1', $tracer->getActiveSpan()->getOperationName());
    }
 
+    /**
+     * @test
+     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
+     * @expectedExceptionMessage The format 'bad-format' is not supported.
+     */
+    public function shouldThrowExceptionOnInvalidFormat()
+    {
+        $spanContext = new SpanContext(0, 0, 0, 0);
+        $carrier = [];
+
+        $this->tracer->inject($spanContext, 'bad-format', $carrier);
+        $this->assertSame([], $carrier);
+    }
+
     /** @test */
     public function shouldNotThrowExceptionOnInvalidContext()
     {
@@ -92,16 +106,6 @@ class TracerTest extends TestCase
         $carrier = [];
 
         $this->tracer->inject($spanContext, ZIPKIN_SPAN_FORMAT, $carrier);
-        $this->assertSame([], $carrier);
-    }
-
-    /** @test */
-    public function shouldNotThrowExceptionOnInvalidFormat()
-    {
-        $spanContext = new SpanContext(0, 0, 0, 0);
-        $carrier = [];
-
-        $this->tracer->inject($spanContext, null, $carrier);
         $this->assertSame([], $carrier);
     }
 
@@ -117,8 +121,12 @@ class TracerTest extends TestCase
         $this->assertEquals('0:0:0:0', $carrier[TRACE_ID_HEADER]);
     }
 
-    /** @test */
-    public function shouldNotThrowExceptionOnExtractInvalidFormat()
+    /**
+     * @test
+     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
+     * @expectedExceptionMessage The format 'bad-format' is not supported.
+     */
+    public function shouldThrowExceptionOnExtractInvalidFormat()
     {
         $this->assertNull($this->tracer->extract('bad-format', []));
     }

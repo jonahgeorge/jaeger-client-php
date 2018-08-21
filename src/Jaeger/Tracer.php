@@ -15,6 +15,7 @@ use OpenTracing\Tracer as OTTracer;
 use OpenTracing\SpanContext as OTSpanContext;
 use OpenTracing\Reference;
 use OpenTracing\StartSpanOptions;
+use OpenTracing\Exceptions\UnsupportedFormat;
 use const OpenTracing\Formats\BINARY;
 use const OpenTracing\Formats\HTTP_HEADERS;
 use const OpenTracing\Formats\TEXT_MAP;
@@ -217,6 +218,8 @@ class Tracer implements OTTracer
      * @param string $format
      * @param mixed $carrier
      * @return void
+     *
+     * @throws UnsupportedFormat
      */
     public function inject(OTSpanContext $spanContext, $format, &$carrier)
     {
@@ -224,8 +227,7 @@ class Tracer implements OTTracer
             $codec = $this->codecs[$format] ?? null;
 
             if ($codec == null) {
-                $this->logger->warning('Unsupported format: ' . $format);
-                return;
+                throw UnsupportedFormat::forFormat(is_scalar($format) ? $format : gettype($format));
             }
 
 
@@ -246,13 +248,15 @@ class Tracer implements OTTracer
      *
      * @param mixed $carrier
      * @return SpanContext|null
+     *
+     * @throws UnsupportedFormat
      */
     public function extract($format, $carrier)
     {
         $codec = $this->codecs[$format] ?? null;
 
         if ($codec == null) {
-            $this->logger->warning('Unsupported format: ' . $format);
+            throw UnsupportedFormat::forFormat(is_scalar($format) ? $format : gettype($format));
         }
 
         try {
