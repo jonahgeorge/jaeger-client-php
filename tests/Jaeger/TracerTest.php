@@ -2,7 +2,6 @@
 
 namespace Jaeger\Tests;
 
-use InvalidArgumentException;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\SamplerInterface;
 use Jaeger\Scope;
@@ -14,6 +13,7 @@ use OpenTracing\NoopSpanContext;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use const Jaeger\TRACE_ID_HEADER;
 use const Jaeger\ZIPKIN_SPAN_FORMAT;
 use const OpenTracing\Formats\TEXT_MAP;
 
@@ -85,18 +85,48 @@ class TracerTest extends TestCase
         $this->assertEquals('test-operation1', $tracer->getActiveSpan()->getOperationName());
    }
 
-    function testInjectInvalidContext()
+    /**
+     * @test
+     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
+     * @expectedExceptionMessage The format 'bad-format' is not supported.
+     */
+    public function shouldThrowExceptionOnInvalidFormat()
+    {
+        $spanContext = new SpanContext(0, 0, 0, 0);
+        $carrier = [];
+
+        $this->tracer->inject($spanContext, 'bad-format', $carrier);
+        $this->assertSame([], $carrier);
+    }
+
+    /** @test */
+    public function shouldNotThrowExceptionOnInvalidContext()
     {
         $spanContext = new NoopSpanContext();
         $carrier = [];
 
-        $this->expectException(InvalidArgumentException::class);
-
         $this->tracer->inject($spanContext, ZIPKIN_SPAN_FORMAT, $carrier);
+        $this->assertSame([], $carrier);
     }
 
     /** @test */
-    public function shouldNotThrowExceptionOnExtractInvalidFormat()
+    public function shouldInjectSpanContextToCarrier()
+    {
+        $spanContext = new SpanContext(0, 0, 0, 0);
+        $carrier = [];
+
+        $this->tracer->inject($spanContext, TEXT_MAP, $carrier);
+
+        $this->assertCount(1, $carrier);
+        $this->assertEquals('0:0:0:0', $carrier[TRACE_ID_HEADER]);
+    }
+
+    /**
+     * @test
+     * @expectedException \OpenTracing\Exceptions\UnsupportedFormat
+     * @expectedExceptionMessage The format 'bad-format' is not supported.
+     */
+    public function shouldThrowExceptionOnExtractInvalidFormat()
     {
         $this->assertNull($this->tracer->extract('bad-format', []));
     }
