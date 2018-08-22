@@ -161,7 +161,7 @@ class TextCodec implements CodecInterface
         $parts = explode(':', $value);
 
         if (count($parts) != 4) {
-            throw new Exception('Malformed tracer state string');
+            throw new Exception('Malformed tracer state string.');
         }
 
         return [
