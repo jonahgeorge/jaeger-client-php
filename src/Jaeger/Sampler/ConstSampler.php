@@ -21,7 +21,7 @@ class ConstSampler implements SamplerInterface
     private $decision;
 
     /**
-     * Trace tags.
+     * A list of the sampler tags.
      *
      * @var array
      */

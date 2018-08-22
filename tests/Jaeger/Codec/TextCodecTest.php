@@ -43,7 +43,7 @@ class TextCodecTest extends TestCase
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage Malformed tracer state string
+     * @expectedExceptionMessage Malformed tracer state string.
      */
     public function testInvalidSpanContextParsingFromHeader()
     {

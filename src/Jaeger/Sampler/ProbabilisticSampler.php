@@ -23,7 +23,7 @@ class ProbabilisticSampler implements SamplerInterface
     private $rate;
 
     /**
-     * A list of the trace tags.
+     * A list of the sampler tags.
      *
      * @var array
      */
@@ -32,7 +32,7 @@ class ProbabilisticSampler implements SamplerInterface
     /**
      * The boundary of the sample sampling rate.
      *
-     * @var float|int
+     * @var float
      */
     private $boundary;
 

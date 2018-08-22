@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
 
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage service_name required in the config or param
+     * @expectedExceptionMessage service_name required in the config or param.
      */
     function testThrowExceptionWhenServiceNameIsNotDefined()
     {
