@@ -2,7 +2,9 @@
 
 # Jaeger Bindings for PHP OpenTracing API
 
-This is a client-side library that can be used to instrument PHP apps for distributed trace collection, and to send those traces to Jaeger. See the [OpenTracing PHP API](https://github.com/opentracing/opentracing-php) for additional detail.
+This is a client-side library that can be used to instrument PHP apps for distributed trace collection,
+and to send those traces to Jaeger. See the [OpenTracing PHP API](https://github.com/opentracing/opentracing-php)
+for additional detail.
 
 ## Contributing and Developing
 
@@ -10,12 +12,10 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Installation
 
-```json
-{
-  "require": {
-    "jonahgeorge/jaeger-client-php": "0.3.0"
-  }
-}
+Jaeger client can be installed via Composer:
+
+```bash
+composer require jonahgeorge/jaeger-client-php
 ```
 
 ## Getting Started
@@ -54,7 +54,6 @@ Tests are located in the `tests` directory. See [tests/README.md](./tests/README
 
 ## Roadmap
 
-- [Support Span logging](https://github.com/jonahgeorge/jaeger-client-php/issues/1)
 - [Support Span baggage](https://github.com/jonahgeorge/jaeger-client-php/issues/5)
 - [Support PHP Version 5.6](https://github.com/jonahgeorge/jaeger-client-php/issues/11)
 - [Support Tracer metrics](https://github.com/jonahgeorge/jaeger-client-php/issues/12)

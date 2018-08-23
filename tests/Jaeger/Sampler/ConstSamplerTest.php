@@ -4,32 +4,40 @@ namespace Jaeger\Tests\Sampler;
 
 use Jaeger\Sampler\ConstSampler;
 use PHPUnit\Framework\TestCase;
+use const Jaeger\SAMPLER_PARAM_TAG_KEY;
+use const Jaeger\SAMPLER_TYPE_CONST;
+use const Jaeger\SAMPLER_TYPE_TAG_KEY;
 
 class ConstSamplerTest extends TestCase
 {
-    private function getTags($type, $param)
+    /**
+     * @test
+     * @dataProvider samplerProvider
+     * @param bool $decision
+     * @param mixed $traceId
+     */
+    public function shouldDetermineWhetherOrTraceShouldBeSampled($decision, $traceId)
     {
-        return [
-            'sampler.type' => $type,
-            'sampler.param' => $param,
-        ];
+        $sampler = new ConstSampler($decision);
+
+        list($sampled, $tags) = $sampler->isSampled($traceId);
+
+        $this->assertEquals($decision, $sampled);
+        $this->assertEquals([
+            SAMPLER_TYPE_TAG_KEY  => SAMPLER_TYPE_CONST,
+            SAMPLER_PARAM_TAG_KEY => $decision,
+        ], $tags);
+
+        $sampler->close();
     }
 
-    public function testConstSampler()
+    public function samplerProvider()
     {
-        $sampler = new ConstSampler(True);
-        list($sampled, $tags) = $sampler->isSampled(1);
-        $this->assertTrue($sampled);
-
-        list($sampled, $tags) = $sampler->isSampled(PHP_INT_MAX);
-        $this->assertTrue($sampled);
-
-        $sampler = new ConstSampler(False);
-        list($sampled, $tags) = $sampler->isSampled(1);
-        $this->assertFalse($sampled);
-
-        list($sampled, $tags) = $sampler->isSampled(PHP_INT_MAX);
-        $this->assertFalse($sampled);
-        $this->assertEquals($tags, $this->getTags('const', False));
+        return [
+            [true,  1],
+            [true,  PHP_INT_MAX],
+            [false, 1],
+            [false, PHP_INT_MAX],
+        ];
     }
 }

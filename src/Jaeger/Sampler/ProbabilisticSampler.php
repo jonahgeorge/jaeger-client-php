@@ -2,7 +2,7 @@
 
 namespace Jaeger\Sampler;
 
-use Exception;
+use OutOfBoundsException;
 use const Jaeger\SAMPLER_PARAM_TAG_KEY;
 use const Jaeger\SAMPLER_TYPE_PROBABILISTIC;
 use const Jaeger\SAMPLER_TYPE_TAG_KEY;
@@ -10,28 +10,37 @@ use const Jaeger\SAMPLER_TYPE_TAG_KEY;
 /**
  * A sampler that randomly samples a certain percentage of traces specified
  * by the samplingRate, in the range between 0.0 and 1.0.
+ *
+ * @package Jaeger\Sampler
  */
 class ProbabilisticSampler implements SamplerInterface
 {
     /**
+     * The sampling rate rate between 0.0 and 1.0.
+     *
      * @var float
      */
     private $rate;
 
     /**
+     * A list of the sampler tags.
+     *
      * @var array
      */
     private $tags = [];
 
     /**
-     * @var float|int
+     * The boundary of the sample sampling rate.
+     *
+     * @var float
      */
     private $boundary;
 
     /**
      * ProbabilisticSampler constructor.
+     *
      * @param float $rate
-     * @throws Exception
+     * @throws OutOfBoundsException
      */
     public function __construct(float $rate)
     {
@@ -41,7 +50,7 @@ class ProbabilisticSampler implements SamplerInterface
         ];
 
         if ($rate <= 0.0 || $rate >= 1.0) {
-            throw new Exception('Sampling rate must be between 0.0 and 1.0');
+            throw new OutOfBoundsException('Sampling rate must be between 0.0 and 1.0.');
         }
 
         $this->rate = $rate;
@@ -49,8 +58,10 @@ class ProbabilisticSampler implements SamplerInterface
     }
 
     /**
-     * @param string $traceId
-     * @param string $operation
+     * {@inheritdoc}
+     *
+     * @param string $traceId   The traceId on the span.
+     * @param string $operation The operation name set on the span.
      * @return array
      */
     public function isSampled(string $traceId, string $operation = ''): array
@@ -58,7 +69,15 @@ class ProbabilisticSampler implements SamplerInterface
         return [($traceId < $this->boundary), $this->tags];
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * Only implemented to satisfy the sampler interface.
+     *
+     * @return void
+     */
     public function close()
     {
+        // nothing to do
     }
 }

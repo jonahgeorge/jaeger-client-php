@@ -54,7 +54,7 @@ class Config
 
         $this->serviceName = $config['service_name'] ?? $serviceName;
         if ($this->serviceName === null) {
-            throw new Exception('service_name required in the config or param');
+            throw new Exception('service_name required in the config or param.');
         }
 
         $this->logger = $logger ?: new NullLogger();
