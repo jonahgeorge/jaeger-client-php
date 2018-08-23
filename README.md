@@ -12,10 +12,10 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Installation
 
-Install [Composer](https://getcomposer.org) in a common location or in your project. Then run the installer as follows:
+Jaeger client can be installed via Composer:
 
 ```bash
-php composer.phar require jonahgeorge/jaeger-client-php
+composer require jonahgeorge/jaeger-client-php
 ```
 
 ## Getting Started
