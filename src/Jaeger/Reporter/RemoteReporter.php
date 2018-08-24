@@ -25,13 +25,21 @@ class RemoteReporter implements ReporterInterface
     }
 
     /**
+     * {@inheritdoc}
+     *
      * @param Span $span
+     * @return void
      */
     public function reportSpan(Span $span)
     {
         $this->transport->append($span);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return void
+     */
     public function close()
     {
         $this->transport->flush();
