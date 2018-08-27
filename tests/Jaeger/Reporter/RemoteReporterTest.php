@@ -12,17 +12,22 @@ class RemoteReporterTest extends TestCase
     /** @var RemoteReporter */
     private $reporter;
 
-    /** @var UdpSender */
+    /** @var UdpSender|\PHPUnit\Framework\MockObject\MockObject */
     private $transport;
 
-    function setUp()
+    /**
+     * {@inheritdoc}
+     */
+    public function setUp()
     {
         $this->transport = $this->createMock(UdpSender::class);
         $this->reporter = new RemoteReporter($this->transport);
     }
 
-    function testReportSpan()
+    /** @test */
+    public function shouldReportSpan()
     {
+        /** @var Span|\PHPUnit\Framework\MockObject\MockObject $span */
         $span = $this->createMock(Span::class);
 
         $this->transport->expects($this->once())->method('append')->with($span);
@@ -30,7 +35,8 @@ class RemoteReporterTest extends TestCase
         $this->reporter->reportSpan($span);
     }
 
-    function testClose()
+    /** @test */
+    public function shouldCloseReporter()
     {
         $this->transport->expects($this->once())->method('flush');
         $this->transport->expects($this->once())->method('close');

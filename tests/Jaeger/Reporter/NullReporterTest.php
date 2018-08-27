@@ -8,13 +8,22 @@ use PHPUnit\Framework\TestCase;
 
 class NullReporterTest extends TestCase
 {
-    public function testNullReporter()
+    /**
+     * Nothing to test because NullReporter doing nothing.
+     *
+     * @test
+     */
+    public function shouldReportSpan()
     {
+        /** @var \Jaeger\Span|\PHPUnit\Framework\MockObject\MockObject $span */
         $span = $this->createMock(Span::class);
 
         $reporter = new NullReporter();
 
-        $this->assertNull($reporter->reportSpan($span));
-        $this->assertNull($reporter->close());
+        $reporter->reportSpan($span);
+        $reporter->close();
+
+        // Only needed to avoid PhpUnit message: "This test did not perform any assertions"
+        $this->assertTrue(true);
     }
 }

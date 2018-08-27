@@ -9,22 +9,19 @@ use PHPUnit\Framework\TestCase;
 
 class CompositeReporterTest extends TestCase
 {
-    /**
-     * @var CompositeReporter
-     */
+    /** @var CompositeReporter */
     private $reporter;
 
-    /**
-     * @var ReporterInterface
-     */
+    /** @var ReporterInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $childReporter1;
 
-    /**
-     * @var ReporterInterface
-     */
+    /** @var ReporterInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $childReporter2;
 
-    function setUp()
+    /**
+     * {@inheritdoc}
+     */
+    public function setUp()
     {
         $this->childReporter1 = $this->createMock(ReporterInterface::class);
         $this->childReporter2 = $this->createMock(ReporterInterface::class);
@@ -32,8 +29,10 @@ class CompositeReporterTest extends TestCase
         $this->reporter = new CompositeReporter($this->childReporter1, $this->childReporter2);
     }
 
-    function testReportSpan()
+    /** @test */
+    public function shouldReportSpan()
     {
+        /** @var \Jaeger\Span|\PHPUnit\Framework\MockObject\MockObject $span */
         $span = $this->createMock(Span::class);
 
         $this->childReporter1->expects($this->once())->method('reportSpan')->with($span);
@@ -42,7 +41,8 @@ class CompositeReporterTest extends TestCase
         $this->reporter->reportSpan($span);
     }
 
-    function testClose()
+    /** @test */
+    public function shouldCloseReporter()
     {
         $this->childReporter1->expects($this->once())->method('close');
         $this->childReporter2->expects($this->once())->method('close');

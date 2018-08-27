@@ -10,12 +10,15 @@ use Jaeger\Span;
 class InMemoryReporter implements ReporterInterface
 {
     /**
-     * @var array
+     * @var Span[]
      */
     private $spans = [];
 
     /**
+     * {@inheritdoc}
+     *
      * @param Span $span
+     * @return void
      */
     public function reportSpan(Span $span)
     {
@@ -23,14 +26,22 @@ class InMemoryReporter implements ReporterInterface
     }
 
     /**
-     * @return array
+     * @return Span[]
      */
     public function getSpans(): array
     {
         return $this->spans;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * Only implemented to satisfy the sampler interface.
+     *
+     * @return void
+     */
     public function close()
     {
+        // nothing to do
     }
 }

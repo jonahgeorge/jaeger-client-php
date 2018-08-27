@@ -8,8 +8,10 @@ use PHPUnit\Framework\TestCase;
 
 class InMemoryReporterTest extends TestCase
 {
-    public function testInMemoryReporter()
+    /** @test */
+    public function shouldReportSpan()
     {
+        /** @var \Jaeger\Span|\PHPUnit\Framework\MockObject\MockObject $span */
         $span = $this->createMock(Span::class);
         $reporter = new InMemoryReporter();
 

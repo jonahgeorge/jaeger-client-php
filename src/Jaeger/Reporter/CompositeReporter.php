@@ -16,6 +16,7 @@ class CompositeReporter implements ReporterInterface
 
     /**
      * CompositeReporter constructor.
+     *
      * @param ReporterInterface ...$reporters
      */
     public function __construct(ReporterInterface ...$reporters)
@@ -24,7 +25,10 @@ class CompositeReporter implements ReporterInterface
     }
 
     /**
+     * {@inheritdoc}
+     *
      * @param Span $span
+     * @return void
      */
     public function reportSpan(Span $span)
     {
@@ -33,6 +37,11 @@ class CompositeReporter implements ReporterInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return void
+     */
     public function close()
     {
         foreach ($this->reporters as $reporter) {

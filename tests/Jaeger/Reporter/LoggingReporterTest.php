@@ -9,8 +9,13 @@ use Psr\Log\NullLogger;
 
 class LoggingReporterTest extends TestCase
 {
-    public function testLoggingReporter()
+    /** @test */
+    public function shouldReportSpan()
     {
+        /**
+         * @var NullLogger|\PHPUnit\Framework\MockObject\MockObject v
+         * @var Span|\PHPUnit\Framework\MockObject\MockObject $span
+         */
         $logger = $this->createMock(NullLogger::class);
         $span = $this->createMock(Span::class);
 
@@ -21,5 +26,6 @@ class LoggingReporterTest extends TestCase
             ->with($this->stringStartsWith('Reporting span'));
 
         $reporter->reportSpan($span);
+        $reporter->close();
     }
 }

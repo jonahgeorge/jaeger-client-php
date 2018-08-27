@@ -18,6 +18,7 @@ class LoggingReporter implements ReporterInterface
 
     /**
      * LoggingReporter constructor.
+     *
      * @param LoggerInterface|null $logger
      */
     public function __construct(LoggerInterface $logger = null)
@@ -26,14 +27,25 @@ class LoggingReporter implements ReporterInterface
     }
 
     /**
+     * {@inheritdoc}
+     *
      * @param Span $span
+     * @return void
      */
     public function reportSpan(Span $span)
     {
         $this->logger->info('Reporting span ' . $span->getOperationName());
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * Only implemented to satisfy the sampler interface.
+     *
+     * @return void
+     */
     public function close()
     {
+        // nothing to do
     }
 }
