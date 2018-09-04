@@ -160,21 +160,19 @@ class UdpSender
 
     private function addZipkinAnnotations(JaegerSpan $span, Endpoint $endpoint)
     {
-        if ($span->isRpc()) {
+        if ($span->isRpc() && $span->peer) {
             $isClient = $span->isRpcClient();
 
-            if ($span->peer) {
-                $host = $this->makeEndpoint(
-                    $span->peer['ipv4'] ?? 0,
-                    $span->peer['port'] ?? 0,
-                    $span->peer['service_name'] ?? ''
-                );
+            $host = $this->makeEndpoint(
+                $span->peer['ipv4'] ?? 0,
+                $span->peer['port'] ?? 0,
+                $span->peer['service_name'] ?? ''
+            );
 
-                $key = ($isClient) ? self::SERVER_ADDR : self::CLIENT_ADDR;
+            $key = ($isClient) ? self::SERVER_ADDR : self::CLIENT_ADDR;
 
-                $peer = $this->makePeerAddressTag($key, $host);
-                $span->tags[$key] = $peer;
-            }
+            $peer = $this->makePeerAddressTag($key, $host);
+            $span->tags[$key] = $peer;
         } else {
             $tag = $this->makeLocalComponentTag(
                 $span->getComponent() ?? $span->getTracer()->getServiceName(),
