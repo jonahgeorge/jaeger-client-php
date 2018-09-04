@@ -49,12 +49,17 @@ class ProbabilisticSampler implements SamplerInterface
             SAMPLER_PARAM_TAG_KEY => $rate,
         ];
 
-        if ($rate <= 0.0 || $rate >= 1.0) {
+        if ($rate < 0.0 || $rate > 1.0) {
             throw new OutOfBoundsException('Sampling rate must be between 0.0 and 1.0.');
         }
 
         $this->rate = $rate;
-        $this->boundary = $rate * PHP_INT_MAX;
+        if ($rate < 0.5) {
+            $this->boundary = (int)($rate * PHP_INT_MAX);
+        } else {
+            // more precise calculation due to int and float having different precision near PHP_INT_MAX
+            $this->boundary = PHP_INT_MAX - (int)((1 - $rate) * PHP_INT_MAX);
+        }
     }
 
     /**
