@@ -35,6 +35,8 @@ class ProbablisticSamplerTest extends TestCase
     public function samplerProvider()
     {
         return [
+            [1.0, PHP_INT_MAX-1, true],
+            [0, 0, false],
             [0.5, PHP_INT_MIN + 10, true],
             [0.5, PHP_INT_MAX - 10, false],
         ];
