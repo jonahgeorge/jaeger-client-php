@@ -93,7 +93,7 @@ class Span implements OTSpan
         $this->tracer = $tracer;
 
         $this->operationName = $operationName;
-        $this->startTime = $startTime ?? $this->timestampMicro();
+        $this->startTime = $this->microTime($startTime);
         $this->endTime = null;
         $this->kind = null;
         $this->peer = null;
@@ -102,6 +102,38 @@ class Span implements OTSpan
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
         }
+    }
+
+    /**
+     * Converts time to microtime int
+     *  - int represents microseconds
+     *  - float represents seconds
+     *
+     * @param int|float|DateTime|null $time
+     * @return int
+     */
+    protected function microTime($time): int
+    {
+        if ($time === null) {
+            return $this->timestampMicro();
+        }
+
+        if ($time instanceof \DateTimeInterface) {
+            return (int)round($time->format('U.u') * 1000000, 0);
+        }
+
+        if (is_int($time)) {
+            return $time;
+        }
+
+        if (is_float($time)) {
+            return (int)round($time * 1000000, 0);
+        }
+
+        throw new \InvalidArgumentException(sprintf(
+            'Time should be one of the types int|float|DateTime|null, got %s.',
+            gettype($time)
+        ));
     }
 
     /**
@@ -121,15 +153,15 @@ class Span implements OTSpan
     }
 
     /**
-     * @return DateTime|float|int|null
+     * @return int
      */
-    public function getStartTime()
+    public function getStartTime(): int
     {
         return $this->startTime;
     }
 
     /**
-     * @return DateTime|float|int|null
+     * @return int|null
      */
     public function getEndTime()
     {
@@ -176,7 +208,7 @@ class Span implements OTSpan
             $this->log($logRecord);
         }
 
-        $this->endTime = $finishTime ?? $this->timestampMicro();
+        $this->endTime = $this->microTime($finishTime);
         $this->tracer->reportSpan($this);
     }
 
@@ -331,14 +363,7 @@ class Span implements OTSpan
      */
     public function log(array $fields = [], $timestamp = null)
     {
-        if ($timestamp instanceof \DateTimeInterface || $timestamp instanceof \DateTime) {
-            $timestamp = $timestamp->getTimestamp();
-        }
-
-        if ($timestamp !== null) {
-            $timestamp = (int) ($timestamp * 1000000);
-        }
-
+        $timestamp = $this->microTime($timestamp);
         if ($timestamp < $this->getStartTime()) {
             $timestamp = $this->timestampMicro();
         }

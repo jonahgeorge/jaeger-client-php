@@ -31,6 +31,15 @@ class SpanTest extends TestCase
         $this->context = new SpanContext(0, 0,0, SAMPLED_FLAG);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown()
+    {
+        $this->tracer = null;
+        $this->context = null;
+    }
+
     /** @test */
     public function shouldProperlyInitializeAtConstructTime()
     {
@@ -112,7 +121,7 @@ class SpanTest extends TestCase
         $dateTime03 = microtime(true) + 5;
 
         $span->log($fields01, $dateTime01);
-        $span->log($fields02, $dateTime01->getTimestamp());
+        $span->log($fields02, $dateTime01->getTimestamp()*1000000);
         $span->log($fields02, $dateTime03);
         $span->log($fields02);
 
@@ -121,11 +130,11 @@ class SpanTest extends TestCase
         $this->assertCount(4, $logs);
 
         $this->assertInternalType('integer', $logs[0]['timestamp']);
-        $this->assertSame($dateTime01->getTimestamp() * 1000000, $logs[0]['timestamp']);
+        $this->assertEquals((int)($dateTime01->format('U.u')*1000000), $logs[0]['timestamp']);
         $this->assertSame($fields01, $logs[0]['fields']);
 
         $this->assertInternalType('integer', $logs[1]['timestamp']);
-        $this->assertSame($dateTime02 * 1000000, $logs[1]['timestamp']);
+        $this->assertSame($dateTime02*1000000, $logs[1]['timestamp']);
         $this->assertSame($fields02, $logs[1]['fields']);
 
         $this->assertInternalType('integer', $logs[2]['timestamp']);
@@ -134,5 +143,107 @@ class SpanTest extends TestCase
 
         $this->assertInternalType('integer', $logs[3]['timestamp']);
         $this->assertSame($fields02, $logs[3]['fields']);
+    }
+
+    /** @test */
+    public function timingDefaultTimes()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+        $span->finish();
+
+        $this->assertEquals(0.0, round(($span->getEndTime() - $span->getStartTime()) / 1000000));
+    }
+
+    /** @test */
+    public function timingSetStartTimeAsDateTime()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation', [], new \DateTime('-2 seconds'));
+        $span->finish();
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetEndTimeAsDateTime()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+
+        $endTime = new \DateTime('+2 seconds');
+        // add microseconds because php < 7.1 has a bug
+        // https://bugs.php.net/bug.php?id=48225
+        if (version_compare(phpversion(), '7.1', '<')) {
+            list($usec) = explode(' ', microtime());
+            $endTime = \DateTime::createFromFormat('U.u', $endTime->format('U')+$usec);
+        }
+        $span->finish($endTime);
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetStartTimeAsInt()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation', [], (int) round((microtime(true) - 2) * 1000000));
+        $span->finish();
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetEndTimeAsInt()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+        $span->finish((int) round((microtime(true) + 2) * 1000000));
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetStartTimeAsFloat()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation', [], microtime(true) - 2);
+        $span->finish();
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetEndTimeAsFloat()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+        $span->finish(microtime(true) + 2);
+
+        $this->assertSpanDuration($span);
+    }
+
+    /** @test */
+    public function timingSetMixedTimes()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation', [], new \DateTime());
+        $span->finish(microtime(true) + 2);
+
+        $this->assertSpanDuration($span);
+    }
+
+    protected function assertSpanDuration(Span $span)
+    {
+        $this->assertEquals(2, (int)(($span->getEndTime() - $span->getStartTime()) / 1000000));
+    }
+
+    /** @test */
+    public function invalidStartTime()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Time should be one of the types int|float|DateTime|null, got string.');
+        $span = new Span($this->context, $this->tracer, 'test-operation', [], 'string');
+    }
+
+    /** @test */
+    public function invalidEndTime()
+    {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Time should be one of the types int|float|DateTime|null, got array.');
+        $span->finish([]);
     }
 }
