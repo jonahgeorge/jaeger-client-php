@@ -8,7 +8,6 @@ This folder includes all the unit tests that test Jaeger components, ensuring th
 
 | version | status |
 |---------|--------|
-| 5.6     | 𝙓      |
 | 7.0     | ✔      |
 | 7.1     | ✔      |
 | 7.2     | ✔      |
@@ -40,7 +39,6 @@ There is also an ability to run tests for different PHP versions. To achieve thi
 [docker](https://docs.docker.com/install/)-based approach:
 
 ```bash
-$ docker run --rm -it -v $(pwd):/usr/app php:5.6 ./usr/app/tests/php-test.sh
 
 $ docker run --rm -it -v $(pwd):/usr/app php:7.0 ./usr/app/tests/php-test.sh
 
