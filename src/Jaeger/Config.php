@@ -105,7 +105,7 @@ class Config
     private function initializeGlobalTracer(Tracer $tracer)
     {
         GlobalTracer::set($tracer);
-        $this->logger->info('OpenTracing\GlobalTracer initialized to ' . $tracer->getServiceName());
+        $this->logger->debug('OpenTracing\GlobalTracer initialized to ' . $tracer->getServiceName());
     }
 
     /**
@@ -173,7 +173,7 @@ class Config
         $protocol = new TCompactProtocol($transport);
         $client = new AgentClient($protocol);
 
-        $this->logger->info('Initializing Jaeger Tracer with UDP reporter');
+        $this->logger->debug('Initializing Jaeger Tracer with UDP reporter');
 
         return new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
     }

@@ -22,7 +22,7 @@ class LoggingReporterTest extends TestCase
         $reporter = new LoggingReporter($logger);
 
         $logger->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with($this->stringStartsWith('Reporting span'));
 
         $reporter->reportSpan($span);
