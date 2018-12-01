@@ -34,7 +34,7 @@ class LoggingReporter implements ReporterInterface
      */
     public function reportSpan(Span $span)
     {
-        $this->logger->info('Reporting span ' . $span->getOperationName());
+        $this->logger->debug('Reporting span ' . $span->getOperationName());
     }
 
     /**
