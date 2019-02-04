@@ -88,7 +88,17 @@ class Config
      */
     public function createTracer(ReporterInterface $reporter, SamplerInterface $sampler): Tracer
     {
-        return new Tracer($this->serviceName, $reporter, $sampler, true, $this->logger);
+        return new Tracer(
+            $this->serviceName,
+            $reporter,
+            $sampler,
+            true,
+            $this->logger,
+            null,
+            $this->getTraceIdHeader(),
+            $this->getBaggageHeaderPrefix(),
+            $this->getDebugIdHeaderKey()
+        );
     }
 
     /**
@@ -210,5 +220,29 @@ class Config
     private function getLocalAgentGroup(): array
     {
         return $this->config['local_agent'] ?? [];
+    }
+
+    /**
+     * @return string
+     */
+    private function getTraceIdHeader(): string
+    {
+        return $this->config['trace_id_header'] ?? TRACE_ID_HEADER;
+    }
+
+    /**
+     * @return string
+     */
+    private function getBaggageHeaderPrefix(): string
+    {
+        return $this->config['baggage_header_prefix'] ?? BAGGAGE_HEADER_PREFIX;
+    }
+
+    /**
+     * @return string
+     */
+    private function getDebugIdHeaderKey(): string
+    {
+        return $this->config['debug_id_header_key'] ?? DEBUG_ID_HEADER_KEY;
     }
 }
