@@ -9,10 +9,13 @@ use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
+use Jaeger\Sampler\RateLimitingSampler;
 use Jaeger\Sampler\SamplerInterface;
 use Jaeger\Sender\UdpSender;
 use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Util\RateLimiter;
 use OpenTracing\GlobalTracer;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
@@ -42,14 +45,24 @@ class Config
     private $logger;
 
     /**
+     * @var CacheItemPoolInterface
+     */
+    private $cache;
+
+    /**
      * Config constructor.
      * @param array $config
      * @param string|null $serviceName
      * @param LoggerInterface|null $logger
+     * @param CacheItemPoolInterface|null $cache
      * @throws Exception
      */
-    public function __construct(array $config, string $serviceName = null, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        array $config,
+        string $serviceName = null,
+        LoggerInterface $logger = null,
+        CacheItemPoolInterface $cache = null
+    ) {
         $this->config = $config;
 
         $this->serviceName = $config['service_name'] ?? $serviceName;
@@ -58,6 +71,7 @@ class Config
         }
 
         $this->logger = $logger ?: new NullLogger();
+        $this->cache = $cache;
     }
 
     /**
@@ -149,14 +163,23 @@ class Config
     {
         $samplerConfig = $this->config['sampler'] ?? [];
         $samplerType = $samplerConfig['type'] ?? null;
-        $samplerParam = $samplerConfig['param'] ?? null;
+        $samplerParams = $samplerConfig['params'] ?? [];
 
         if ($samplerType === null) {
             return new ConstSampler(true);
         } elseif ($samplerType === SAMPLER_TYPE_CONST) {
-            return new ConstSampler($samplerParam ?? false);
+            return new ConstSampler($samplerParams['sample'] ?? false);
         } elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
-            return new ProbabilisticSampler((float)$samplerParam);
+            return new ProbabilisticSampler((float)$samplerParams['rate'] ?? 0.0);
+        } elseif ($samplerType === SAMPLER_TYPE_RATE_LIMITING) {
+            return new RateLimitingSampler(
+                $samplerParams['maxTracesPerSecond'] ?? 0,
+                new RateLimiter(
+                    $this->cache,
+                    $samplerParams['currentBalanceKey'] ?? 'rate.currentBalance',
+                    $samplerParams['lastTickKey'] ?? 'rate.lastTick'
+                )
+            );
         }
 
         throw new Exception('Unknown sampler type ' . $samplerType);
