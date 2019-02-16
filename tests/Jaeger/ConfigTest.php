@@ -80,4 +80,31 @@ class ConfigTest extends TestCase
         $tracer = GlobalTracer::get();
         $this->assertInstanceOf(Tracer::class, $tracer);
     }
+
+    /**
+     * @test
+     * @expectedException Exception
+     * @expectedExceptionMessage Unknown sampler type unsupportedSampler
+     */
+    public function shouldThrowExceptionWhenCreatingNotSupportedSampler()
+    {
+        $config = new Config(['service_name' => 'test-service-name', 'sampler' => ['type' => 'unsupportedSampler']]);
+
+        $config->initializeTracer();
+    }
+
+    /**
+     * @test
+     * @expectedException Exception
+     * @expectedExceptionMessage You cannot use RateLimitingSampler without cache component
+     */
+    public function shouldThrowExceptionWhenCreatingRateLimitingSamplerWithoutCacheComponent()
+    {
+        $config = new Config([
+            'service_name' => 'test-service-name',
+            'sampler' => ['type' => \Jaeger\SAMPLER_TYPE_RATE_LIMITING]]
+        );
+
+        $config->initializeTracer();
+    }
 }

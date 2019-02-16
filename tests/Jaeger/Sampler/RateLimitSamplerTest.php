@@ -17,6 +17,7 @@ class RateLimitSamplerTest extends TestCase
      * @dataProvider maxRateProvider
      * @param integer $maxTracesPerSecond
      * @param array $traces array of traces result after being sampled one after another
+     * @throws
      */
     public function shouldDetermineWhetherOrTraceShouldBeSampled($maxTracesPerSecond, $traces)
     {

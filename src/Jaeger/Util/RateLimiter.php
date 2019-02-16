@@ -93,7 +93,7 @@ class RateLimiter
      * @param float $creditsPerNanosecond
      * @param float $maxBalance
      */
-    public function initialize(float $creditsPerNanosecond, float $maxBalance) : void
+    public function initialize(float $creditsPerNanosecond, float $maxBalance)
     {
         $this->creditsPerNanosecond = $creditsPerNanosecond;
         $this->maxBalance = $maxBalance;

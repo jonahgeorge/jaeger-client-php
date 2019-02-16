@@ -24,6 +24,8 @@ apt-get install -yq git wget unzip zip > /dev/null 2>&1
 
 echo "[INFO]: Install PHP extensions..."
 docker-php-ext-install bcmath sockets > /dev/null 2>&1
+pecl install hrtime > /dev/null 2>&1
+docker-php-ext-enable hrtime > /dev/null 2>&1
 
 echo "[INFO]: Install Xdebug to enable code coverage..."
 pecl install xdebug > /dev/null 2>&1
