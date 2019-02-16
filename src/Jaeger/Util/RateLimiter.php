@@ -67,10 +67,10 @@ class RateLimiter
             return true;
         }
 
-        $currentTime = hrtime(true);
-        $elapsedTime = $currentTime - $lastTick;
+        $currentTick = hrtime(true);
+        $elapsedTime = $currentTick - $lastTick;
         $balance += $elapsedTime * $this->creditsPerNanosecond;
-
+        var_dump($lastTick, $currentTick, $elapsedTime, $balance, $this->creditsPerNanosecond);
         if ($balance > $this->maxBalance) {
             $balance = $this->maxBalance;
         }
@@ -81,7 +81,7 @@ class RateLimiter
             $result = true;
         }
 
-        $this->saveState($currentTime, $balance);
+        $this->saveState($currentTick, $balance);
 
         return $result;
     }
