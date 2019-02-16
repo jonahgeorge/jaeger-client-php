@@ -80,7 +80,7 @@ class TextCodecTest extends TestCase
         $this->assertEquals($spanId, $spanContext->getSpanId());
         $this->assertEquals($parentId, $spanContext->getParentId());
         $this->assertEquals($flags, $spanContext->getFlags());
-        $this->assertEquals(count($baggage), count($spanContext->getBaggage()));
+        $this->assertCount(count($baggage), $spanContext->getBaggage() ? $spanContext->getBaggage() : []);
         foreach ($baggage as $key => $value) {
             $this->assertEquals($value, $spanContext->getBaggageItem($key));
         }
