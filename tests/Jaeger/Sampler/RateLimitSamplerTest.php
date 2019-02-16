@@ -16,10 +16,10 @@ class RateLimitSamplerTest extends TestCase
      * @test
      * @dataProvider maxRateProvider
      * @param integer $maxTracesPerSecond
-     * @param array $traces array of traces result after being sampled one after another
+     * @param bool $decision
      * @throws
      */
-    public function shouldDetermineWhetherOrTraceShouldBeSampled($maxTracesPerSecond, $traces)
+    public function shouldDetermineWhetherOrTraceShouldBeSampled($maxTracesPerSecond, $decision)
     {
         $sampler = new RateLimitingSampler(
             $maxTracesPerSecond,
@@ -27,16 +27,12 @@ class RateLimitSamplerTest extends TestCase
         );
 
         $sampler->isSampled();
-        foreach ($traces as $trace) {
-            list($sleep, $decision) = $trace;
-            usleep($sleep);
-            list($sampled, $tags) = $sampler->isSampled();
-            $this->assertEquals($decision, $sampled);
-            $this->assertEquals([
-                SAMPLER_TYPE_TAG_KEY  => SAMPLER_TYPE_RATE_LIMITING,
-                SAMPLER_PARAM_TAG_KEY => $maxTracesPerSecond,
-            ], $tags);
-        }
+        list($sampled, $tags) = $sampler->isSampled();
+        $this->assertEquals($decision, $sampled);
+        $this->assertEquals([
+            SAMPLER_TYPE_TAG_KEY  => SAMPLER_TYPE_RATE_LIMITING,
+            SAMPLER_PARAM_TAG_KEY => $maxTracesPerSecond,
+        ], $tags);
 
         $sampler->close();
     }
@@ -44,9 +40,9 @@ class RateLimitSamplerTest extends TestCase
     public function maxRateProvider()
     {
         return [
-            [1000000, [[1, true], [1, true], [1, true]]],
-            [1000, [[0, false], [1000, true]]],
-            [0, [0, false]],
+            [1000000, true],
+            [1, false],
+            [0, false],
         ];
     }
 }
