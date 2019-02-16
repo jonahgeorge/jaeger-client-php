@@ -157,31 +157,35 @@ class Config
 
     /**
      * @return SamplerInterface
+     * @throws \Psr\Cache\InvalidArgumentException
      * @throws Exception
      */
     private function getSampler(): SamplerInterface
     {
         $samplerConfig = $this->config['sampler'] ?? [];
         $samplerType = $samplerConfig['type'] ?? null;
-        $samplerParams = $samplerConfig['params'] ?? [];
+        $samplerParam = $samplerConfig['param'] ?? null;
 
         if ($samplerType === null) {
             return new ConstSampler(true);
         } elseif ($samplerType === SAMPLER_TYPE_CONST) {
-            return new ConstSampler($samplerParams['sample'] ?? false);
+            return new ConstSampler($samplerParam ?? false);
         } elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
-            return new ProbabilisticSampler((float)$samplerParams['rate'] ?? 0.0);
+            return new ProbabilisticSampler((float)$samplerParam);
         } elseif ($samplerType === SAMPLER_TYPE_RATE_LIMITING) {
+            if (!$this->cache) {
+                throw new Exception('You cannot use RateLimitingSampler without cache component');
+            }
+            $cacheConfig = $samplerConfig['cache'] ?? [];
             return new RateLimitingSampler(
-                $samplerParams['maxTracesPerSecond'] ?? 0,
+                $samplerParam ?? 0,
                 new RateLimiter(
                     $this->cache,
-                    $samplerParams['currentBalanceKey'] ?? 'rate.currentBalance',
-                    $samplerParams['lastTickKey'] ?? 'rate.lastTick'
+                    $cacheConfig['currentBalanceKey'] ?? 'rate.currentBalance',
+                    $cacheConfig['lastTickKey'] ?? 'rate.lastTick'
                 )
             );
         }
-
         throw new Exception('Unknown sampler type ' . $samplerType);
     }
 

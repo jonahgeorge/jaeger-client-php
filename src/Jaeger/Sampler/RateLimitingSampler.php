@@ -31,8 +31,7 @@ class RateLimitingSampler implements SamplerInterface
 
         $maxTracesPerNanosecond = $maxTracesPerSecond / 1000000000.0;
         $this->rateLimiter = $rateLimiter;
-        $this->rateLimiter->setCreditsPerNanosecond($maxTracesPerNanosecond);
-        $this->rateLimiter->setMaxBalance($maxTracesPerSecond > 1.0 ? 1.0 : $maxTracesPerSecond);
+        $this->rateLimiter->initialize($maxTracesPerNanosecond, $maxTracesPerSecond > 1.0 ? 1.0 : $maxTracesPerSecond);
     }
 
     /**

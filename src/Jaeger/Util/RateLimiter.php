@@ -2,6 +2,7 @@
 
 namespace Jaeger\Util;
 
+use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 class RateLimiter
@@ -12,17 +13,17 @@ class RateLimiter
     private $cache;
 
     /**
-     * @var float
+     * @var CacheItemInterface
      */
     private $balance;
 
     /**
-     * @var integer
+     * @var CacheItemInterface
      */
     private $lastTick;
 
     /**
-     * @var int
+     * @var float
      */
     private $creditsPerNanosecond = 0;
 
@@ -31,6 +32,14 @@ class RateLimiter
      */
     private $maxBalance = 0;
 
+    /**
+     * RateLimiter constructor.
+     *
+     * @param CacheItemPoolInterface $cache
+     * @param string $currentBalanceKey key of current balance value in $cache
+     * @param string $lastTickKey key of last tick value in $cache
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function __construct(
         CacheItemPoolInterface $cache,
         string $currentBalanceKey,
@@ -77,23 +86,25 @@ class RateLimiter
         return $result;
     }
 
-    /**
-     * @param int $creditsPerNanosecond
-     */
-    public function setCreditsPerNanosecond($creditsPerNanosecond)
-    {
-        $this->creditsPerNanosecond = $creditsPerNanosecond;
-    }
 
     /**
+     * Initializes limiter costs and boundaries
+     *
+     * @param float $creditsPerNanosecond
      * @param float $maxBalance
      */
-    public function setMaxBalance(float $maxBalance)
+    public function initialize(float $creditsPerNanosecond, float $maxBalance) : void
     {
+        $this->creditsPerNanosecond = $creditsPerNanosecond;
         $this->maxBalance = $maxBalance;
     }
 
-    private function getState()
+    /**
+     * Method loads last tick and current balance from cache
+     *
+     * @return array [$lastTick, $balance]
+     */
+    private function getState() : array
     {
         return [
             $this->lastTick->get(),
@@ -101,6 +112,12 @@ class RateLimiter
         ];
     }
 
+    /**
+     * Method saves last tick and current balance into cache
+     *
+     * @param integer $lastTick
+     * @param float $balance
+     */
     private function saveState($lastTick, $balance)
     {
         $this->lastTick->set($lastTick);
