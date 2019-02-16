@@ -45,7 +45,7 @@ class RateLimitSamplerTest extends TestCase
     {
         return [
             [1000000, [[1, true], [1, true], [1, true]]],
-            [1000, [[0, false], [1, false], [1000, true]]],
+            [1000, [[0, false], [1000, true]]],
             [0, [0, false]],
         ];
     }
