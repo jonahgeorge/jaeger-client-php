@@ -273,6 +273,7 @@ class Tracer implements OTTracer
      */
     public function flush()
     {
+        $this->sampler->close();
         $this->reporter->close();
     }
 

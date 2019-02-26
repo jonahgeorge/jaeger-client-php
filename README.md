@@ -31,7 +31,7 @@ use OpenTracing\GlobalTracer;
 $config = new Config(
     [
         'sampler' => [
-            'type' => 'const',
+            'type' => Jaeger\SAMPLER_TYPE_CONST,
             'param' => true,
         ],
         'logging' => true,
@@ -46,6 +46,52 @@ $scope = $tracer->startActiveSpan('TestSpan', []);
 $scope->close();
 
 $tracer->flush();
+```
+
+### Samplers
+
+List of supported samplers, for more info about samplers, please read [Jaeger Sampling](https://www.jaegertracing.io/docs/1.9/sampling/) guide.
+
+#### Const sampler
+This sampler either samples everything, or nothing.
+
+##### Configuration
+```
+'sampler' => [
+    'type' => Jaeger\SAMPLER_TYPE_CONST,
+    'param' => true, // boolean wheter to trace or not
+],
+```
+
+#### Probabilistic sampler
+This sampler samples request by given rate.
+
+##### Configuration
+```
+'sampler' => [
+    'type' => Jaeger\SAMPLER_TYPE_PROBABILISTIC,
+    'param' => 0.5, // float [0.0, 1.0]
+],
+```
+
+#### Rate limiting sampler
+Samples maximum specified number of traces (requests) per second.
+
+##### Requirements
+* `psr/cache` PSR-6 cache component to store and retrieve sampler state between requests.
+Cache component is passed to `Jaeger\Config` trough its constructor.
+* `hrtime()` function, that can retrieve time in nanoseconds. You need either `php 7.3` or [PECL/hrtime](http://pecl.php.net/package/hrtime) extension.
+
+##### Configuration
+```
+'sampler' => [
+    'type' => Jaeger\SAMPLER_TYPE_RATE_LIMITING,
+    'param' => 100 // integer maximum number of traces per second,
+    'cache' => [
+        'currentBalanceKey' => 'rate.currentBalance' // string
+        'lastTickKey' => 'rate.lastTick' // string
+    ]
+],
 ```
 
 ## Testing
