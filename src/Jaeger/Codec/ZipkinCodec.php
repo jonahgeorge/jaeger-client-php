@@ -29,10 +29,10 @@ class ZipkinCodec implements CodecInterface
      */
     public function inject(SpanContext $spanContext, &$carrier)
     {
-        $carrier[self::TRACE_ID_NAME] = base_convert($spanContext->getTraceId(), 10, 16);
-        $carrier[self::SPAN_ID_NAME] = base_convert($spanContext->getSpanId(), 10, 16);
+        $carrier[self::TRACE_ID_NAME] = dechex($spanContext->getTraceId());
+        $carrier[self::SPAN_ID_NAME] = dechex($spanContext->getSpanId());
         if ($spanContext->getParentId() != null) {
-            $carrier[self::PARENT_ID_NAME] = base_convert($spanContext->getParentId(), 10, 16);
+            $carrier[self::PARENT_ID_NAME] = dechex($spanContext->getParentId());
         }
         $carrier[self::FLAGS_NAME] = (int) $spanContext->getFlags();
     }
@@ -61,15 +61,15 @@ class ZipkinCodec implements CodecInterface
         }
 
         if (isset($carrier[strtolower(self::TRACE_ID_NAME)])) {
-            $traceId = base_convert($carrier[strtolower(self::TRACE_ID_NAME)], 16, 10);
+            $traceId =  CodecUtility::hexToInt64($carrier[strtolower(self::TRACE_ID_NAME)], 16, 10);
         }
 
         if (isset($carrier[strtolower(self::PARENT_ID_NAME)])) {
-            $parentId = base_convert($carrier[strtolower(self::PARENT_ID_NAME)], 16, 10);
+            $parentId =  CodecUtility::hexToInt64($carrier[strtolower(self::PARENT_ID_NAME)], 16, 10);
         }
 
         if (isset($carrier[strtolower(self::SPAN_ID_NAME)])) {
-            $spanId = base_convert($carrier[strtolower(self::SPAN_ID_NAME)], 16, 10);
+            $spanId =  CodecUtility::hexToInt64($carrier[strtolower(self::SPAN_ID_NAME)], 16, 10);
         }
 
         if (isset($carrier[strtolower(self::FLAGS_NAME)])) {
@@ -78,7 +78,7 @@ class ZipkinCodec implements CodecInterface
             }
         }
 
-        if ($traceId !== "0" && $spanId !== "0") {
+        if ($traceId != "0" && $spanId != "0") {
             return new SpanContext($traceId, $spanId, $parentId, $flags);
         }
 

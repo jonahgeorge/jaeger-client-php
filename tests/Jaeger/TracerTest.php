@@ -134,7 +134,7 @@ class TracerTest extends TestCase
     /** @test */
     public function shouldNotThrowExceptionOnExtractFromMalformedState()
     {
-        $this->assertNull(null, $this->tracer->extract(TEXT_MAP, ['uber-trace-id' => '']));
+        $this->assertNull($this->tracer->extract(TEXT_MAP, ['uber-trace-id' => '']));
     }
 
     /** @test */

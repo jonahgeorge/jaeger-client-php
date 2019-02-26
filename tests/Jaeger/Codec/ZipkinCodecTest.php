@@ -47,9 +47,9 @@ class ZipkinCodecTest extends TestCase
     {
         // Given
         $carrier = [
-            'x-b3-traceid' => '463ac35c9f6413ad48485a3953bb6124',
-            'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
-            'x-b3-parentspanid' => '463ac35c9f6413ad48485a3953bb6124',
+            'x-b3-traceid' => 'a53bf337d7e455e1',
+            'x-b3-spanid' => '153bf227d1f455a1',
+            'x-b3-parentspanid' => 'a53bf337d7e455e1',
             'x-b3-flags' => '1',
         ];
 
@@ -58,9 +58,9 @@ class ZipkinCodecTest extends TestCase
 
         // Then
         $this->assertEquals(new SpanContext(
-            '93351075330931896558786731617803788580',
-            '93351075330931896558786731617803788580',
-            '93351075330931896558786731617803788580',
+            '-6540366612654696991',
+            '1530082751262512545',
+            '-6540366612654696991',
             DEBUG_FLAG
         ), $spanContext);
     }
@@ -69,8 +69,8 @@ class ZipkinCodecTest extends TestCase
     {
         // Given
         $carrier = [
-            'x-b3-traceid' => '463ac35c9f6413ad48485a3953bb6124',
-            'x-b3-spanid' => '463ac35c9f6413ad48485a3953bb6124',
+            'x-b3-traceid' => '8d824d69da5f50d9',
+            'x-b3-spanid' => '8d824d69da5f50d9',
             'x-b3-flags' => '1',
         ];
 
@@ -79,8 +79,8 @@ class ZipkinCodecTest extends TestCase
 
         // Then
         $this->assertEquals(new SpanContext(
-            '93351075330931896558786731617803788580',
-            '93351075330931896558786731617803788580',
+            '-8249946450358742823',
+            '-8249946450358742823',
             '0',
             DEBUG_FLAG
         ), $spanContext);
