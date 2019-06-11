@@ -203,10 +203,8 @@ class Tracer implements OTTracer
             $options->getStartTime()
         );
 
-        if (($rpcServer || $parentId === null) && ($flags & SAMPLED_FLAG)) {
-            // this is a first-in-process span, and is sampled
-            $span->setTags($this->tags);
-        }
+        $mergedTags = $this->tags = array_merge($this->tags, $tags);
+        $span->setTags($mergedTags);
 
         return $span;
     }
