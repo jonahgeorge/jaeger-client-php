@@ -133,7 +133,7 @@ class Tracer implements OTTracer
         $hostname = $this->getHostName();
         $this->ipAddress = $this->getHostByName($hostname);
 
-        if (empty($hostname) != false) {
+        if (!empty($hostname)) {
             $this->tags[JAEGER_HOSTNAME_TAG_KEY] = $hostname;
         }
     }
