@@ -130,7 +130,7 @@ class Tracer implements OTTracer
             $this->tags = array_merge($this->tags, $tags);
         }
 
-        $hostname = $this->getHostname();
+        $hostname = $this->getHostName();
         $this->ipAddress = $this->getHostByName($hostname);
 
         if (empty($hostname) != false) {
