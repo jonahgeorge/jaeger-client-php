@@ -203,7 +203,7 @@ class Tracer implements OTTracer
             $options->getStartTime()
         );
 
-        $mergedTags = $this->tags = array_merge($this->tags, $tags);
+        $mergedTags = array_merge($this->tags, $tags);
         $span->setTags($mergedTags);
 
         return $span;
