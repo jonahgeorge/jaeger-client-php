@@ -130,10 +130,10 @@ class Tracer implements OTTracer
             $this->tags = array_merge($this->tags, $tags);
         }
 
-        $hostname = $this->getHostname();
+        $hostname = $this->getHostName();
         $this->ipAddress = $this->getHostByName($hostname);
 
-        if (empty($hostname) != false) {
+        if (!empty($hostname)) {
             $this->tags[JAEGER_HOSTNAME_TAG_KEY] = $hostname;
         }
     }
@@ -203,10 +203,8 @@ class Tracer implements OTTracer
             $options->getStartTime()
         );
 
-        if (($rpcServer || $parentId === null) && ($flags & SAMPLED_FLAG)) {
-            // this is a first-in-process span, and is sampled
-            $span->setTags($this->tags);
-        }
+        $mergedTags = array_merge($this->tags, $tags);
+        $span->setTags($mergedTags);
 
         return $span;
     }
