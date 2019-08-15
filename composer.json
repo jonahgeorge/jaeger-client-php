@@ -25,13 +25,13 @@
     "require": {
         "php": "^7.0",
         "ext-sockets": "*",
-        "opentracing/opentracing": "1.0.0-beta5",
+        "opentracing/opentracing": "1.0.0-beta6",
         "packaged/thrift": "^0.10",
         "phlib/base_convert": "^1.0",
         "psr/log": "^1.0"
     },
     "provide": {
-        "opentracing/opentracing": "1.0.0-beta5"
+        "opentracing/opentracing": "1.0.0-beta6"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.4",

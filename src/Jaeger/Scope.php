@@ -47,7 +47,7 @@ class Scope implements OTScope
     /**
      * {@inheritdoc}
      */
-    public function close()
+    public function close() : void
     {
         if ($this->scopeManager->getActive() !== $this) {
             // This shouldn't happen if users call methods in expected order
@@ -64,7 +64,7 @@ class Scope implements OTScope
     /**
      * {@inheritdoc}
      */
-    public function getSpan()
+    public function getSpan() : OTSpan
     {
         return $this->wrapped;
     }

@@ -16,6 +16,9 @@ use OpenTracing\SpanContext as OTSpanContext;
 use OpenTracing\Reference;
 use OpenTracing\StartSpanOptions;
 use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\Span as OTSpan;
+use OpenTracing\Scope as  OTScope;
+use OpenTracing\ScopeManager as OTScopeManager;
 use const OpenTracing\Formats\BINARY;
 use const OpenTracing\Formats\HTTP_HEADERS;
 use const OpenTracing\Formats\TEXT_MAP;
@@ -141,7 +144,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function startSpan($operationName, $options = [])
+    public function startSpan(string $operationName, $options = []) :OTSpan
     {
         if (!($options instanceof StartSpanOptions)) {
             $options = StartSpanOptions::create($options);
@@ -221,7 +224,7 @@ class Tracer implements OTTracer
      *
      * @throws UnsupportedFormat
      */
-    public function inject(OTSpanContext $spanContext, $format, &$carrier)
+    public function inject(OTSpanContext $spanContext, string $format, &$carrier) :void
     {
         if ($spanContext instanceof SpanContext) {
             $codec = $this->codecs[$format] ?? null;
@@ -251,7 +254,7 @@ class Tracer implements OTTracer
      *
      * @throws UnsupportedFormat
      */
-    public function extract($format, $carrier)
+    public function extract(string $format, $carrier) :?OTSpanContext
     {
         $codec = $this->codecs[$format] ?? null;
 
@@ -271,8 +274,9 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function flush(): void
     {
+        $this->sampler->close();
         $this->reporter->close();
     }
 
@@ -284,7 +288,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function getScopeManager()
+    public function getScopeManager() :OTScopeManager
     {
         return $this->scopeManager;
     }
@@ -292,7 +296,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function getActiveSpan()
+    public function getActiveSpan() :OTSpan
     {
         $activeScope = $this->getScopeManager()->getActive();
         if ($activeScope === null) {
@@ -305,7 +309,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function startActiveSpan($operationName, $options = [])
+    public function startActiveSpan(string $operationName, $options = []): OTScope
     {
         if (!$options instanceof StartSpanOptions) {
             $options = StartSpanOptions::create($options);

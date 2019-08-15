@@ -4,6 +4,7 @@ namespace Jaeger;
 
 use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
 use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
+use OpenTracing\SpanContext as OTSpanContext;
 use OpenTracing\Span as OTSpan;
 use DateTime;
 use DateTimeInterface;
@@ -190,7 +191,7 @@ class Span implements OTSpan
      *
      * @return SpanContext
      */
-    public function getContext()
+    public function getContext() :OTSpanContext
     {
         return $this->context;
     }
@@ -198,7 +199,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function finish($finishTime = null, array $logRecords = [])
+    public function finish($finishTime = null, array $logRecords = []) :void
     {
         if (!$this->isSampled()) {
             return;
@@ -227,7 +228,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function overwriteOperationName($newOperationName)
+    public function overwriteOperationName(string $newOperationName) :void
     {
         // TODO log warning
         $this->operationName = $newOperationName;
@@ -239,7 +240,7 @@ class Span implements OTSpan
      * @param array $tags
      * @return void
      */
-    public function setTags($tags)
+    public function setTags(string $tags) :void
     {
         foreach ($tags as $key => $value) {
             $this->setTag($key, $value);
@@ -249,7 +250,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function setTag($key, $value)
+    public function setTag(string $key, $value) :void
     {
         if ($this->isSampled()) {
             $special = self::SPECIAL_TAGS[$key] ?? null;
@@ -264,8 +265,6 @@ class Span implements OTSpan
                 $this->tags[$key] = $tag;
             }
         }
-
-        return $this;
     }
 
     const SPECIAL_TAGS = [
@@ -361,7 +360,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function log(array $fields = [], $timestamp = null)
+    public function log(array $fields = [], $timestamp = null) :void
     {
         $timestamp = $this->microTime($timestamp);
         if ($timestamp < $this->getStartTime()) {
@@ -396,7 +395,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function addBaggageItem($key, $value)
+    public function addBaggageItem(string $key, string $value) :void
     {
         $this->context = $this->context->withBaggageItem($key, $value);
     }
@@ -404,7 +403,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function getBaggageItem($key)
+    public function getBaggageItem(string $key) :?string
     {
         return $this->context->getBaggageItem($key);
     }
