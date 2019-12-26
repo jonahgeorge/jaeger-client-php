@@ -25,17 +25,14 @@
     "require": {
         "php": "^7.0",
         "ext-sockets": "*",
-        "opentracing/opentracing": "1.0.0-beta5",
+        "opentracing/opentracing": "^1@beta",
         "packaged/thrift": "^0.10",
         "phlib/base_convert": "^1.0",
         "psr/cache": "^1.0",
         "psr/log": "^1.0"
     },
-    "provide": {
-        "opentracing/opentracing": "1.0.0-beta5"
-    },
     "require-dev": {
-        "phpunit/phpunit": "^6.4",
+        "phpunit/phpunit": "^6.4 || ^7",
         "squizlabs/php_codesniffer": "3.*",
         "cache/array-adapter": "^1.0",
         "symfony/polyfill-php73": "^1.10"
