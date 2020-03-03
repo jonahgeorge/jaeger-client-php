@@ -432,8 +432,8 @@ class Span implements OTSpan
      */
     private function makeStringTag(string $key, string $value): BinaryAnnotation
     {
-        if (strlen($value) > 256) {
-            $value = substr($value, 0, 256);
+        if (strlen($value) > 1024) {
+            $value = substr($value, 0, 1024);
         }
         return new BinaryAnnotation([
             'key' => $key,
