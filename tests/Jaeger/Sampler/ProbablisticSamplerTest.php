@@ -3,6 +3,7 @@
 namespace Jaeger\Tests\Sampler;
 
 use Jaeger\Sampler\ProbabilisticSampler;
+use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
 use const Jaeger\SAMPLER_PARAM_TAG_KEY;
 use const Jaeger\SAMPLER_TYPE_PROBABILISTIC;
@@ -46,11 +47,12 @@ class ProbablisticSamplerTest extends TestCase
      * @test
      * @dataProvider rateProvider
      * @param mixed $rate
-     * @expectedException \OutOfBoundsException
-     * @expectedExceptionMessage Sampling rate must be between 0.0 and 1.0.
      */
     public function shouldThrowOutOfBoundsExceptionInCaseOfInvalidRate($rate)
     {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Sampling rate must be between 0.0 and 1.0.');
+
         new ProbabilisticSampler($rate);
     }
 

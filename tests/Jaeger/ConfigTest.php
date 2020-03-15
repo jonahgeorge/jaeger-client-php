@@ -47,12 +47,11 @@ class ConfigTest extends TestCase
         $this->assertEquals($this->serviceName, $tracer->getServiceName());
     }
 
-    /**
-     * @expectedException Exception
-     * @expectedExceptionMessage service_name required in the config or param.
-     */
     function testThrowExceptionWhenServiceNameIsNotDefined()
     {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('service_name required in the config or param.');
+
         new Config([]);
     }
 
@@ -81,29 +80,27 @@ class ConfigTest extends TestCase
         $this->assertInstanceOf(Tracer::class, $tracer);
     }
 
-    /**
-     * @test
-     * @expectedException Exception
-     * @expectedExceptionMessage Unknown sampler type unsupportedSampler
-     */
+    /** @test */
     public function shouldThrowExceptionWhenCreatingNotSupportedSampler()
     {
         $config = new Config(['service_name' => 'test-service-name', 'sampler' => ['type' => 'unsupportedSampler']]);
 
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unknown sampler type unsupportedSampler');
+
         $config->initializeTracer();
     }
 
-    /**
-     * @test
-     * @expectedException Exception
-     * @expectedExceptionMessage You cannot use RateLimitingSampler without cache component
-     */
+    /** @test */
     public function shouldThrowExceptionWhenCreatingRateLimitingSamplerWithoutCacheComponent()
     {
         $config = new Config([
             'service_name' => 'test-service-name',
-            'sampler' => ['type' => \Jaeger\SAMPLER_TYPE_RATE_LIMITING]]
-        );
+            'sampler' => ['type' => \Jaeger\SAMPLER_TYPE_RATE_LIMITING]
+        ]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('You cannot use RateLimitingSampler without cache component');
 
         $config->initializeTracer();
     }

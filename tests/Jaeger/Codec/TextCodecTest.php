@@ -2,6 +2,7 @@
 
 namespace Jaeger\Tests\Codec;
 
+use Exception;
 use const Jaeger\BAGGAGE_HEADER_PREFIX;
 use Jaeger\Codec\TextCodec;
 use const Jaeger\DEBUG_ID_HEADER_KEY;
@@ -127,24 +128,22 @@ class TextCodecTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage baggage without trace ctx
-     */
     public function testBaggageWithoutTraceContext()
     {
         $carrier = [BAGGAGE_HEADER_PREFIX.'test' => 'some data'];
 
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('baggage without trace ctx');
+
         $this->textCodec->extract($carrier);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Malformed tracer state string.
-     */
     public function testInvalidSpanContextParsingFromHeader()
     {
         $carrier = [TRACE_ID_HEADER => 'invalid_data'];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Malformed tracer state string.');
 
         $this->textCodec->extract($carrier);
     }
