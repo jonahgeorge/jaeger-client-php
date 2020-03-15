@@ -64,6 +64,9 @@ class Tracer implements OTTracer
      */
     private $oneSpanPerRpc;
 
+    /**
+     * @var string[]
+     */
     private $tags;
 
     /**

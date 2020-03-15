@@ -13,6 +13,8 @@ use OpenTracing\NoopSpanContext;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use const Jaeger\BAGGAGE_HEADER_PREFIX;
+use const Jaeger\DEBUG_ID_HEADER_KEY;
 use const Jaeger\TRACE_ID_HEADER;
 use const Jaeger\ZIPKIN_SPAN_FORMAT;
 use const OpenTracing\Formats\TEXT_MAP;
@@ -84,6 +86,70 @@ class TracerTest extends TestCase
 
         $this->assertEquals('test-operation1', $tracer->getActiveSpan()->getOperationName());
    }
+
+    /** @test */
+    public function shouldAddConfiguredTagsToStartedSpanWhenSampled()
+    {
+        $this->sampler->expects($this->any())
+            ->method('isSampled')
+            ->willReturn([true, []]);
+
+        $tags = [
+            'bar' => 'a-value',
+            'other.tag' => 'foo',
+        ];
+
+        $tracer = new Tracer(
+            $this->serviceName,
+            $this->reporter,
+            $this->sampler,
+            true,
+            $this->logger,
+            $this->scopeManager,
+            TRACE_ID_HEADER,
+            BAGGAGE_HEADER_PREFIX,
+            DEBUG_ID_HEADER_KEY,
+            $tags
+        );
+
+        $span = $tracer->startSpan('test-span');
+        $spanTags = $span->getTags();
+
+        foreach ($tags as $name => $value) {
+            $this->assertArrayHasKey($name, $spanTags, "Tag '$name' should be set on span");
+            $this->assertEquals($value, $spanTags[$name]->value, "Tag '$name' should have configured value");
+        }
+    }
+
+    /** @test */
+    public function shouldAddNoConfiguredTagsToStartedSpanWhenNotSampled()
+    {
+        $this->sampler->expects($this->any())
+            ->method('isSampled')
+            ->willReturn([false, []]);
+
+        $tags = [
+            'bar' => 'a-value',
+            'other.tag' => 'foo',
+        ];
+
+        $tracer = new Tracer(
+            $this->serviceName,
+            $this->reporter,
+            $this->sampler,
+            true,
+            $this->logger,
+            $this->scopeManager,
+            TRACE_ID_HEADER,
+            BAGGAGE_HEADER_PREFIX,
+            DEBUG_ID_HEADER_KEY,
+            $tags
+        );
+
+        $span = $tracer->startSpan('test-span');
+
+        $this->assertEquals([], $span->getTags(), 'No tags should be set when not sampled');
+    }
 
     /**
      * @test
