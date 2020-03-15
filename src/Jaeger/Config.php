@@ -111,7 +111,8 @@ class Config
             null,
             $this->getTraceIdHeader(),
             $this->getBaggageHeaderPrefix(),
-            $this->getDebugIdHeaderKey()
+            $this->getDebugIdHeaderKey(),
+            $this->getConfiguredTags()
         );
     }
 
@@ -271,5 +272,14 @@ class Config
     private function getDebugIdHeaderKey(): string
     {
         return $this->config['debug_id_header_key'] ?? DEBUG_ID_HEADER_KEY;
+    }
+
+    /**
+     * Get a list of user-defined tags to be added to each span created by the tracer initialized by this config.
+     * @return string[]
+     */
+    private function getConfiguredTags(): array
+    {
+        return $this->config['tags'] ?? [];
     }
 }

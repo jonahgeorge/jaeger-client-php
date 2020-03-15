@@ -107,4 +107,27 @@ class ConfigTest extends TestCase
 
         $config->initializeTracer();
     }
+
+    /** @test */
+    public function shouldPassConfiguredTagsToTracer()
+    {
+        $tags = [
+            'bar' => 'a-value',
+            'other.tag' => 'foo',
+        ];
+
+        $config = new Config([
+            'service_name' => 'test-service-name',
+            'tags' => $tags,
+        ]);
+
+        $tracer = $config->initializeTracer();
+        $span = $tracer->startSpan('test-span');
+        $spanTags = $span->getTags();
+
+        foreach ($tags as $name => $value) {
+            $this->assertArrayHasKey($name, $spanTags, "Tag '$name' should be set on span");
+            $this->assertEquals($value, $spanTags[$name]->value, "Tag '$name' should have configured value");
+        }
+    }
 }
