@@ -106,7 +106,7 @@ class Config
             $this->serviceName,
             $reporter,
             $sampler,
-            true,
+            $this->shouldUseOneSpanPerRpc(),
             $this->logger,
             null,
             $this->getTraceIdHeader(),
@@ -281,5 +281,17 @@ class Config
     private function getConfiguredTags(): array
     {
         return $this->config['tags'] ?? [];
+    }
+
+    /**
+     * Whether to follow the Zipkin model of using one span per RPC,
+     * as opposed to the model of using separate spans on the RPC client and server.
+     * Defaults to true.
+     *
+     * @return bool
+     */
+    private function shouldUseOneSpanPerRpc(): bool
+    {
+        return $this->config['one_span_per_rpc'] ?? true;
     }
 }
