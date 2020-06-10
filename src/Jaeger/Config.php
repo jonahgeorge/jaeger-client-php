@@ -65,7 +65,9 @@ class Config
     ) {
         $this->config = $config;
 
-        $this->serviceName = $config['service_name'] ?? $serviceName;
+        $this->setConfigFromEnv();
+
+        $this->serviceName = $this->config['service_name'] ?? $serviceName;
         if ($this->serviceName === null) {
             throw new Exception('service_name required in the config or param.');
         }
@@ -293,5 +295,46 @@ class Config
     private function shouldUseOneSpanPerRpc(): bool
     {
         return $this->config['one_span_per_rpc'] ?? true;
+    }
+
+    /**
+     * Sets values from env vars into config props, unless ones has been already set.
+     */
+    private function setConfigFromEnv()
+    {
+        // general
+        if (isset($_ENV['JAEGER_SERVICE_NAME']) && !isset($this->config['service_name'])) {
+            $this->config['service_name'] = $_ENV['JAEGER_SERVICE_NAME'];
+        }
+
+        if (isset($_ENV['JAEGER_TAGS']) && !isset($this->config["tags"])) {
+            $this->config['tags'] = $_ENV['JAEGER_TAGS'];
+        }
+
+        // reporting
+        if (isset($_ENV['JAEGER_AGENT_HOST']) && !isset($this->config['local_agent']['reporting_host'])) {
+            $this->config['local_agent']['reporting_host'] = $_ENV['JAEGER_AGENT_HOST'];
+        }
+
+        if (isset($_ENV['JAEGER_AGENT_PORT']) && !isset($this->config['local_agent']['reporting_port'])) {
+            $this->config['local_agent']['reporting_port'] = intval($_ENV['JAEGER_AGENT_PORT']);
+        }
+
+        if (isset($_ENV['JAEGER_REPORTER_LOG_SPANS']) && !isset($this->config['logging'])) {
+            $this->config['logging'] = filter_var($_ENV['JAEGER_REPORTER_LOG_SPANS'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if (isset($_ENV['JAEGER_REPORTER_MAX_QUEUE_SIZE']) && !isset($this->config['max_buffer_length'])) {
+            $this->config['max_buffer_length'] = intval($_ENV['JAEGER_REPORTER_MAX_QUEUE_SIZE']);
+        }
+
+        // sampling
+        if (isset($_ENV['JAEGER_SAMPLER_TYPE']) && !isset($this->config['sampler']['type'])) {
+            $this->config['sampler']['type'] = $_ENV['JAEGER_SAMPLER_TYPE'];
+        }
+
+        if (isset($_ENV['JAEGER_SAMPLER_PARAM']) && !isset($this->config['sampler']['param'])) {
+            $this->config['sampler']['param'] = $_ENV['JAEGER_SAMPLER_PARAM'];
+        }
     }
 }
