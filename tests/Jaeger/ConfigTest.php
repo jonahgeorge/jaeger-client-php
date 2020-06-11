@@ -127,4 +127,104 @@ class ConfigTest extends TestCase
             $this->assertEquals($value, $spanTags[$name]->value, "Tag '$name' should have configured value");
         }
     }
+
+    /**
+     * @test
+     * @dataProvider shouldSetConfigPropertiesFromEnvVarsProvider
+     */
+    public function shouldSetConfigPropertiesFromEnvVars($varName, $varVal, $initialConfig, $valueGetter, $expectedVal)
+    {
+        $_ENV[$varName] = $varVal;
+
+        $config = new Config([]);
+        $configProperty = (new \ReflectionObject($config))->getProperty('config');
+        $configProperty->setAccessible('true');
+        $configArray = $configProperty->getValue($config);
+
+        $this->assertSame($expectedVal, $valueGetter($configArray));
+    }
+
+    /**
+     * @test
+     * @dataProvider shouldSetConfigPropertiesFromEnvVarsProvider
+     */
+    public function shouldNotSetConfigPropertiesFromEnvVars($varName, $varVal, $initialConfig, $valueGetter, $expectedVal)
+    {
+        $_ENV[$varName] = $varVal;
+
+        $config = new Config($initialConfig);
+        $configProperty = (new \ReflectionObject($config))->getProperty('config');
+        $configProperty->setAccessible('true');
+        $configArray = $configProperty->getValue($config);
+
+        $this->assertNotEquals($expectedVal, $valueGetter($configArray));
+    }
+
+    /**
+     *  0 -> varName
+     *  1 -> varVal
+     *  2 -> initialConfig
+     *  3 -> valueGetter
+     *  4 -> expectedVal
+     */
+    public function shouldSetConfigPropertiesFromEnvVarsProvider() {
+        return [
+            [
+                'JAEGER_SERVICE_NAME',
+                'some-str',
+                ['service_name' => 'some-other-str'],
+                function ($a) { return $a['service_name']; },
+                'some-str',
+            ],
+            [
+                'JAEGER_TAGS',
+                'some-str',
+                ['tags' => 'some-other-str'],
+                function ($a) { return $a['tags']; },
+                'some-str',
+            ],
+            [
+                'JAEGER_AGENT_HOST',
+                'some-str',
+                ['local_agent' => ['reporting_host' => 'some-other-str']],
+                function ($a) { return $a['local_agent']['reporting_host'];},
+                'some-str',
+            ],
+            [
+                'JAEGER_AGENT_PORT',
+                '2222',
+                ['local_agent' => ['reporting_port' => 1111]],
+                function ($a) { return $a['local_agent']['reporting_port']; },
+                2222,
+            ],
+            [
+                'JAEGER_REPORTER_LOG_SPANS',
+                'true',
+                ['logging' => false],
+                function ($a) { return $a['logging']; },
+                true,
+            ],
+            [
+                'JAEGER_REPORTER_MAX_QUEUE_SIZE',
+                '2222',
+                ['max_buffer_length' => 1111],
+                function ($a) { return $a['max_buffer_length']; },
+                2222,
+            ],
+            [
+                'JAEGER_SAMPLER_TYPE',
+                'some-str',
+                ['sampler' => ['type' => 'some-other-str']],
+                function ($a) { return $a['sampler']['type']; },
+                'some-str',
+            ],
+            [
+                'JAEGER_SAMPLER_PARAM',
+                'some-str',
+                ['sampler' => ['param' => 'some-other-str']],
+                function ($a) { return $a['sampler']['param']; },
+                'some-str',
+            ],
+        ];
+    }
 }
