@@ -169,8 +169,9 @@ class Config
         $samplerType = $samplerConfig['type'] ?? null;
         $samplerParam = $samplerConfig['param'] ?? null;
 
-        if ($samplerType === null) {
-            return new ConstSampler(true);
+        if ($samplerType === null || $samplerType === SAMPLER_TYPE_REMOTE) {
+            // todo: implement remote sampling
+            return new ProbabilisticSampler((float)$samplerParam);
         } elseif ($samplerType === SAMPLER_TYPE_CONST) {
             return new ConstSampler($samplerParam ?? false);
         } elseif ($samplerType === SAMPLER_TYPE_PROBABILISTIC) {
