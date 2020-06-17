@@ -9,6 +9,7 @@ use Jaeger\Sampler\SamplerInterface;
 use Jaeger\Tracer;
 use OpenTracing\GlobalTracer;
 use PHPUnit\Framework\TestCase;
+use const Jaeger\SAMPLER_TYPE_CONST;
 
 class ConfigTest extends TestCase
 {
@@ -114,6 +115,10 @@ class ConfigTest extends TestCase
         ];
 
         $config = new Config([
+            'sampler' => [
+                'type' => SAMPLER_TYPE_CONST,
+                'param' => true,
+            ],
             'service_name' => 'test-service-name',
             'tags' => $tags,
         ]);
