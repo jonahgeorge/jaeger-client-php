@@ -44,12 +44,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Jaeger\\": "src/Jaeger/",
-            "Jaeger\\Tests\\": "tests/Jaeger/"
+            "Jaeger\\": "src/Jaeger/"
         },
         "files": [
             "./src/Jaeger/Constants.php"
         ]
+    },
+    "autoload-dev": {
+        "Jaeger\\Tests\\": "tests/Jaeger/"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
