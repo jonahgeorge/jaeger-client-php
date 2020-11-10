@@ -40,7 +40,7 @@ class ZipkinCodecTest extends TestCase
         $this->assertEquals('7b', $carrier['X-B3-TraceId']);
         $this->assertEquals('1c8', $carrier['X-B3-SpanId']);
         $this->assertEquals('315', $carrier['X-B3-ParentSpanId']);
-        $this->assertEquals('1', $carrier['X-B3-Flags']);
+        $this->assertSame(1, $carrier['X-B3-Flags']);
     }
 
     function testExtract()

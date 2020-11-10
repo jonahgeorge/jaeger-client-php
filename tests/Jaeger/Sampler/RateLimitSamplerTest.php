@@ -1,6 +1,6 @@
 <?php
 
-namespace Jaeger\Test\Sampler;
+namespace Jaeger\Tests\Sampler;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Jaeger\Sampler\RateLimitingSampler;
