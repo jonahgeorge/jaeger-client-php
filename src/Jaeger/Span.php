@@ -227,7 +227,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function overwriteOperationName($newOperationName): void
+    public function overwriteOperationName(string $newOperationName): void
     {
         // TODO log warning
         $this->operationName = $newOperationName;
@@ -394,7 +394,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function addBaggageItem($key, $value): void
+    public function addBaggageItem(string $key, string $value): void
     {
         $this->context = $this->context->withBaggageItem($key, $value);
     }
@@ -402,7 +402,7 @@ class Span implements OTSpan
     /**
      * {@inheritdoc}
      */
-    public function getBaggageItem($key): ?string
+    public function getBaggageItem(string $key): ?string
     {
         return $this->context->getBaggageItem($key);
     }

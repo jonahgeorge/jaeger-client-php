@@ -18,6 +18,7 @@ matrix:
     - php: nightly
 
 install:
+  - phpenv config-add ci.ini
   - |
     composer install \
         --no-interaction \
