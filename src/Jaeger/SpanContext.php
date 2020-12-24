@@ -53,7 +53,7 @@ class SpanContext implements OTSpanContext
     /**
      * {@inheritdoc}
      */
-    public function getBaggageItem($key)
+    public function getBaggageItem(string $key): ?string
     {
         return array_key_exists($key, $this->baggage) ? $this->baggage[$key] : null;
     }
@@ -65,7 +65,7 @@ class SpanContext implements OTSpanContext
      * @param string $value
      * @return SpanContext
      */
-    public function withBaggageItem($key, $value)
+    public function withBaggageItem(string $key, string $value): ?OTSpanContext
     {
         return new self(
             $this->traceId,

@@ -3,6 +3,9 @@
 namespace Jaeger;
 
 use Exception;
+use OpenTracing\Scope as OTScope;
+use OpenTracing\Span as OTSpan;
+use OpenTracing\UnsupportedFormatException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Jaeger\Codec\BinaryCodec;
@@ -21,6 +24,7 @@ use const OpenTracing\Formats\HTTP_HEADERS;
 use const OpenTracing\Formats\TEXT_MAP;
 use const OpenTracing\Tags\SPAN_KIND;
 use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
+use OpenTracing\ScopeManager as OTScopeManager;
 
 class Tracer implements OTTracer
 {
@@ -144,7 +148,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function startSpan($operationName, $options = [])
+    public function startSpan(string $operationName, $options = []): OTSpan
     {
         if (!($options instanceof StartSpanOptions)) {
             $options = StartSpanOptions::create($options);
@@ -222,13 +226,13 @@ class Tracer implements OTTracer
      *
      * @throws UnsupportedFormat
      */
-    public function inject(OTSpanContext $spanContext, $format, &$carrier)
+    public function inject(OTSpanContext $spanContext, string $format, &$carrier): void
     {
         if ($spanContext instanceof SpanContext) {
             $codec = $this->codecs[$format] ?? null;
 
             if ($codec == null) {
-                throw UnsupportedFormat::forFormat(is_scalar($format) ? $format : gettype($format));
+                throw UnsupportedFormatException::forFormat(is_scalar($format) ? $format : gettype($format));
             }
 
 
@@ -252,12 +256,12 @@ class Tracer implements OTTracer
      *
      * @throws UnsupportedFormat
      */
-    public function extract($format, $carrier)
+    public function extract(string $format, $carrier): ?OTSpanContext
     {
         $codec = $this->codecs[$format] ?? null;
 
         if ($codec == null) {
-            throw UnsupportedFormat::forFormat(is_scalar($format) ? $format : gettype($format));
+            throw UnsupportedFormatException::forFormat(is_scalar($format) ? $format : gettype($format));
         }
 
         try {
@@ -272,7 +276,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function flush(): void
     {
         $this->sampler->close();
         $this->reporter->close();
@@ -286,7 +290,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function getScopeManager()
+    public function getScopeManager(): OTScopeManager
     {
         return $this->scopeManager;
     }
@@ -294,7 +298,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function getActiveSpan()
+    public function getActiveSpan(): ?OTSpan
     {
         $activeScope = $this->getScopeManager()->getActive();
         if ($activeScope === null) {
@@ -307,7 +311,7 @@ class Tracer implements OTTracer
     /**
      * {@inheritdoc}
      */
-    public function startActiveSpan($operationName, $options = [])
+    public function startActiveSpan(string $operationName, $options = []): OTScope
     {
         if (!$options instanceof StartSpanOptions) {
             $options = StartSpanOptions::create($options);
@@ -335,7 +339,7 @@ class Tracer implements OTTracer
         $references = $options->getReferences();
         foreach ($references as $ref) {
             if ($ref->isType(Reference::CHILD_OF)) {
-                return $ref->getContext();
+                return $ref->getSpanContext();
             }
         }
 

@@ -11,6 +11,7 @@ use Jaeger\SpanContext;
 use Jaeger\Tracer;
 use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing\NoopSpanContext;
+use OpenTracing\UnsupportedFormatException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -158,8 +159,8 @@ class TracerTest extends TestCase
         $spanContext = new SpanContext(0, 0, 0, 0);
         $carrier = [];
 
-        $this->expectException(UnsupportedFormat::class);
-        $this->expectExceptionMessage("The format 'bad-format' is not supported.");
+        $this->expectException(UnsupportedFormatException::class);
+        $this->expectExceptionMessage('The format "bad-format" is not supported.');
 
         $this->tracer->inject($spanContext, 'bad-format', $carrier);
         $this->assertSame([], $carrier);
@@ -190,8 +191,8 @@ class TracerTest extends TestCase
     /** @test */
     public function shouldThrowExceptionOnExtractInvalidFormat()
     {
-        $this->expectException(UnsupportedFormat::class);
-        $this->expectExceptionMessage("The format 'bad-format' is not supported.");
+        $this->expectException(UnsupportedFormatException::class);
+        $this->expectExceptionMessage('The format "bad-format" is not supported.');
 
         $this->tracer->extract('bad-format', []);
     }
