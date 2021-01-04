@@ -23,9 +23,9 @@
         }
     ],
     "require": {
-        "php": "^7.0",
+        "php": "^7.1",
         "ext-sockets": "*",
-        "opentracing/opentracing": "^1@beta",
+        "opentracing/opentracing": "^1.0",
         "packaged/thrift": "^0.10",
         "phlib/base_convert": "^1.0",
         "psr/cache": "^1.0",
