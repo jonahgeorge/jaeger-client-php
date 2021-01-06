@@ -3,7 +3,7 @@
 namespace Jaeger\Codec;
 
 use Jaeger\SpanContext;
-use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\UnsupportedFormatException;
 
 class BinaryCodec implements CodecInterface
 {
@@ -19,7 +19,7 @@ class BinaryCodec implements CodecInterface
      */
     public function inject(SpanContext $spanContext, &$carrier)
     {
-        throw new UnsupportedFormat('Binary encoding not implemented');
+        throw new UnsupportedFormatException('Binary encoding not implemented');
     }
 
     /**
@@ -30,10 +30,10 @@ class BinaryCodec implements CodecInterface
      * @param mixed $carrier
      * @return SpanContext|null
      *
-     * @throws UnsupportedFormat
+     * @throws UnsupportedFormatException
      */
     public function extract($carrier)
     {
-        throw new UnsupportedFormat('Binary encoding not implemented');
+        throw new UnsupportedFormatException('Binary encoding not implemented');
     }
 }
