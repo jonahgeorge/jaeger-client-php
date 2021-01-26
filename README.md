@@ -1,4 +1,4 @@
-[![Build Status][ci-img]][ci] [![PHP version][packagist-img]][packagist]
+[![Build Status](https://github.com/jonahgeorge/jaeger-client-php/workflows/Test/badge.svg) [![PHP version][packagist-img]][packagist]
 
 # Jaeger Bindings for PHP OpenTracing API
 
