@@ -23,7 +23,7 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^7.1 || ^8.0",
         "ext-sockets": "*",
         "opentracing/opentracing": "^1.0",
         "packaged/thrift": "^0.10",
