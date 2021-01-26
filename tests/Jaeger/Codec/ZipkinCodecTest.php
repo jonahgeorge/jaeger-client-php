@@ -13,7 +13,7 @@ class ZipkinCodecTest extends TestCase
     /** @var ZipkinCodec */
     private $codec;
 
-    function setUp()
+    function setUp(): void
     {
         $this->codec = new ZipkinCodec;
     }

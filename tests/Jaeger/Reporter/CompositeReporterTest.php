@@ -21,7 +21,7 @@ class CompositeReporterTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->childReporter1 = $this->createMock(ReporterInterface::class);
         $this->childReporter2 = $this->createMock(ReporterInterface::class);

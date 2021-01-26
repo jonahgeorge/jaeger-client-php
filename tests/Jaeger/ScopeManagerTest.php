@@ -13,7 +13,7 @@ class ScopeManagerTest extends TestCase
      */
     private $scopeManager;
 
-    function setUp()
+    function setUp(): void
     {
         $this->scopeManager = new ScopeManager();
     }

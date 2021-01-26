@@ -58,7 +58,7 @@ class TracerTest extends TestCase
      */
     private $operationName = 'test-operation';
 
-    function setUp()
+    public function setUp(): void
     {
         $this->scopeManager = $this->createMock(ScopeManager::class);
         $this->sampler = $this->createMock(SamplerInterface::class);
@@ -68,14 +68,14 @@ class TracerTest extends TestCase
         $this->tracer = new Tracer($this->serviceName, $this->reporter, $this->sampler, true, $this->logger, $this->scopeManager);
     }
 
-    function testStartSpan()
+    public function testStartSpan(): void
     {
         $span = $this->tracer->startSpan($this->operationName);
 
         $this->assertEquals($this->operationName, $span->getOperationName());
     }
 
-   function testStartActiveSpan()
+   public function testStartActiveSpan(): void
    {
         $tracer = new Tracer($this->serviceName, $this->reporter, $this->sampler);
 
@@ -90,7 +90,7 @@ class TracerTest extends TestCase
    }
 
     /** @test */
-    public function shouldAddConfiguredTagsToStartedSpanWhenSampled()
+    public function shouldAddConfiguredTagsToStartedSpanWhenSampled(): void
     {
         $this->sampler->expects($this->any())
             ->method('isSampled')
@@ -124,7 +124,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldAddNoConfiguredTagsToStartedSpanWhenNotSampled()
+    public function shouldAddNoConfiguredTagsToStartedSpanWhenNotSampled(): void
     {
         $this->sampler->expects($this->any())
             ->method('isSampled')
@@ -154,7 +154,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldThrowExceptionOnInvalidFormat()
+    public function shouldThrowExceptionOnInvalidFormat(): void
     {
         $spanContext = new SpanContext(0, 0, 0, 0);
         $carrier = [];
@@ -167,7 +167,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldNotThrowExceptionOnInvalidContext()
+    public function shouldNotThrowExceptionOnInvalidContext(): void
     {
         $spanContext = new NoopSpanContext();
         $carrier = [];
@@ -177,7 +177,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldInjectSpanContextToCarrier()
+    public function shouldInjectSpanContextToCarrier(): void
     {
         $spanContext = new SpanContext(0, 0, 0, 0);
         $carrier = [];
@@ -189,7 +189,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldThrowExceptionOnExtractInvalidFormat()
+    public function shouldThrowExceptionOnExtractInvalidFormat(): void
     {
         $this->expectException(UnsupportedFormatException::class);
         $this->expectExceptionMessage('The format "bad-format" is not supported.');
@@ -198,25 +198,25 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldNotThrowExceptionOnExtractFromMalformedState()
+    public function shouldNotThrowExceptionOnExtractFromMalformedState(): void
     {
         $this->assertNull($this->tracer->extract(TEXT_MAP, ['uber-trace-id' => '']));
     }
 
     /** @test */
-    public function shouldExtractSpanContextFromCarrier()
+    public function shouldExtractSpanContextFromCarrier(): void
     {
         $carrier = ['uber-trace-id' => '32834e4115071776:f7802330248418d:f123456789012345:1'];
 
         $this->assertInstanceOf(SpanContext::class, $this->tracer->extract(TEXT_MAP, $carrier));
     }
 
-    function testGetScopeManager()
+    public function testGetScopeManager()
     {
         $this->assertEquals($this->scopeManager, $this->tracer->getScopeManager());
     }
 
-    function testGetActiveSpan()
+    public function testGetActiveSpan(): void
     {
         $span = $this->createMock(Span::class);
         $scope = $this->createMock(Scope::class);
@@ -227,14 +227,14 @@ class TracerTest extends TestCase
         $this->assertEquals($span, $this->tracer->getActiveSpan());
     }
 
-    function testGetActiveSpanNull()
+    public function testGetActiveSpanNull(): void
     {
         $this->scopeManager->expects($this->once())->method('getActive')->willReturn(null);
 
         $this->assertEquals(null, $this->tracer->getActiveSpan());
     }
 
-    function testFlush()
+    public function testFlush(): void
     {
         $this->reporter->expects($this->once())->method('close');
 
@@ -242,7 +242,7 @@ class TracerTest extends TestCase
     }
 
     /** @test */
-    public function shouldHandleEmptyHostName()
+    public function shouldHandleEmptyHostName(): void
     {
         $tracer = new \ReflectionClass(Tracer::class);
 

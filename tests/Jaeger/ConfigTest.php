@@ -33,7 +33,7 @@ class ConfigTest extends TestCase
      */
     private $serviceName = 'test-service';
 
-    function setUp()
+    function setUp(): void
     {
         $this->config = new Config([], $this->serviceName);
         $this->reporter = $this->createMock(ReporterInterface::class);

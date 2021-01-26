@@ -15,12 +15,12 @@ class TextCodecTest extends TestCase
     /** @var TextCodec */
     private $textCodec;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->textCodec = new TextCodec();
     }
 
-    public function testCanInjectSimpleContextInCarrier()
+    public function testCanInjectSimpleContextInCarrier(): void
     {
         $context = new SpanContext('trace-id', 'span-id', null, null);
         $carrier = [];
@@ -36,7 +36,7 @@ class TextCodecTest extends TestCase
      * @param bool $urlEncode
      * @param $baggage
      */
-    public function testCanInjectContextBaggageInCarrier(bool $urlEncode, $baggage, $injectedBaggage)
+    public function testCanInjectContextBaggageInCarrier(bool $urlEncode, $baggage, $injectedBaggage): void
     {
         $carrier = [];
 
@@ -72,7 +72,7 @@ class TextCodecTest extends TestCase
      * @param $baggage
      * @throws \Exception
      */
-    public function testSpanContextParsingFromHeader($urlEncode, $carrier, $traceId, $spanId, $parentId, $flags, $baggage)
+    public function testSpanContextParsingFromHeader($urlEncode, $carrier, $traceId, $spanId, $parentId, $flags, $baggage): void
     {
         $textCodec = new TextCodec($urlEncode);
         $spanContext = $textCodec->extract($carrier);
@@ -87,7 +87,7 @@ class TextCodecTest extends TestCase
         }
     }
 
-    public function carrierDataProvider()
+    public function carrierDataProvider(): array
     {
         return [
             [
@@ -128,7 +128,7 @@ class TextCodecTest extends TestCase
         ];
     }
 
-    public function testBaggageWithoutTraceContext()
+    public function testBaggageWithoutTraceContext(): void
     {
         $carrier = [BAGGAGE_HEADER_PREFIX.'test' => 'some data'];
 
@@ -138,7 +138,7 @@ class TextCodecTest extends TestCase
         $this->textCodec->extract($carrier);
     }
 
-    public function testInvalidSpanContextParsingFromHeader()
+    public function testInvalidSpanContextParsingFromHeader(): void
     {
         $carrier = [TRACE_ID_HEADER => 'invalid_data'];
 
@@ -148,7 +148,7 @@ class TextCodecTest extends TestCase
         $this->textCodec->extract($carrier);
     }
 
-    public function testExtractDebugSpanContext()
+    public function testExtractDebugSpanContext(): void
     {
         $carrier = [DEBUG_ID_HEADER_KEY => 'debugId'];
 
@@ -162,7 +162,7 @@ class TextCodecTest extends TestCase
     }
 
 
-    public function testExtractEmptySpanContext()
+    public function testExtractEmptySpanContext(): void
     {
         $spanContext = $this->textCodec->extract([]);
         $this->assertNull($spanContext);

@@ -13,7 +13,7 @@ class ThriftUdpTransportTest extends TestCase
      */
     private $transport;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->transport = new ThriftUdpTransport('127.0.0.1', 12345);
     }
