@@ -18,7 +18,7 @@ class RemoteReporterTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->transport = $this->createMock(UdpSender::class);
         $this->reporter = new RemoteReporter($this->transport);

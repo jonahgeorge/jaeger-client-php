@@ -23,13 +23,13 @@ class UdpSenderTest extends TestCase
      */
     private $client;
 
-    function setUp()
+    public function setUp(): void
     {
         $this->client = $this->createMock(AgentClient::class);
         $this->sender = new UdpSender($this->client, 64000);
     }
 
-    function testMaxBufferLength()
+    public function testMaxBufferLength(): void
     {
         $tracer = $this->createMock(Tracer::class);
         $tracer->method('getIpAddress')->willReturn('');
@@ -44,18 +44,23 @@ class UdpSenderTest extends TestCase
 
         $sender = new UdpSender($this->client, 100);
 
-        $this->client->expects($this->at(0))->method('emitZipkinBatch')->with($this->countOf(2));
-        $this->client->expects($this->at(1))->method('emitZipkinBatch')->with($this->countOf(1));
+        $this->client
+            ->expects(self::exactly(2))
+            ->method('emitZipkinBatch')
+            ->withConsecutive(
+                [self::countOf(2)],
+                [self::countOf(1)]
+            );
 
         // one span has a length of ~25
         $sender->append($span); // 30 + 25 < 100 - chunk 1
         $sender->append($span); // 30 + 25 * 2 < 100 - chunk 1
         $sender->append($span); // 30 + 25 * 3 > 100 - chunk 2
 
-        $this->assertEquals(3, $sender->flush($span));
+        self::assertEquals(3, $sender->flush());
     }
 
-    function testFlush()
+    public function testFlush(): void
     {
         $this->assertEquals(0, $this->sender->flush());
 

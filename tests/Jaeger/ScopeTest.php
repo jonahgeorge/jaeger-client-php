@@ -19,7 +19,7 @@ class ScopeTest extends TestCase
      */
     private $span;
 
-    function setUp()
+    function setUp(): void
     {
         $this->scopeManager = $this->createMock(ScopeManager::class);
         $this->span = $this->createMock(Span::class);
