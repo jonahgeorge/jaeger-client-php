@@ -29,7 +29,7 @@ const JAEGER_CLIENT_VERSION = 'PHP-' . PHP_VERSION;
 const JAEGER_VERSION_TAG_KEY = 'jaeger.version';
 
 // Tracer-scoped tag that contains the hostname
-const JAEGER_HOSTNAME_TAG_KEY = 'jaeger.hostname';
+const JAEGER_HOSTNAME_TAG_KEY = 'hostname';
 
 const SAMPLER_TYPE_TAG_KEY = 'sampler.type';
 
@@ -83,6 +83,8 @@ const SAMPLER_TYPE_LOWER_BOUND = 'lowerbound';
 const DEFAULT_REPORTING_HOST = 'localhost';
 
 const DEFAULT_REPORTING_PORT = 5775;
+
+const DEFAULT_JAEGER_THRIFT_REPORTING_PORT = 6832;
 
 const DEFAULT_SAMPLING_PORT = 5778;
 

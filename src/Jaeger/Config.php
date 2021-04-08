@@ -4,14 +4,15 @@ namespace Jaeger;
 
 use Exception;
 use Jaeger\Reporter\CompositeReporter;
+use Jaeger\Reporter\JaegerThriftReporter;
 use Jaeger\Reporter\LoggingReporter;
-use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
 use Jaeger\Sampler\RateLimitingSampler;
 use Jaeger\Sampler\SamplerInterface;
-use Jaeger\Sender\UdpSender;
+use Jaeger\Sender\JaegerThriftSender;
+use Jaeger\Sender\SenderInterface;
 use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Util\RateLimiter;
 use OpenTracing\GlobalTracer;
@@ -19,7 +20,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
-use Thrift\Protocol\TCompactProtocol;
+use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Transport\TBufferedTransport;
 
 class Config
@@ -148,8 +149,8 @@ class Config
      */
     private function getReporter(): ReporterInterface
     {
-        $channel = $this->getLocalAgentSender();
-        $reporter = new RemoteReporter($channel);
+        $sender = $this->getLocalAgentSender();
+        $reporter = new JaegerThriftReporter($sender);
 
         if ($this->getLogging()) {
             $reporter = new CompositeReporter($reporter, new LoggingReporter($this->logger));
@@ -194,9 +195,9 @@ class Config
     }
 
     /**
-     * @return UdpSender
+     * @return SenderInterface
      */
-    private function getLocalAgentSender(): UdpSender
+    private function getLocalAgentSender(): SenderInterface
     {
         $udp = new ThriftUdpTransport(
             $this->getLocalAgentReportingHost(),
@@ -211,12 +212,12 @@ class Config
             $this->logger->warning($e->getMessage());
         }
 
-        $protocol = new TCompactProtocol($transport);
+        $protocol = new TBinaryProtocol($transport);
         $client = new AgentClient($protocol);
 
-        $this->logger->debug('Initializing Jaeger Tracer with UDP reporter');
+        $this->logger->debug('Initializing Jaeger Tracer with Jaeger Thrift reporter');
 
-        return new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
+        return new JaegerThriftSender($client, $this->logger);
     }
 
     /**
@@ -242,7 +243,7 @@ class Config
      */
     private function getLocalAgentReportingPort(): int
     {
-        return (int)($this->getLocalAgentGroup()['reporting_port'] ?? DEFAULT_REPORTING_PORT);
+        return (int)($this->getLocalAgentGroup()['reporting_port'] ?? DEFAULT_JAEGER_THRIFT_REPORTING_PORT);
     }
 
     /**

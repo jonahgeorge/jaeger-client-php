@@ -146,6 +146,14 @@ class Tracer implements OTTracer
     }
 
     /**
+     * @return string[]
+     */
+    public function getTags(): array
+    {
+        return $this->tags;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function startSpan(string $operationName, $options = []): OTSpan
