@@ -6,6 +6,7 @@ use Exception;
 use Jaeger\Reporter\CompositeReporter;
 use Jaeger\Reporter\JaegerThriftReporter;
 use Jaeger\Reporter\LoggingReporter;
+use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
@@ -13,6 +14,7 @@ use Jaeger\Sampler\RateLimitingSampler;
 use Jaeger\Sampler\SamplerInterface;
 use Jaeger\Sender\JaegerThriftSender;
 use Jaeger\Sender\SenderInterface;
+use Jaeger\Sender\UdpSender;
 use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Util\RateLimiter;
 use OpenTracing\GlobalTracer;
@@ -21,10 +23,14 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
 
 class Config
 {
+    const JAEGER_OVER_BINARY = "jaeger_over_binary";
+    const ZIPKIN_OVER_COMPACT = "zipkin_over_compact";
+
     /**
      * @var array
      */
@@ -67,6 +73,10 @@ class Config
         $this->config = $config;
 
         $this->setConfigFromEnv();
+
+        if(empty($this->config["dispatch_mode"])) {
+            $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT;
+        }
 
         $this->serviceName = $this->config['service_name'] ?? $serviceName;
         if ($this->serviceName === null) {
@@ -149,8 +159,35 @@ class Config
      */
     private function getReporter(): ReporterInterface
     {
-        $sender = $this->getLocalAgentSender();
-        $reporter = new JaegerThriftReporter($sender);
+        $udp = new ThriftUdpTransport(
+            $this->getLocalAgentReportingHost(),
+            $this->getLocalAgentReportingPort(),
+            $this->logger
+        );
+
+        $transport = new TBufferedTransport($udp, $this->getMaxBufferLength(), $this->getMaxBufferLength());
+        try {
+            $transport->open();
+        } catch (TTransportException $e) {
+            $this->logger->warning($e->getMessage());
+        }
+
+        switch ($this->config["dispatch_mode"]) {
+            case self::ZIPKIN_OVER_COMPACT:
+                $protocol = new TCompactProtocol($transport);
+                $client = new AgentClient($protocol);
+                $this->logger->debug('Initializing Jaeger Tracer with Zipkin over Compact reporter');
+                $sender = new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
+                $reporter = new RemoteReporter($sender);
+                break;
+            case self::JAEGER_OVER_BINARY:
+                $protocol = new TBinaryProtocol($transport);
+                $client = new AgentClient($protocol);
+                $this->logger->debug('Initializing Jaeger Tracer with Jaeger over Binary reporter');
+                $sender = new JaegerThriftSender($client, $this->logger);
+                $reporter = new JaegerThriftReporter($sender);
+                break;
+        }
 
         if ($this->getLogging()) {
             $reporter = new CompositeReporter($reporter, new LoggingReporter($this->logger));
@@ -195,32 +232,6 @@ class Config
     }
 
     /**
-     * @return SenderInterface
-     */
-    private function getLocalAgentSender(): SenderInterface
-    {
-        $udp = new ThriftUdpTransport(
-            $this->getLocalAgentReportingHost(),
-            $this->getLocalAgentReportingPort(),
-            $this->logger
-        );
-
-        $transport = new TBufferedTransport($udp, $this->getMaxBufferLength(), $this->getMaxBufferLength());
-        try {
-            $transport->open();
-        } catch (TTransportException $e) {
-            $this->logger->warning($e->getMessage());
-        }
-
-        $protocol = new TBinaryProtocol($transport);
-        $client = new AgentClient($protocol);
-
-        $this->logger->debug('Initializing Jaeger Tracer with Jaeger Thrift reporter');
-
-        return new JaegerThriftSender($client, $this->logger);
-    }
-
-    /**
      * The UDP max buffer length.
      *
      * @return int
@@ -243,7 +254,17 @@ class Config
      */
     private function getLocalAgentReportingPort(): int
     {
-        return (int)($this->getLocalAgentGroup()['reporting_port'] ?? DEFAULT_JAEGER_THRIFT_REPORTING_PORT);
+        $port = $this->getLocalAgentGroup()['reporting_port'] ?? null;
+        if (empty($this->getLocalAgentGroup()['reporting_port'])) {
+            switch ($this->config['dispatch_mode']) {
+                case self::JAEGER_OVER_BINARY:
+                    $port = DEFAULT_JAEGER_THRIFT_REPORTING_PORT;
+                    break;
+                default:
+                    $port = DEFAULT_REPORTING_PORT;
+            }
+        }
+        return (int)$port;
     }
 
     /**
@@ -311,6 +332,10 @@ class Config
 
         if (isset($_ENV['JAEGER_TAGS']) && !isset($this->config["tags"])) {
             $this->config['tags'] = $_ENV['JAEGER_TAGS'];
+        }
+
+        if (isset($_ENV['JAEGER_DISPATCH_MODE']) && !isset($this->config['dispatch_mode'])) {
+            $this->config['dispatch_mode'] = $_ENV['JAEGER_DISPATCH_MODE'];
         }
 
         // reporting
