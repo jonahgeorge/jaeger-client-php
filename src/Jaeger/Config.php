@@ -181,13 +181,17 @@ class Config
                 $sender = new JaegerThriftSender($client, $this->logger);
                 $reporter = new JaegerThriftReporter($sender);
                 break;
-            default:
+            case self::ZIPKIN_OVER_COMPACT:
                 $protocol = new TCompactProtocol($transport);
                 $client = new AgentClient($protocol);
                 $this->logger->debug('Initializing Jaeger Tracer with Zipkin over Compact reporter');
                 $sender = new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
                 $reporter = new RemoteReporter($sender);
                 break;
+            default:
+                throw new \RuntimeException(
+                    sprintf("Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s",
+                        $this->config["dispatch_mode"], self::JAEGER_OVER_BINARY, self::ZIPKIN_OVER_COMPACT));
         }
 
         if ($this->getLogging()) {
