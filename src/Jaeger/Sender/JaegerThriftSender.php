@@ -172,7 +172,7 @@ class JaegerThriftSender implements SenderInterface
                 "operationName" => $span->getOperationName(),
                 "startTime" => $timestamp,
                 "duration" => $duration,
-                "flags" => 1 + (int)$span->isDebug(), // todo i'm not sure check this later
+                "flags" => (int)$span->isDebug(),
                 "tags" => $tags,
                 "logs" => $logs
             ]);
@@ -265,6 +265,9 @@ class JaegerThriftSender implements SenderInterface
 
         // append tracer global tags to process tags
         foreach ($this->tracer->getTags() as $k => $v) {
+            if ($k === \Jaeger\JAEGER_HOSTNAME_TAG_KEY) {
+                $k = "hostname";
+            }
             $tags[] = new Tag([
                 "key" => $k,
                 "vType" => TagType::STRING,
@@ -274,9 +277,9 @@ class JaegerThriftSender implements SenderInterface
 
         // we need to add ip tag manually
         $tags[] = new Tag([
-            "key" => "ip",
+            "key" => "format",
             "vType" => TagType::STRING,
-            "vStr" => $this->tracer->getIpAddress()
+            "vStr" => "jaeger.thrift"
         ]);
 
         $batch = new Batch([

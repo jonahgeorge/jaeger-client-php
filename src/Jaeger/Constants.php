@@ -29,7 +29,7 @@ const JAEGER_CLIENT_VERSION = 'PHP-' . PHP_VERSION;
 const JAEGER_VERSION_TAG_KEY = 'jaeger.version';
 
 // Tracer-scoped tag that contains the hostname
-const JAEGER_HOSTNAME_TAG_KEY = 'hostname';
+const JAEGER_HOSTNAME_TAG_KEY = 'jaeger.hostname';
 
 const SAMPLER_TYPE_TAG_KEY = 'sampler.type';
 
