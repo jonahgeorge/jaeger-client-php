@@ -101,6 +101,7 @@ class Config
         $reporter = $this->getReporter();
         $sampler = $this->getSampler();
 
+
         $tracer = $this->createTracer($reporter, $sampler);
 
         $this->initializeGlobalTracer($tracer);
@@ -173,19 +174,19 @@ class Config
         }
 
         switch ($this->config["dispatch_mode"]) {
-            case self::ZIPKIN_OVER_COMPACT:
-                $protocol = new TCompactProtocol($transport);
-                $client = new AgentClient($protocol);
-                $this->logger->debug('Initializing Jaeger Tracer with Zipkin over Compact reporter');
-                $sender = new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
-                $reporter = new RemoteReporter($sender);
-                break;
             case self::JAEGER_OVER_BINARY:
                 $protocol = new TBinaryProtocol($transport);
                 $client = new AgentClient($protocol);
                 $this->logger->debug('Initializing Jaeger Tracer with Jaeger over Binary reporter');
                 $sender = new JaegerThriftSender($client, $this->logger);
                 $reporter = new JaegerThriftReporter($sender);
+                break;
+            default:
+                $protocol = new TCompactProtocol($transport);
+                $client = new AgentClient($protocol);
+                $this->logger->debug('Initializing Jaeger Tracer with Zipkin over Compact reporter');
+                $sender = new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
+                $reporter = new RemoteReporter($sender);
                 break;
         }
 
