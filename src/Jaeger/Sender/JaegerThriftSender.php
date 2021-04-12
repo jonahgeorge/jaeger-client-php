@@ -124,37 +124,16 @@ class JaegerThriftSender implements SenderInterface
             $logs = [];
 
             $spanLogs = $span->getLogs();
+
             foreach ($spanLogs as $spanLog) {
                 /** @var Tag $fields */
                 $fields = [];
-                foreach ($spanLog["fields"] as $k=>$v) {
-                    $type = null;
-                    $vKey = "";
-                    $varType = gettype($v);
-                    switch ($varType) {
-                        case "boolean":
-                            $type = TagType::BOOL;
-                            $vKey = "vBool";
-                            break;
-                        case "integer":
-                            $type = TagType::LONG;
-                            $vKey = "vLong";
-                            break;
-                        case "string":
-                            $type = TagType::STRING;
-                            $vKey = "vStr";
-                            break;
-                        default:
-                            $this->logger->warning("Unsupported type while processing span log fields. Expected bool|int|str, got ${varType}. This field was casted to string");
-                            $type = TagType::STRING;
-                            $vKey = "vStr";
-                            $v = (string)$v;
-                    }
 
+                if (!empty($spanLog["fields"])) {
                     $fields[] = new Tag([
-                        "key" => $k,
-                        "vType" => $type,
-                        $vKey => $v,
+                        "key" => "event",
+                        "vType" => TagType::STRING,
+                        "vStr" => json_encode($spanLog["fields"])
                     ]);
                 }
 
@@ -275,7 +254,6 @@ class JaegerThriftSender implements SenderInterface
             ]);
         }
 
-        // we need to add ip tag manually
         $tags[] = new Tag([
             "key" => "format",
             "vType" => TagType::STRING,
@@ -289,11 +267,11 @@ class JaegerThriftSender implements SenderInterface
         ]);
 
         $batch = new Batch([
-           "spans" => $spans,
-           "process" => new Process([
-               "serviceName" => $this->tracer->getServiceName(),
-               "tags" => $tags
-           ])
+            "spans" => $spans,
+            "process" => new Process([
+                "serviceName" => $this->tracer->getServiceName(),
+                "tags" => $tags
+            ])
         ]);
 
         $this->agentClient->emitBatch($batch);
