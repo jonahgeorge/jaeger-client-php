@@ -16,6 +16,7 @@ use Jaeger\Thrift\Tag;
 use Jaeger\Thrift\TagType;
 use Jaeger\Tracer;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use const OpenTracing\Tags\COMPONENT;
 
 class JaegerThriftSender implements SenderInterface
@@ -48,10 +49,10 @@ class JaegerThriftSender implements SenderInterface
      * @param AgentClient $agentClient
      * @param LoggerInterface $logger
      */
-    public function __construct(AgentClient $agentClient, LoggerInterface $logger)
+    public function __construct(AgentClient $agentClient, LoggerInterface $logger = null)
     {
         $this->agentClient = $agentClient;
-        $this->logger = $logger;
+        $this->logger = $logger ?? new NullLogger();
     }
 
 
