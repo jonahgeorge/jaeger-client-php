@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Jaeger\Sender;
-
 
 use Jaeger\Span as JaegerSpan;
 

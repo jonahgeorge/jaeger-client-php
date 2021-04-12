@@ -80,7 +80,8 @@ class JaegerThriftSender implements SenderInterface
      * @param JaegerSpan[] $spans
      * @return array
      */
-    private function makeJaegerBatch(array $spans) : array {
+    private function makeJaegerBatch(array $spans) : array
+    {
         /** @var JaegerThriftSpan[] $jaegerSpans */
         $jaegerSpans = [];
 
@@ -239,7 +240,8 @@ class JaegerThriftSender implements SenderInterface
     /**
      * @param JaegerThriftSpan[] $spans
      */
-    private function send(array $spans) {
+    private function send(array $spans)
+    {
         /** @var Tag[] $tags */
         $tags = [];
 

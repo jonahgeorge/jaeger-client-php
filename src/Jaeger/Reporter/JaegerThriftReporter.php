@@ -1,9 +1,6 @@
 <?php
 
-
 namespace Jaeger\Reporter;
-
-
 
 use Jaeger\Sender\SenderInterface;
 use Jaeger\Span;

@@ -74,7 +74,7 @@ class Config
 
         $this->setConfigFromEnv();
 
-        if(empty($this->config["dispatch_mode"])) {
+        if (empty($this->config["dispatch_mode"])) {
             $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT;
         }
 
