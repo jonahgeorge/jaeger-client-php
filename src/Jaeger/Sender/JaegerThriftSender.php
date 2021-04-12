@@ -282,6 +282,12 @@ class JaegerThriftSender implements SenderInterface
             "vStr" => "jaeger.thrift"
         ]);
 
+        $tags[] = new Tag([
+            "key" => "ip",
+            "vType" => TagType::STRING,
+            "vStr" => $this->tracer->getIpAddress()
+        ]);
+
         $batch = new Batch([
            "spans" => $spans,
            "process" => new Process([
