@@ -190,8 +190,13 @@ class Config
                 break;
             default:
                 throw new \RuntimeException(
-                    sprintf("Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s",
-                        $this->config["dispatch_mode"], self::JAEGER_OVER_BINARY, self::ZIPKIN_OVER_COMPACT));
+                    sprintf(
+                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s",
+                        $this->config["dispatch_mode"],
+                        self::JAEGER_OVER_BINARY,
+                        self::ZIPKIN_OVER_COMPACT
+                    )
+                );
         }
 
         if ($this->getLogging()) {
