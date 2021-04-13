@@ -6,6 +6,7 @@ use Exception;
 use Jaeger\Reporter\CompositeReporter;
 use Jaeger\Reporter\LoggingReporter;
 use Jaeger\Reporter\ReporterInterface;
+use Jaeger\ReporterFactory\JaegerHttpReporterFactory;
 use Jaeger\ReporterFactory\JaegerReporterFactory;
 use Jaeger\ReporterFactory\ZipkinReporterFactory;
 use Jaeger\Sampler\ConstSampler;
@@ -19,10 +20,13 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TBufferedTransport;
+use Thrift\Transport\TCurlClient;
+use Thrift\Transport\THttpClient;
 
 class Config
 {
     const JAEGER_OVER_BINARY = "jaeger_over_binary";
+    const JAEGER_OVER_HTTP   = "jaeger_over_http";
     const ZIPKIN_OVER_COMPACT = "zipkin_over_compact";
 
     /**
@@ -44,6 +48,14 @@ class Config
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
 
     /**
      * @var CacheItemPoolInterface
@@ -154,33 +166,23 @@ class Config
      */
     private function getReporter(): ReporterInterface
     {
-        $udp = new ThriftUdpTransport(
-            $this->getLocalAgentReportingHost(),
-            $this->getLocalAgentReportingPort(),
-            $this->logger
-        );
-
-        $transport = new TBufferedTransport($udp, $this->getMaxBufferLength(), $this->getMaxBufferLength());
-        try {
-            $transport->open();
-        } catch (TTransportException $e) {
-            $this->logger->warning($e->getMessage());
-        }
-
         switch ($this->config["dispatch_mode"]) {
             case self::JAEGER_OVER_BINARY:
-                $reporter = (new JaegerReporterFactory($transport, $this->logger))->createReporter();
+                $reporter = (new JaegerReporterFactory($this))->createReporter();
                 break;
             case self::ZIPKIN_OVER_COMPACT:
-                $reporter = (new ZipkinReporterFactory($transport, $this->logger, $this->getMaxBufferLength()))
-                    ->createReporter();
+                $reporter = (new ZipkinReporterFactory($this))->createReporter();
+                break;
+            case self::JAEGER_OVER_HTTP:
+                $reporter = (new JaegerHttpReporterFactory($this))->createReporter();
                 break;
             default:
                 throw new \RuntimeException(
                     sprintf(
-                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s",
+                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s, %s",
                         $this->config["dispatch_mode"],
                         self::JAEGER_OVER_BINARY,
+                        self::JAEGER_OVER_HTTP,
                         self::ZIPKIN_OVER_COMPACT
                     )
                 );
@@ -233,7 +235,7 @@ class Config
      *
      * @return int
      */
-    private function getMaxBufferLength(): int
+    public function getMaxBufferLength(): int
     {
         return (int)($this->config['max_buffer_length'] ?? 64000);
     }
@@ -241,7 +243,7 @@ class Config
     /**
      * @return string
      */
-    private function getLocalAgentReportingHost(): string
+    public function getLocalAgentReportingHost(): string
     {
         return $this->getLocalAgentGroup()['reporting_host'] ?? DEFAULT_REPORTING_HOST;
     }
@@ -249,7 +251,7 @@ class Config
     /**
      * @return int
      */
-    private function getLocalAgentReportingPort(): int
+    public function getLocalAgentReportingPort(): int
     {
         $port = $this->getLocalAgentGroup()['reporting_port'] ?? null;
         if (empty($this->getLocalAgentGroup()['reporting_port'])) {

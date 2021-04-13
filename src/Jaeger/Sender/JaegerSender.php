@@ -6,6 +6,7 @@ namespace Jaeger\Sender;
 use Jaeger\Mapper\SpanToJaegerMapper;
 use Jaeger\Span as JaegerSpan;
 use Jaeger\Thrift\Agent\AgentClient;
+use Jaeger\Thrift\Agent\AgentIf;
 use Jaeger\Thrift\Batch;
 use Jaeger\Thrift\Process;
 use Jaeger\Thrift\Span as JaegerThriftSpan;
@@ -24,7 +25,7 @@ class JaegerSender implements SenderInterface
     private $spans = [];
 
     /**
-     * @var AgentClient
+     * @var AgentIf
      */
     private $agentClient;
 
@@ -45,12 +46,12 @@ class JaegerSender implements SenderInterface
 
 
     /**
-     * PekhotaSender constructor.
-     * @param AgentClient $agentClient
-     * @param LoggerInterface $logger
+     * @param AgentIf $agentClient
+     * @param LoggerInterface|null $logger
+     * @param SpanToJaegerMapper|null $mapper
      */
     public function __construct(
-        AgentClient $agentClient,
+        AgentIf $agentClient,
         LoggerInterface $logger = null,
         SpanToJaegerMapper $mapper = null
     ) {

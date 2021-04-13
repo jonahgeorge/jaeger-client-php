@@ -2,25 +2,25 @@
 
 namespace Jaeger\ReporterFactory;
 
+use Jaeger\Config;
 use Psr\Log\LoggerInterface;
 use Thrift\Transport\TTransport;
 
 abstract class AbstractReporterFactory implements ReporterFactoryInterface
 {
-    /** @var TTransport */
-    protected $transport;
-
-    /** @var LoggerInterface  */
-    protected $logger;
+    /**
+     * @var Config
+     */
+    protected $config;
 
     /**
-     * JaegerReporterFactory constructor.
-     * @param $transport
-     * @param $logger
+     * AbstractReporterFactory constructor.
+     * @param Config $config
      */
-    public function __construct(TTransport $transport, LoggerInterface $logger)
+    public function __construct($config)
     {
-        $this->transport = $transport;
-        $this->logger = $logger;
+        $this->config = $config;
     }
+
+
 }

@@ -9,14 +9,24 @@ return [
     ],
     'logging' => true,
     "tags" => [
+        // process. prefix works only with JAEGER_OVER_HTTP, JAEGER_OVER_BINARY
+        // otherwise it will be shown as simple global tag
         "process.process-tag-key-1" => "process-value-1", // all tags with `process.` prefix goes to process section
         "process.process-tag-key-2" => "process-value-2", // all tags with `process.` prefix goes to process section
         "global-tag-key-1" => "global-tag-value-1", // this tag will be appended to all spans
         "global-tag-key-2" => "global-tag-value-2", // this tag will be appended to all spans
     ],
-    // The way how to send data to Jaeger Agent
-    // Available options:
-    // - Config::JAEGER_OVER_BINARY
-    // - Config::ZIPKIN_OVER_COMPACT - default
+    "local_agent" => [
+        "reporting_host" => "localhost",
+//        ZIPKIN_OVER_COMPACT:
+//        "reporting_port" => 5775
+//        JAEGER_OVER_BINARY:
+        "reporting_port" => 6832
+//        JAEGER_OVER_HTTP:
+//        "reporting_port" => 14268
+    ],
+//     Different ways to send data to Jaeger Agent. Available options (Config::ZIPKIN_OVER_COMPACT - default):
+//    'dispatch_mode' => Config::ZIPKIN_OVER_COMPACT,
     'dispatch_mode' => Config::JAEGER_OVER_BINARY,
+//    'dispatch_mode' => Config::JAEGER_OVER_HTTP,
 ];
