@@ -21,6 +21,4 @@ abstract class AbstractReporterFactory implements ReporterFactoryInterface
     {
         $this->config = $config;
     }
-
-
 }

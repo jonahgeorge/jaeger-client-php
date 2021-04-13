@@ -22,7 +22,12 @@ class JaegerReporterFactory extends AbstractReporterFactory implements ReporterF
             $this->config->getLogger()
         );
 
-        $transport = new TBufferedTransport($udp, $this->config->getMaxBufferLength(), $this->config->getMaxBufferLength());
+        $transport = new TBufferedTransport(
+            $udp,
+            $this->config->getMaxBufferLength(),
+            $this->config->getMaxBufferLength()
+        );
+
         try {
             $transport->open();
         } catch (TTransportException $e) {

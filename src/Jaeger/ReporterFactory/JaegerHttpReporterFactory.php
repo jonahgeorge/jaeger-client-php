@@ -1,18 +1,13 @@
 <?php
 
-
 namespace Jaeger\ReporterFactory;
-
 
 use Jaeger\AgentClient\HttpAgentClient;
 use Jaeger\Reporter\JaegerReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sender\JaegerSender;
-use Jaeger\Thrift\Agent\AgentClient;
-use Jaeger\ThriftUdpTransport;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Transport\TBufferedTransport;
 use Thrift\Transport\TCurlClient;
 
 class JaegerHttpReporterFactory extends AbstractReporterFactory implements ReporterFactoryInterface
