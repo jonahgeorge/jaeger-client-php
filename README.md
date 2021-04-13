@@ -93,6 +93,58 @@ Cache component is passed to `Jaeger\Config` trough its constructor.
     ]
 ],
 ```
+## Dispatch mode
+
+The library supports 2 ways of sending data to Jaeger Agent:  
+
+1. `Zipkin.thrift` over Compact protocol (default)
+2. `Jaeger.thrift` over Binary protocol
+
+If you want to enable "`Jaeger.thrift` over Binary protocol" one, than
+you need to set `dispatch_mode` config option or `JAEGER_DISPATCH_MODE` env
+variable.
+
+Allowed values for `dispatch_mode` are:
+- `jaeger_over_binary`
+- `zipkin_over_compact`
+
+There are 2 constants available, so it is better to use them:
+```php
+class Config
+{
+    const JAEGER_OVER_BINARY = "jaeger_over_binary";
+    const ZIPKIN_OVER_COMPACT = "zipkin_over_compact";
+    ...
+}
+```
+
+A possible config with custom `dispatch_mode` can look like this:
+```php
+<?php
+// config.php
+use Jaeger\Config;
+
+return [
+    'sampler' => [
+        'type' => Jaeger\SAMPLER_TYPE_CONST,
+        'param' => true,
+    ],
+    'logging' => true,
+    "tags" => [
+        "process.process-tag-key-1" => "process-value-1", // all tags with `process.` prefix goes to process section
+        "process.process-tag-key-2" => "process-value-2", // all tags with `process.` prefix goes to process section
+        "global-tag-key-1" => "global-tag-value-1", // this tag will be appended to all spans
+        "global-tag-key-2" => "global-tag-value-2", // this tag will be appended to all spans
+    ],
+    // The way how to send data to Jaeger Agent
+    // Available options:
+    // - Config::JAEGER_OVER_BINARY
+    // - Config::ZIPKIN_OVER_COMPACT - default
+    'dispatch_mode' => Config::JAEGER_OVER_BINARY,
+];
+```
+
+The full example you can see at `examples` directory.
 
 ## Testing
 

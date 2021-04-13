@@ -3,7 +3,7 @@
 
 namespace Jaeger\Tests\Sender;
 
-use Jaeger\Sender\JaegerThriftSender;
+use Jaeger\Sender\JaegerSender;
 use Jaeger\Span;
 use Jaeger\SpanContext;
 use Jaeger\Thrift\Agent\AgentClient;
@@ -40,7 +40,7 @@ class JaegerThriftSenderTest extends TestCase
         $span->method('getContext')->willReturn($this->context);
 
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerThriftSender($client);
+        $sender = new JaegerSender($client);
 
         $client
             ->expects(self::exactly(1))
@@ -55,7 +55,7 @@ class JaegerThriftSenderTest extends TestCase
 
     public function testEmitBatch() {
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerThriftSender($client);
+        $sender = new JaegerSender($client);
 
         $span = $this->createMock(Span::class);
         $span->method('getOperationName')->willReturn('dummy-operation');

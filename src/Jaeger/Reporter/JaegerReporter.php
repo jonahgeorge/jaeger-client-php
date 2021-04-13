@@ -5,7 +5,7 @@ namespace Jaeger\Reporter;
 use Jaeger\Sender\SenderInterface;
 use Jaeger\Span;
 
-class JaegerThriftReporter implements ReporterInterface
+class JaegerReporter implements ReporterInterface
 {
     /**
      * @var SenderInterface

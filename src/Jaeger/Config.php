@@ -4,26 +4,20 @@ namespace Jaeger;
 
 use Exception;
 use Jaeger\Reporter\CompositeReporter;
-use Jaeger\Reporter\JaegerThriftReporter;
 use Jaeger\Reporter\LoggingReporter;
-use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
+use Jaeger\ReporterFactory\JaegerReporterFactory;
+use Jaeger\ReporterFactory\ZipkinReporterFactory;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
 use Jaeger\Sampler\RateLimitingSampler;
 use Jaeger\Sampler\SamplerInterface;
-use Jaeger\Sender\JaegerThriftSender;
-use Jaeger\Sender\SenderInterface;
-use Jaeger\Sender\UdpSender;
-use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Util\RateLimiter;
 use OpenTracing\GlobalTracer;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
-use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
 
 class Config
@@ -175,18 +169,11 @@ class Config
 
         switch ($this->config["dispatch_mode"]) {
             case self::JAEGER_OVER_BINARY:
-                $protocol = new TBinaryProtocol($transport);
-                $client = new AgentClient($protocol);
-                $this->logger->debug('Initializing Jaeger Tracer with Jaeger over Binary reporter');
-                $sender = new JaegerThriftSender($client, $this->logger);
-                $reporter = new JaegerThriftReporter($sender);
+                $reporter = (new JaegerReporterFactory($transport, $this->logger))->createReporter();
                 break;
             case self::ZIPKIN_OVER_COMPACT:
-                $protocol = new TCompactProtocol($transport);
-                $client = new AgentClient($protocol);
-                $this->logger->debug('Initializing Jaeger Tracer with Zipkin over Compact reporter');
-                $sender = new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
-                $reporter = new RemoteReporter($sender);
+                $reporter = (new ZipkinReporterFactory($transport, $this->logger, $this->getMaxBufferLength()))
+                    ->createReporter();
                 break;
             default:
                 throw new \RuntimeException(
