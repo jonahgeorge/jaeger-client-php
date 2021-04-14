@@ -18,16 +18,20 @@ use OpenTracing\GlobalTracer;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Thrift\Exception\TTransportException;
-use Thrift\Transport\TBufferedTransport;
-use Thrift\Transport\TCurlClient;
-use Thrift\Transport\THttpClient;
 
 class Config
 {
-    const JAEGER_OVER_BINARY = "jaeger_over_binary";
-    const JAEGER_OVER_HTTP   = "jaeger_over_http";
-    const ZIPKIN_OVER_COMPACT = "zipkin_over_compact";
+    const ZIPKIN_OVER_COMPACT_UDP   = "zipkin_over_compact_udp";
+    const JAEGER_OVER_BINARY_UDP    = "jaeger_over_binary_udp";
+    const JAEGER_OVER_BINARY_HTTP   = "jaeger_over_binary_http";
+
+    /**
+     * @return string[]
+     */
+    public static function getAvailableDispatchModes()
+    {
+        return [self::ZIPKIN_OVER_COMPACT_UDP, self::JAEGER_OVER_BINARY_UDP, self::JAEGER_OVER_BINARY_HTTP];
+    }
 
     /**
      * @var array
@@ -81,7 +85,7 @@ class Config
         $this->setConfigFromEnv();
 
         if (empty($this->config["dispatch_mode"])) {
-            $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT;
+            $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT_UDP;
         }
 
         $this->serviceName = $this->config['service_name'] ?? $serviceName;
@@ -167,23 +171,21 @@ class Config
     private function getReporter(): ReporterInterface
     {
         switch ($this->config["dispatch_mode"]) {
-            case self::JAEGER_OVER_BINARY:
+            case self::JAEGER_OVER_BINARY_UDP:
                 $reporter = (new JaegerReporterFactory($this))->createReporter();
                 break;
-            case self::ZIPKIN_OVER_COMPACT:
+            case self::ZIPKIN_OVER_COMPACT_UDP:
                 $reporter = (new ZipkinReporterFactory($this))->createReporter();
                 break;
-            case self::JAEGER_OVER_HTTP:
+            case self::JAEGER_OVER_BINARY_HTTP:
                 $reporter = (new JaegerHttpReporterFactory($this))->createReporter();
                 break;
             default:
                 throw new \RuntimeException(
                     sprintf(
-                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s, %s, %s",
+                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s",
                         $this->config["dispatch_mode"],
-                        self::JAEGER_OVER_BINARY,
-                        self::JAEGER_OVER_HTTP,
-                        self::ZIPKIN_OVER_COMPACT
+                        implode(", ", Config::getAvailableDispatchModes())
                     )
                 );
         }
@@ -256,8 +258,11 @@ class Config
         $port = $this->getLocalAgentGroup()['reporting_port'] ?? null;
         if (empty($this->getLocalAgentGroup()['reporting_port'])) {
             switch ($this->config['dispatch_mode']) {
-                case self::JAEGER_OVER_BINARY:
+                case self::JAEGER_OVER_BINARY_UDP:
                     $port = DEFAULT_JAEGER_THRIFT_REPORTING_PORT;
+                    break;
+                case self::JAEGER_OVER_BINARY_HTTP:
+                    $port = DEFAULT_JAEGER_HTTP_BINARY_REPORTING_PORT;
                     break;
                 default:
                     $port = DEFAULT_REPORTING_PORT;

@@ -18,15 +18,8 @@ return [
     ],
     "local_agent" => [
         "reporting_host" => "localhost",
-//        ZIPKIN_OVER_COMPACT:
-//        "reporting_port" => 5775
-//        JAEGER_OVER_BINARY:
-        "reporting_port" => 6832
-//        JAEGER_OVER_HTTP:
-//        "reporting_port" => 14268
+//        "reporting_port" => 6832
     ],
-//     Different ways to send data to Jaeger Agent. Available options (Config::ZIPKIN_OVER_COMPACT - default):
-//    'dispatch_mode' => Config::ZIPKIN_OVER_COMPACT,
-    'dispatch_mode' => Config::JAEGER_OVER_BINARY,
-//    'dispatch_mode' => Config::JAEGER_OVER_HTTP,
+//     Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):
+    'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
 ];
