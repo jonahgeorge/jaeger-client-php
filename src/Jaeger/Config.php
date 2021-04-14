@@ -259,13 +259,13 @@ class Config
         if (empty($this->getLocalAgentGroup()['reporting_port'])) {
             switch ($this->config['dispatch_mode']) {
                 case self::JAEGER_OVER_BINARY_UDP:
-                    $port = DEFAULT_JAEGER_THRIFT_REPORTING_PORT;
+                    $port = DEFAULT_JAEGER_UDP_BINARY_REPORTING_PORT;
                     break;
                 case self::JAEGER_OVER_BINARY_HTTP:
                     $port = DEFAULT_JAEGER_HTTP_BINARY_REPORTING_PORT;
                     break;
                 default:
-                    $port = DEFAULT_REPORTING_PORT;
+                    $port = DEFAULT_ZIPKIN_UDP_COMPACT_REPORTING_PORT;
             }
         }
         return (int)$port;
