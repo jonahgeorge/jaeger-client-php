@@ -18,6 +18,7 @@ return [
     ],
     "local_agent" => [
         "reporting_host" => "localhost",
+//        You can override port by setting local_agent.reporting_port value
 //        "reporting_port" => 6832
     ],
 //     Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):

@@ -8,13 +8,13 @@ use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sender\JaegerSender;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Transport\TCurlClient;
+use Thrift\Transport\THttpClient;
 
 class JaegerHttpReporterFactory extends AbstractReporterFactory implements ReporterFactoryInterface
 {
     public function createReporter() : ReporterInterface
     {
-        $transport = new TCurlClient(
+        $transport = new THttpClient(
             $this->config->getLocalAgentReportingHost(),
             $this->config->getLocalAgentReportingPort(),
             "/api/traces"
