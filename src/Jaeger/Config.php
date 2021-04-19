@@ -5,25 +5,34 @@ namespace Jaeger;
 use Exception;
 use Jaeger\Reporter\CompositeReporter;
 use Jaeger\Reporter\LoggingReporter;
-use Jaeger\Reporter\RemoteReporter;
 use Jaeger\Reporter\ReporterInterface;
+use Jaeger\ReporterFactory\JaegerHttpReporterFactory;
+use Jaeger\ReporterFactory\JaegerReporterFactory;
+use Jaeger\ReporterFactory\ZipkinReporterFactory;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Sampler\ProbabilisticSampler;
 use Jaeger\Sampler\RateLimitingSampler;
 use Jaeger\Sampler\SamplerInterface;
-use Jaeger\Sender\UdpSender;
-use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Util\RateLimiter;
 use OpenTracing\GlobalTracer;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Thrift\Exception\TTransportException;
-use Thrift\Protocol\TCompactProtocol;
-use Thrift\Transport\TBufferedTransport;
 
 class Config
 {
+    const ZIPKIN_OVER_COMPACT_UDP   = "zipkin_over_compact_udp";
+    const JAEGER_OVER_BINARY_UDP    = "jaeger_over_binary_udp";
+    const JAEGER_OVER_BINARY_HTTP   = "jaeger_over_binary_http";
+
+    /**
+     * @return string[]
+     */
+    public static function getAvailableDispatchModes()
+    {
+        return [self::ZIPKIN_OVER_COMPACT_UDP, self::JAEGER_OVER_BINARY_UDP, self::JAEGER_OVER_BINARY_HTTP];
+    }
+
     /**
      * @var array
      */
@@ -43,6 +52,14 @@ class Config
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
 
     /**
      * @var CacheItemPoolInterface
@@ -67,6 +84,10 @@ class Config
 
         $this->setConfigFromEnv();
 
+        if (empty($this->config["dispatch_mode"])) {
+            $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT_UDP;
+        }
+
         $this->serviceName = $this->config['service_name'] ?? $serviceName;
         if ($this->serviceName === null) {
             throw new Exception('service_name required in the config or param.');
@@ -89,6 +110,7 @@ class Config
 
         $reporter = $this->getReporter();
         $sampler = $this->getSampler();
+
 
         $tracer = $this->createTracer($reporter, $sampler);
 
@@ -148,8 +170,25 @@ class Config
      */
     private function getReporter(): ReporterInterface
     {
-        $channel = $this->getLocalAgentSender();
-        $reporter = new RemoteReporter($channel);
+        switch ($this->config["dispatch_mode"]) {
+            case self::JAEGER_OVER_BINARY_UDP:
+                $reporter = (new JaegerReporterFactory($this))->createReporter();
+                break;
+            case self::ZIPKIN_OVER_COMPACT_UDP:
+                $reporter = (new ZipkinReporterFactory($this))->createReporter();
+                break;
+            case self::JAEGER_OVER_BINARY_HTTP:
+                $reporter = (new JaegerHttpReporterFactory($this))->createReporter();
+                break;
+            default:
+                throw new \RuntimeException(
+                    sprintf(
+                        "Unsupported `dispatch_mode` value: %s. Allowed values are: %s",
+                        $this->config["dispatch_mode"],
+                        implode(", ", Config::getAvailableDispatchModes())
+                    )
+                );
+        }
 
         if ($this->getLogging()) {
             $reporter = new CompositeReporter($reporter, new LoggingReporter($this->logger));
@@ -194,37 +233,11 @@ class Config
     }
 
     /**
-     * @return UdpSender
-     */
-    private function getLocalAgentSender(): UdpSender
-    {
-        $udp = new ThriftUdpTransport(
-            $this->getLocalAgentReportingHost(),
-            $this->getLocalAgentReportingPort(),
-            $this->logger
-        );
-
-        $transport = new TBufferedTransport($udp, $this->getMaxBufferLength(), $this->getMaxBufferLength());
-        try {
-            $transport->open();
-        } catch (TTransportException $e) {
-            $this->logger->warning($e->getMessage());
-        }
-
-        $protocol = new TCompactProtocol($transport);
-        $client = new AgentClient($protocol);
-
-        $this->logger->debug('Initializing Jaeger Tracer with UDP reporter');
-
-        return new UdpSender($client, $this->getMaxBufferLength(), $this->logger);
-    }
-
-    /**
      * The UDP max buffer length.
      *
      * @return int
      */
-    private function getMaxBufferLength(): int
+    public function getMaxBufferLength(): int
     {
         return (int)($this->config['max_buffer_length'] ?? 64000);
     }
@@ -232,7 +245,7 @@ class Config
     /**
      * @return string
      */
-    private function getLocalAgentReportingHost(): string
+    public function getLocalAgentReportingHost(): string
     {
         return $this->getLocalAgentGroup()['reporting_host'] ?? DEFAULT_REPORTING_HOST;
     }
@@ -240,9 +253,22 @@ class Config
     /**
      * @return int
      */
-    private function getLocalAgentReportingPort(): int
+    public function getLocalAgentReportingPort(): int
     {
-        return (int)($this->getLocalAgentGroup()['reporting_port'] ?? DEFAULT_REPORTING_PORT);
+        $port = $this->getLocalAgentGroup()['reporting_port'] ?? null;
+        if (empty($this->getLocalAgentGroup()['reporting_port'])) {
+            switch ($this->config['dispatch_mode']) {
+                case self::JAEGER_OVER_BINARY_UDP:
+                    $port = DEFAULT_JAEGER_UDP_BINARY_REPORTING_PORT;
+                    break;
+                case self::JAEGER_OVER_BINARY_HTTP:
+                    $port = DEFAULT_JAEGER_HTTP_BINARY_REPORTING_PORT;
+                    break;
+                default:
+                    $port = DEFAULT_ZIPKIN_UDP_COMPACT_REPORTING_PORT;
+            }
+        }
+        return (int)$port;
     }
 
     /**
@@ -310,6 +336,10 @@ class Config
 
         if (isset($_ENV['JAEGER_TAGS']) && !isset($this->config["tags"])) {
             $this->config['tags'] = $_ENV['JAEGER_TAGS'];
+        }
+
+        if (isset($_ENV['JAEGER_DISPATCH_MODE']) && !isset($this->config['dispatch_mode'])) {
+            $this->config['dispatch_mode'] = $_ENV['JAEGER_DISPATCH_MODE'];
         }
 
         // reporting
