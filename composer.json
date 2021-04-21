@@ -26,7 +26,7 @@
         "php": "^7.1 || ^8.0",
         "ext-sockets": "*",
         "opentracing/opentracing": "^1.0",
-        "packaged/thrift": "^0.10",
+        "packaged/thrift": "^0.13",
         "phlib/base_convert": "^1.0",
         "psr/cache": "^1.0",
         "psr/log": "^1.0"
