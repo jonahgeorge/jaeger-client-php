@@ -106,6 +106,28 @@ class ConfigTest extends TestCase
         $config->initializeTracer();
     }
 
+    /** @test  */
+    public function shouldPassDifferentDispatchMode() {
+        foreach (Config::getAvailableDispatchModes() as $dispatchMode) {
+            $config = new Config(
+                [
+                    'sampler' => [
+                        'type' => SAMPLER_TYPE_CONST,
+                        'param' => true,
+                    ],
+                    'logging' => false,
+                    "local_agent" => [
+                        "reporting_host" => "localhost",
+                    ],
+                    'dispatch_mode' => $dispatchMode,
+                ],
+                'your-app-name'
+            );
+            $config->initializeTracer();
+            $this->expectNotToPerformAssertions();
+        }
+    }
+
     /** @test */
     public function shouldPassConfiguredTagsToTracer()
     {
