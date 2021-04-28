@@ -6,6 +6,7 @@ use Jaeger\Reporter\NullReporter;
 use Jaeger\Sampler\ConstSampler;
 use Jaeger\Span;
 use Jaeger\SpanContext;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
 use Jaeger\Tracer;
 use PHPUnit\Framework\TestCase;
 use const Jaeger\SAMPLED_FLAG;
@@ -87,6 +88,49 @@ class SpanTest extends TestCase
         ]);
 
         $this->assertEquals( 3, count($span->getTags()));
+    }
+
+    /** @test */
+    public function shouldSetDifferentTypeOfTags() {
+        $span = new Span($this->context, $this->tracer, 'test-operation');
+
+        $this->assertEquals( 0, count($span->getTags()));
+
+        $span->setTags([
+            'tag-bool1' => true,
+            'tag-bool2' => false,
+            'tag-int' => 1234567,
+            'tag-float' => 1.23456,
+            'tag-string' => "hello-world"
+        ]);
+
+        $tags = array_values($span->getTags());
+        $this->assertEquals( 5, count($tags));
+
+        $index = 0;
+        $this->assertTrue($tags[$index]->annotation_type === AnnotationType::BOOL);
+        $this->assertTrue($tags[$index]->value === true);
+        $this->assertTrue($tags[$index]->key === 'tag-bool1');
+        $index++;
+
+        $this->assertTrue($tags[$index]->annotation_type === AnnotationType::BOOL);
+        $this->assertTrue($tags[$index]->value === false);
+        $this->assertTrue($tags[$index]->key === 'tag-bool2');
+        $index++;
+
+        $this->assertTrue($tags[$index]->annotation_type === AnnotationType::I64);
+        $this->assertTrue($tags[$index]->value === 1234567);
+        $this->assertTrue($tags[$index]->key === 'tag-int');
+        $index++;
+
+        $this->assertTrue($tags[$index]->annotation_type === AnnotationType::DOUBLE);
+        $this->assertTrue($tags[$index]->value === 1.23456);
+        $this->assertTrue($tags[$index]->key === 'tag-float');
+        $index++;
+
+        $this->assertTrue($tags[$index]->annotation_type === AnnotationType::STRING);
+        $this->assertTrue($tags[$index]->value === "hello-world");
+        $this->assertTrue($tags[$index]->key === 'tag-string');
     }
 
     /** @test */

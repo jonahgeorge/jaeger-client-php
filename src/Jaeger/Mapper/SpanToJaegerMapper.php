@@ -3,6 +3,7 @@
 namespace Jaeger\Mapper;
 
 use Jaeger\Span;
+use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
 use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
 use Jaeger\Thrift\Log;
 use Jaeger\Thrift\Span as JaegerThriftSpan;
@@ -57,11 +58,36 @@ class SpanToJaegerMapper
                 continue;
             }
 
+            $type = "";
+            $vkey = "";
+            switch ($binaryAnnotationTag->annotation_type) {
+                case AnnotationType::BOOL:
+                    $type = TagType::BOOL;
+                    $vkey = "vBool";
+                    break;
+                case AnnotationType::BYTES:
+                    $type = TagType::BINARY;
+                    $vkey = "vBinary";
+                    break;
+                case AnnotationType::DOUBLE:
+                    $type = TagType::DOUBLE;
+                    $vkey = "vDouble";
+                    break;
+                case AnnotationType::I16:
+                case AnnotationType::I32:
+                case AnnotationType::I64:
+                    $type = TagType::LONG;
+                    $vkey = "vLong";
+                    break;
+                default:
+                    $type = TagType::STRING;
+                    $vkey = "vStr";
+            }
+
             $tags[] = new Tag([
                 "key" => $binaryAnnotationTag->key,
-                "vType" => TagType::STRING,
-                "vStr" => $binaryAnnotationTag->value,
-
+                "vType" => $type,
+                $vkey => $binaryAnnotationTag->value,
             ]);
         }
 

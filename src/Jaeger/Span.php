@@ -260,7 +260,7 @@ class Span implements OTSpan
             }
 
             if (!$handled) {
-                $tag = $this->makeStringTag($key, (string) $value);
+                $tag = $this->makeTag($key, $value);
                 $this->tags[$key] = $tag;
             }
         }
@@ -425,18 +425,35 @@ class Span implements OTSpan
 
     /**
      * @param string $key
-     * @param string $value
+     * @param mixed $value
      * @return BinaryAnnotation
      */
-    private function makeStringTag(string $key, string $value): BinaryAnnotation
+    private function makeTag(string $key, $value): BinaryAnnotation
     {
-        if (strlen($value) > 1024) {
-            $value = substr($value, 0, 1024);
+        $valueType = gettype($value);
+        $annotationType = null;
+        switch ($valueType) {
+            case "boolean":
+                $annotationType = AnnotationType::BOOL;
+                break;
+            case "integer":
+                $annotationType = AnnotationType::I64;
+                break;
+            case "double":
+                $annotationType = AnnotationType::DOUBLE;
+                break;
+            default:
+                $annotationType = AnnotationType::STRING;
+                $value = (string)$value;
+                if (strlen($value) > 1024) {
+                    $value = substr($value, 0, 1024);
+                }
         }
+
         return new BinaryAnnotation([
             'key' => $key,
             'value' => $value,
-            'annotation_type' => AnnotationType::STRING,
+            'annotation_type' => $annotationType,
         ]);
     }
 }
