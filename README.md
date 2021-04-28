@@ -1,4 +1,6 @@
-![Build Status](https://github.com/jonahgeorge/jaeger-client-php/workflows/Test/badge.svg) [![PHP version][packagist-img]][packagist]
+[![Build Status](https://github.com/jonahgeorge/jaeger-client-php/actions/workflows/main.yaml/badge.svg)](https://github.com/jonahgeorge/jaeger-client-php/actions/workflows/main.yaml)
+[![Package version](https://img.shields.io/packagist/v/jonahgeorge/jaeger-client-php)](https://packagist.org/packages/jonahgeorge/jaeger-client-php)
+
 
 # Jaeger Bindings for PHP OpenTracing API
 
@@ -142,11 +144,11 @@ return [
         "global-tag-key-2" => "global-tag-value-2", // this tag will be appended to all spans
     ],
     "local_agent" => [
-        "reporting_host" => "localhost", 
-//        You can override port by setting local_agent.reporting_port value   
+        "reporting_host" => "localhost",
+        // You can override port by setting local_agent.reporting_port value   
         "reporting_port" => 6832
     ],
-//     Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):
+    // Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):
     'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
 ];
 ```
@@ -175,8 +177,3 @@ Tests are located in the `tests` directory. See [tests/README.md](./tests/README
 ## License
 
 [MIT License](./LICENSE).
-
-[ci-img]: https://travis-ci.org/jonahgeorge/jaeger-client-php.svg?branch=travis
-[ci]: https://travis-ci.org/jonahgeorge/jaeger-client-php
-[packagist-img]: https://badge.fury.io/ph/jonahgeorge%2Fjaeger-client-php.svg
-[packagist]: https://badge.fury.io/ph/jonahgeorge%2Fjaeger-client-php
