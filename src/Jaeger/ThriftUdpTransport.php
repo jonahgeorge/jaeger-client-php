@@ -2,103 +2,59 @@
 
 namespace Jaeger;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Thrift\Exception\TException;
 use Thrift\Exception\TTransportException;
-use Thrift\Transport\TTransport;
+use Thrift\Transport\TSocket;
 
-class ThriftUdpTransport extends TTransport
+class ThriftUdpTransport extends TSocket
 {
-    private $socket;
-
-    /**
-     * @var string
-     */
-    private $host;
-
-    /**
-     * @var int
-     */
-    private $port;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * ThriftUdpTransport constructor.
-     * @param string $host
-     * @param int $port
-     * @param LoggerInterface $logger
-     */
-    public function __construct(string $host, int $port, LoggerInterface $logger = null)
-    {
-        $this->host = $host;
-        $this->port = $port;
-        $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        $this->logger = $logger ?? new NullLogger();
-    }
-
-    /**
-     * Whether this transport is open.
-     *
-     * @return boolean true if open
-     */
-    public function isOpen()
-    {
-        return $this->socket !== null;
-    }
-
-    /**
-     * Open the transport for reading/writing
-     *
-     * @throws TTransportException if cannot open
-     */
     public function open()
     {
-        $ok = @socket_connect($this->socket, $this->host, $this->port);
-        if ($ok === false) {
-            throw new TTransportException('socket_connect failed');
+        if ($this->isOpen()) {
+            throw new TTransportException('Socket already connected', TTransportException::ALREADY_OPEN);
+        }
+
+        if (empty($this->host_)) {
+            throw new TTransportException('Cannot open null host', TTransportException::NOT_OPEN);
+        }
+
+        if ($this->port_ <= 0) {
+            throw new TTransportException('Cannot open without port', TTransportException::NOT_OPEN);
+        }
+
+        if ($this->persist_) {
+            $this->handle_ = @pfsockopen(
+                $this->host_,
+                $this->port_,
+                $errno,
+                $errstr,
+                $this->sendTimeoutSec_ + ($this->sendTimeoutUsec_ / 1000000)
+            );
+        } else {
+            $this->handle_ = @fsockopen(
+                $this->host_,
+                $this->port_,
+                $errno,
+                $errstr,
+                $this->sendTimeoutSec_ + ($this->sendTimeoutUsec_ / 1000000)
+            );
+        }
+
+        // Connect failed?
+        if ($this->handle_ === false) {
+            $error = 'TSocket: Could not connect to ' .
+                $this->host_ . ':' . $this->port_ . ' (' . $errstr . ' [' . $errno . '])';
+            if ($this->debug_) {
+                call_user_func($this->debugHandler_, $error);
+            }
+            throw new TException($error);
         }
     }
 
-    /**
-     * Close the transport.
-     */
-    public function close()
+    public function __construct($host = 'localhost', $port = 9090, $persist = false, $debugHandler = null)
     {
-        @socket_close($this->socket);
-        $this->socket = null;
-    }
+        $host = "udp://".$host;
 
-    /**
-     * Read some data into the array.
-     *
-     * @todo
-     *
-     * @param int $len How much to read
-     * @return string The data that has been read
-     */
-    public function read($len)
-    {
-    }
-
-    /**
-     * Writes the given data out.
-     *
-     * @param string $buf The data to write
-     * @throws TTransportException if writing fails
-     */
-    public function write($buf)
-    {
-        if (!$this->isOpen()) {
-            throw new TTransportException('transport is closed');
-        }
-
-        $ok = @socket_write($this->socket, $buf);
-        if ($ok === false) {
-            throw new TTransportException('socket_write failed');
-        }
+        parent::__construct($host, $port, $persist, $debugHandler);
     }
 }
