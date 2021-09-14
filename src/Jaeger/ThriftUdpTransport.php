@@ -37,6 +37,9 @@ class ThriftUdpTransport extends TTransport
         $this->host = $host;
         $this->port = $port;
         $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if ($this->socket === false) {
+            $this->handleError("socket_create failed");
+        }
         $this->logger = $logger ?? new NullLogger();
     }
 
@@ -59,7 +62,7 @@ class ThriftUdpTransport extends TTransport
     {
         $ok = @socket_connect($this->socket, $this->host, $this->port);
         if ($ok === false) {
-            throw new TTransportException('socket_connect failed');
+            $this->handleError('socket_connect failed');
         }
     }
 
@@ -98,7 +101,15 @@ class ThriftUdpTransport extends TTransport
 
         $ok = @socket_write($this->socket, $buf);
         if ($ok === false) {
-            throw new TTransportException('socket_write failed');
+            $this->handleError("socket_write failed");
         }
+    }
+
+    public function handleError($msg)
+    {
+        $errorCode = socket_last_error($this->socket);
+        $errorMsg = socket_strerror($errorCode);
+
+        throw new TTransportException(sprintf('%s: [code - %d] %s', $msg, $errorCode, $errorMsg));
     }
 }
