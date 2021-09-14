@@ -37,4 +37,12 @@ class ThriftUdpTransportTest extends TestCase
         $this->expectExceptionMessage('transport is closed');
         $this->transport->write('hello');
     }
+
+    public function testExceptions() {
+        $this->transport->open();
+
+        $this->expectException(TTransportException::class);
+        $this->expectExceptionMessage("socket_write failed: [code - 40] Message too long");
+        $this->transport->write(str_repeat("some string", 10000));
+    }
 }
