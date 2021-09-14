@@ -38,11 +38,18 @@ class ThriftUdpTransportTest extends TestCase
         $this->transport->write('hello');
     }
 
-    public function testExceptions() {
+    public function testException() {
         $this->transport->open();
 
         $this->expectException(TTransportException::class);
-        $this->expectExceptionMessage("socket_write failed: [code - 40] Message too long");
+
+        $msgRegEx = "/socket_write failed: \[code - \d+\] Message too long/";
+        if (method_exists($this, "expectExceptionMessageRegExp")) {
+            $this->expectExceptionMessageRegExp($msgRegEx);
+        } else {
+            $this->expectExceptionMessageMatches($msgRegEx);
+        }
+
         $this->transport->write(str_repeat("some string", 10000));
     }
 }
