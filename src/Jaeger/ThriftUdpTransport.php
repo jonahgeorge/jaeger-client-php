@@ -4,7 +4,6 @@ namespace Jaeger;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
 
 class ThriftUdpTransport extends TTransport
@@ -38,7 +37,7 @@ class ThriftUdpTransport extends TTransport
         $this->port = $port;
         $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         if ($this->socket === false) {
-            $this->handleError("socket_create failed");
+            $this->handleSocketError("socket_create failed");
         }
         $this->logger = $logger ?? new NullLogger();
     }
@@ -55,14 +54,12 @@ class ThriftUdpTransport extends TTransport
 
     /**
      * Open the transport for reading/writing
-     *
-     * @throws TTransportException if cannot open
      */
     public function open()
     {
         $ok = @socket_connect($this->socket, $this->host, $this->port);
         if ($ok === false) {
-            $this->handleError('socket_connect failed');
+            $this->handleSocketError('socket_connect failed');
         }
     }
 
@@ -71,6 +68,11 @@ class ThriftUdpTransport extends TTransport
      */
     public function close()
     {
+        if (is_null($this->socket)) {
+            $this->logger->warning("can't close empty socket");
+            return ;
+        }
+
         @socket_close($this->socket);
         $this->socket = null;
     }
@@ -91,25 +93,25 @@ class ThriftUdpTransport extends TTransport
      * Writes the given data out.
      *
      * @param string $buf The data to write
-     * @throws TTransportException if writing fails
      */
     public function write($buf)
     {
         if (!$this->isOpen()) {
-            throw new TTransportException('transport is closed');
+            $this->logger->warning('transport is closed');
+            return ;
         }
 
         $ok = @socket_write($this->socket, $buf);
         if ($ok === false) {
-            $this->handleError("socket_write failed");
+            $this->handleSocketError("socket_write failed");
         }
     }
 
-    public function handleError($msg)
+    public function handleSocketError($msg)
     {
         $errorCode = socket_last_error($this->socket);
         $errorMsg = socket_strerror($errorCode);
 
-        throw new TTransportException(sprintf('%s: [code - %d] %s', $msg, $errorCode, $errorMsg));
+        $this->logger->warning(sprintf('%s: [code - %d] %s', $msg, $errorCode, $errorMsg));
     }
 }
