@@ -40,7 +40,7 @@ class JaegerThriftSenderTest extends TestCase
         $span->method('getContext')->willReturn($this->context);
 
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerSender($client);
+        $sender = new JaegerSender($client, 64000);
 
         $client
             ->expects(self::exactly(1))
@@ -55,7 +55,7 @@ class JaegerThriftSenderTest extends TestCase
 
     public function testEmitBatch() {
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerSender($client);
+        $sender = new JaegerSender($client, 64000);
 
         $span = $this->createMock(Span::class);
         $span->method('getOperationName')->willReturn('dummy-operation');
