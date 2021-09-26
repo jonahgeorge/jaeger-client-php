@@ -149,7 +149,6 @@ class JaegerSender implements SenderInterface
 
         foreach ($spans as $span) {
             $spanBufferLength = $this->getBufferLength($span);
-
             if (!empty($chunks[$chunkId]) && ($actualBufferSize + $spanBufferLength) > $this->maxBufferLength) {
                 // point to next chunk
                 ++$chunkId;
@@ -169,7 +168,7 @@ class JaegerSender implements SenderInterface
         return $chunks;
     }
 
-    private function emitJaegerBatch(array $spans) {
+    protected function emitJaegerBatch(array $spans) {
         /** @var Tag[] $tags */
         $tags = [];
 
@@ -213,14 +212,6 @@ class JaegerSender implements SenderInterface
                 "tags" => $tags
             ])
         ]);
-
-        $spanTotalSize = 0;
-        foreach ($spans as $span) {
-            $spanTotalSize += $this->getBufferLength($span);
-        }
-
-        $batchSize = $this->getBufferLength($batch);
-
 
         $this->agentClient->emitBatch($batch);
     }

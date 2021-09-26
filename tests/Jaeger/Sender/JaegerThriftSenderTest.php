@@ -4,6 +4,7 @@
 namespace Jaeger\Tests\Sender;
 
 use Jaeger\Sender\JaegerSender;
+use Jaeger\Sender\UdpSender;
 use Jaeger\Span;
 use Jaeger\SpanContext;
 use Jaeger\Thrift\Agent\AgentClient;
@@ -81,5 +82,37 @@ class JaegerThriftSenderTest extends TestCase
 
         $sender->append($span);
         $this->assertEquals(1, $sender->flush());
+    }
+
+    public function testMaxBufferLength() {
+        $tracer = $this->createMock(Tracer::class);
+        $tracer->method('getIpAddress')->willReturn('');
+        $tracer->method('getServiceName')->willReturn('');
+
+        $context = $this->createMock(SpanContext::class);
+
+        $span = $this->createMock(Span::class);
+        $span->method('getOperationName')->willReturn('dummy-operation');
+        $span->method('getTracer')->willReturn($tracer);
+        $span->method('getContext')->willReturn($context);
+
+        $client = $this->createMock(AgentClient::class);
+        $sender = $this->getMockBuilder(JaegerSender::class)->onlyMethods([
+            'emitJaegerBatch'
+        ])->setConstructorArgs([$client, 800])->getMock();
+
+        $sender->expects(self::exactly(2))
+            ->method('emitJaegerBatch')
+            ->withConsecutive(
+                [self::countOf(2)],
+                [self::countOf(1)]
+            );
+
+        // jaeger batch overhead parameter = 512
+        $sender->append($span); // 512 + 143 < 800 - chunk 1
+        $sender->append($span); // 512 + 143*2 => 798 < 800 - chunk 1
+        $sender->append($span); // 512 + 143*3 > 800 - chunk 2
+
+        self::assertEquals(3, $sender->flush());
     }
 }
