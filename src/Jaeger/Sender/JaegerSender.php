@@ -136,13 +136,15 @@ class JaegerSender implements SenderInterface
     /**
      * @param JaegerThriftSpan $span
      */
-    private function getBufferLength($span) {
+    private function getBufferLength($span)
+    {
         $memoryBuffer = new TMemoryBuffer();
         $span->write(new TBinaryProtocol($memoryBuffer));
         return $memoryBuffer->available();
     }
 
-    private function chunkSplit(array $spans): array {
+    private function chunkSplit(array $spans): array
+    {
         $actualBufferSize = $this->jaegerBatchOverheadLength;
         $chunkId = 0;
         $chunks = [];
@@ -168,7 +170,8 @@ class JaegerSender implements SenderInterface
         return $chunks;
     }
 
-    protected function emitJaegerBatch(array $spans) {
+    protected function emitJaegerBatch(array $spans)
+    {
         /** @var Tag[] $tags */
         $tags = [];
 
