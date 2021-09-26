@@ -28,7 +28,8 @@ class JaegerHttpReporterFactory extends AbstractReporterFactory implements Repor
         $protocol = new TBinaryProtocol($transport);
         $client = new HttpAgentClient($protocol);
         $this->config->getLogger()->debug('Initializing HTTP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
-        $sender = new JaegerSender($client, $this->config->getMaxBufferLength(), $this->config->getLogger());
+        $sender = new JaegerSender($client, $this->config->getLogger());
+        $sender->setMaxBufferLength($this->config->getMaxBufferLength());
         return new JaegerReporter($sender);
     }
 }

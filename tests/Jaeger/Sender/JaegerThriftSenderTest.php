@@ -41,7 +41,8 @@ class JaegerThriftSenderTest extends TestCase
         $span->method('getContext')->willReturn($this->context);
 
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerSender($client, 64000);
+        $sender = new JaegerSender($client);
+        $sender->setMaxBufferLength(64000);
 
         $client
             ->expects(self::exactly(1))
@@ -56,7 +57,8 @@ class JaegerThriftSenderTest extends TestCase
 
     public function testEmitBatch() {
         $client = $this->createMock(AgentClient::class);
-        $sender = new JaegerSender($client, 64000);
+        $sender = new JaegerSender($client);
+        $sender->setMaxBufferLength(64000);
 
         $span = $this->createMock(Span::class);
         $span->method('getOperationName')->willReturn('dummy-operation');
@@ -97,10 +99,16 @@ class JaegerThriftSenderTest extends TestCase
         $span->method('getContext')->willReturn($context);
 
         $client = $this->createMock(AgentClient::class);
-        $sender = $this->getMockBuilder(JaegerSender::class)->onlyMethods([
-            'emitJaegerBatch'
-        ])->setConstructorArgs([$client, 800])->getMock();
 
+        $mockBuilder = $this->getMockBuilder(JaegerSender::class);
+        $mockMethods = ['emitJaegerBatch'];
+        if (method_exists($mockBuilder, "onlyMethods")) {
+            $mockBuilder = $mockBuilder->onlyMethods($mockMethods);
+        } else {
+            $mockBuilder = $mockBuilder->setMethods($mockMethods);
+        }
+        $sender = $mockBuilder->setConstructorArgs([$client])->getMock();
+        $sender->setMaxBufferLength(800);
         $sender->expects(self::exactly(2))
             ->method('emitJaegerBatch')
             ->withConsecutive(

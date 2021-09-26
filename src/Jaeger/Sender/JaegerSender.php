@@ -53,11 +53,11 @@ class JaegerSender implements SenderInterface
     private $jaegerBatchOverheadLength = 512;
 
     /**
-     * The maximum length of the thrift-objects for a zipkin-batch.
+     * The maximum length of the thrift-objects for a jaeger-batch.
      *
      * @var int
      */
-    private $maxBufferLength;
+    private $maxBufferLength = 64000;
 
     /**
      * @param AgentIf $agentClient
@@ -66,12 +66,10 @@ class JaegerSender implements SenderInterface
      */
     public function __construct(
         AgentIf $agentClient,
-        int $maxBufferLength,
         LoggerInterface $logger = null,
         SpanToJaegerMapper $mapper = null
     ) {
         $this->agentClient = $agentClient;
-        $this->maxBufferLength = $maxBufferLength;
         $this->logger = $logger ?? new NullLogger();
         $this->mapper = $mapper ?? new SpanToJaegerMapper();
     }
@@ -95,6 +93,11 @@ class JaegerSender implements SenderInterface
         $this->spans = [];
 
         return $count;
+    }
+
+    public function setMaxBufferLength($maxBufferLength)
+    {
+        $this->maxBufferLength = $maxBufferLength;
     }
 
     /**
