@@ -15,6 +15,9 @@ use Jaeger\Thrift\TagType;
 use Jaeger\Tracer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Protocol\TCompactProtocol;
+use Thrift\Transport\TMemoryBuffer;
 use const Jaeger\JAEGER_HOSTNAME_TAG_KEY;
 
 class JaegerSender implements SenderInterface
@@ -44,6 +47,17 @@ class JaegerSender implements SenderInterface
      */
     private $mapper;
 
+    /**
+     * @var int
+     */
+    private $jaegerBatchOverheadLength = 512;
+
+    /**
+     * The maximum length of the thrift-objects for a jaeger-batch.
+     *
+     * @var int
+     */
+    private $maxBufferLength = 64000;
 
     /**
      * @param AgentIf $agentClient
@@ -81,6 +95,11 @@ class JaegerSender implements SenderInterface
         return $count;
     }
 
+    public function setMaxBufferLength($maxBufferLength)
+    {
+        $this->maxBufferLength = $maxBufferLength;
+    }
+
     /**
      * @param JaegerSpan[] $spans
      * @return array
@@ -110,6 +129,52 @@ class JaegerSender implements SenderInterface
             return ;
         }
 
+        $chunks = $this->chunkSplit($spans);
+        foreach ($chunks as $chunk) {
+            /** @var JaegerThriftSpan[] $chunk */
+            $this->emitJaegerBatch($chunk);
+        }
+    }
+
+    /**
+     * @param JaegerThriftSpan $span
+     */
+    private function getBufferLength($span)
+    {
+        $memoryBuffer = new TMemoryBuffer();
+        $span->write(new TBinaryProtocol($memoryBuffer));
+        return $memoryBuffer->available();
+    }
+
+    private function chunkSplit(array $spans): array
+    {
+        $actualBufferSize = $this->jaegerBatchOverheadLength;
+        $chunkId = 0;
+        $chunks = [];
+
+        foreach ($spans as $span) {
+            $spanBufferLength = $this->getBufferLength($span);
+            if (!empty($chunks[$chunkId]) && ($actualBufferSize + $spanBufferLength) > $this->maxBufferLength) {
+                // point to next chunk
+                ++$chunkId;
+
+                // reset buffer size
+                $actualBufferSize = $this->jaegerBatchOverheadLength;
+            }
+
+            if (!isset($chunks[$chunkId])) {
+                $chunks[$chunkId] = [];
+            }
+
+            $chunks[$chunkId][] = $span;
+            $actualBufferSize += $spanBufferLength;
+        }
+
+        return $chunks;
+    }
+
+    protected function emitJaegerBatch(array $spans)
+    {
         /** @var Tag[] $tags */
         $tags = [];
 

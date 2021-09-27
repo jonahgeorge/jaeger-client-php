@@ -37,6 +37,7 @@ class JaegerReporterFactory extends AbstractReporterFactory implements ReporterF
         $client = new AgentClient($protocol);
         $this->config->getLogger()->debug('Initializing UDP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
         $sender = new JaegerSender($client, $this->config->getLogger());
+        $sender->setMaxBufferLength($this->config->getMaxBufferLength());
         return new JaegerReporter($sender);
     }
 }
