@@ -21,9 +21,14 @@ use Psr\Log\NullLogger;
 
 class Config
 {
+    const IP_VERSION = "ip_version";
+
     const ZIPKIN_OVER_COMPACT_UDP   = "zipkin_over_compact_udp";
     const JAEGER_OVER_BINARY_UDP    = "jaeger_over_binary_udp";
     const JAEGER_OVER_BINARY_HTTP   = "jaeger_over_binary_http";
+
+    const IPV6 = "IPv6";
+    const IPV4 = "IPv4";
 
     /**
      * @return string[]
@@ -88,7 +93,12 @@ class Config
             $this->config["dispatch_mode"] = self::ZIPKIN_OVER_COMPACT_UDP;
         }
 
+        if (empty($this->config[Config::IP_VERSION])) {
+            $this->config[Config::IP_VERSION] = self::IPV4;
+        }
+
         $this->serviceName = $this->config['service_name'] ?? $serviceName;
+
         if ($this->serviceName === null) {
             throw new Exception('service_name required in the config or param.');
         }
@@ -324,6 +334,11 @@ class Config
         return $this->config['one_span_per_rpc'] ?? true;
     }
 
+    public function ipProtocolVersion(): string
+    {
+        return $this->config[self::IP_VERSION] ?? self::IPV4;
+    }
+
     /**
      * Sets values from env vars into config props, unless ones has been already set.
      */
@@ -366,6 +381,10 @@ class Config
 
         if (isset($_ENV['JAEGER_SAMPLER_PARAM']) && !isset($this->config['sampler']['param'])) {
             $this->config['sampler']['param'] = $_ENV['JAEGER_SAMPLER_PARAM'];
+        }
+
+        if (isset($_ENV['IP_VERSION']) && !isset($this->config[Config::IP_VERSION])) {
+            $this->config[Config::IP_VERSION] = $_ENV['IP_VERSION'];
         }
     }
 }

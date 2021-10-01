@@ -161,6 +161,43 @@ ZIPKIN_OVER_COMPACT_UDP  | 5775
 JAEGER_OVER_BINARY_UDP   | 6832
 JAEGER_OVER_BINARY_HTTP  | 14268
 
+## IPv6
+
+In case you need IPv6 support you need to set `ip_version` Config variable.
+By default, IPv4 is used. There is an alias `Config::IP_VERSION` which you can use
+as an alternative to raw `ip_version`.
+
+Example:
+
+```php
+use Jaeger\Config;
+
+$config = new Config(
+    [
+        "ip_version" => Config::IPV6, // <-- or use Config::IP_VERSION constant
+        'logging' => true,
+        'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
+    ],
+    'serviceNameExample',
+);
+$config->initializeTracer();
+```
+or
+
+```php
+use Jaeger\Config;
+
+$config = new Config(
+    [
+        Config::IP_VERSION => Config::IPV6, // <--
+        'logging' => true,
+        'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
+    ],
+    'serviceNameExample',
+);
+$config->initializeTracer();
+```
+
 
 ## Testing
 

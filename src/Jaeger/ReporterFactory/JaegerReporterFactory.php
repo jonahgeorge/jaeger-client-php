@@ -19,7 +19,8 @@ class JaegerReporterFactory extends AbstractReporterFactory implements ReporterF
         $udp = new ThriftUdpTransport(
             $this->config->getLocalAgentReportingHost(),
             $this->config->getLocalAgentReportingPort(),
-            $this->config->getLogger()
+            $this->config->getLogger(),
+            $this->config
         );
 
         $transport = new TBufferedTransport(
