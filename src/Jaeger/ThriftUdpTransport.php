@@ -26,20 +26,54 @@ class ThriftUdpTransport extends TTransport
     private $logger;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * ThriftUdpTransport constructor.
      * @param string $host
      * @param int $port
      * @param LoggerInterface $logger
      */
-    public function __construct(string $host, int $port, LoggerInterface $logger = null)
+    public function __construct(string $host, int $port, LoggerInterface $logger = null, Config $config = null)
     {
+        $this->setLogger($logger);
+
+        $this->config = $config;
+
+        $ipProtocol = $this->ipProtocolVersion();
+        $this->socket = $this->createSocket($ipProtocol);
+
         $this->host = $host;
         $this->port = $port;
-        $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        if ($this->socket === false) {
+    }
+
+    protected function setLogger($logger)
+    {
+        $this->logger = $logger ?? new NullLogger();
+    }
+
+    protected function createSocket(string $ipProtocol)
+    {
+        $socketDomain = AF_INET;
+        if ($ipProtocol === Config::IPV6) {
+            $socketDomain = AF_INET6;
+        }
+
+        $socket = @socket_create($socketDomain, SOCK_DGRAM, SOL_UDP);
+        if ($socket === false) {
             $this->handleSocketError("socket_create failed");
         }
-        $this->logger = $logger ?? new NullLogger();
+        return $socket;
+    }
+
+    protected function ipProtocolVersion()
+    {
+        if (!empty($this->config)) {
+            return $this->config->ipProtocolVersion();
+        }
+        return "";
     }
 
     /**
