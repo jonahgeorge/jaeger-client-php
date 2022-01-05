@@ -7,8 +7,6 @@ use Jaeger\SpanContext;
 use const Jaeger\DEBUG_FLAG;
 use const Jaeger\SAMPLED_FLAG;
 
-use function Phlib\base_convert;
-
 class ZipkinCodec implements CodecInterface
 {
     const SAMPLED_NAME = 'X-B3-Sampled';
