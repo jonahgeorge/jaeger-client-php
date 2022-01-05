@@ -9,8 +9,6 @@ use const Jaeger\TRACE_ID_HEADER;
 use const Jaeger\BAGGAGE_HEADER_PREFIX;
 use const Jaeger\DEBUG_ID_HEADER_KEY;
 
-use function Phlib\base_convert;
-
 class TextCodec implements CodecInterface
 {
     private $urlEncoding;
