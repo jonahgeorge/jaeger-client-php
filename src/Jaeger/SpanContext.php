@@ -45,6 +45,7 @@ class SpanContext implements OTSpanContext
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->baggage);
