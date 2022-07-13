@@ -13,6 +13,8 @@ use const OpenTracing\Tags\PEER_HOST_IPV4;
 use const OpenTracing\Tags\PEER_PORT;
 use const OpenTracing\Tags\PEER_SERVICE;
 use const OpenTracing\Tags\SPAN_KIND;
+use const OpenTracing\Tags\SPAN_KIND_MESSAGE_BUS_CONSUMER;
+use const OpenTracing\Tags\SPAN_KIND_MESSAGE_BUS_PRODUCER;
 use const OpenTracing\Tags\SPAN_KIND_RPC_CLIENT;
 use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
 
@@ -294,11 +296,26 @@ class Span implements OTSpan
      */
     private function setSpanKind($value): bool
     {
-        if ($value === null || $value === SPAN_KIND_RPC_CLIENT || $value === SPAN_KIND_RPC_SERVER) {
+        $validSpanKinds = [
+            SPAN_KIND_RPC_CLIENT,
+            SPAN_KIND_RPC_SERVER,
+            SPAN_KIND_MESSAGE_BUS_CONSUMER,
+            SPAN_KIND_MESSAGE_BUS_PRODUCER,
+        ];
+
+        if ($value === null || in_array($value, $validSpanKinds, true)) {
             $this->kind = $value;
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getKind(): ?string
+    {
+        return $this->kind;
     }
 
     /**
