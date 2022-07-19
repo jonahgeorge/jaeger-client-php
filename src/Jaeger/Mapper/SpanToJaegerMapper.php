@@ -10,6 +10,10 @@ use Jaeger\Thrift\Span as JaegerThriftSpan;
 use Jaeger\Thrift\Tag;
 use Jaeger\Thrift\TagType;
 use const OpenTracing\Tags\COMPONENT;
+use const OpenTracing\Tags\PEER_HOST_IPV4;
+use const OpenTracing\Tags\PEER_PORT;
+use const OpenTracing\Tags\PEER_SERVICE;
+use const OpenTracing\Tags\SPAN_KIND;
 
 class SpanToJaegerMapper
 {
@@ -46,6 +50,43 @@ class SpanToJaegerMapper
             "vType" => TagType::STRING,
             "vStr" => $span->getComponent() ?? $span->getTracer()->getServiceName(),
         ]);
+
+        // Handle special tags
+        $peerService = $span->peer['service_name'] ?? null;
+        if ($peerService !== null) {
+            $tags[] = new Tag([
+                "key" => PEER_SERVICE,
+                "vType" => TagType::STRING,
+                "vStr" => $peerService,
+            ]);
+        }
+
+        $peerHostIpv4 = $span->peer['ipv4'] ?? null;
+        if ($peerHostIpv4 !== null) {
+            $tags[] = new Tag([
+                "key" => PEER_HOST_IPV4,
+                "vType" => TagType::STRING,
+                "vStr" => $peerHostIpv4,
+            ]);
+        }
+
+        $peerPort = $span->peer['port'] ?? null;
+        if ($peerPort !== null) {
+            $tags[] = new Tag([
+                "key" => PEER_PORT,
+                "vType" => TagType::LONG,
+                "vLong" => $peerPort,
+            ]);
+        }
+
+        $spanKind = $span->getKind();
+        if ($spanKind !== null) {
+            $tags[] = new Tag([
+                "key" => SPAN_KIND,
+                "vType" => TagType::STRING,
+                "vStr" => $spanKind,
+            ]);
+        }
 
         /** @var BinaryAnnotation[] $binaryAnnotationTags */
         $binaryAnnotationTags = $span->getTags();
