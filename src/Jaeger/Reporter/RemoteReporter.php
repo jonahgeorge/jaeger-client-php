@@ -4,8 +4,6 @@ namespace Jaeger\Reporter;
 
 use Jaeger\Sender\UdpSender;
 use Jaeger\Span;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 class RemoteReporter implements ReporterInterface
 {

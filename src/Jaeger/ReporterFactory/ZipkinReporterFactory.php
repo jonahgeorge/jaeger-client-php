@@ -9,7 +9,6 @@ use Jaeger\Sender\JaegerSender;
 use Jaeger\Sender\UdpSender;
 use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\ThriftUdpTransport;
-use Psr\Log\LoggerInterface;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TCompactProtocol;

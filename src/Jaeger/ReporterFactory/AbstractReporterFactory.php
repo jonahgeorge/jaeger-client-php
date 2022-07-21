@@ -3,7 +3,6 @@
 namespace Jaeger\ReporterFactory;
 
 use Jaeger\Config;
-use Psr\Log\LoggerInterface;
 use Thrift\Transport\TTransport;
 
 abstract class AbstractReporterFactory implements ReporterFactoryInterface
