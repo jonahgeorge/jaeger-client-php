@@ -44,6 +44,7 @@ class SpanContext implements OTSpanContext
 
     /**
      * {@inheritdoc}
+     * @return ArrayIterator
      */
     #[\ReturnTypeWillChange]
     public function getIterator()
