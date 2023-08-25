@@ -25,6 +25,7 @@ class Config
 
     const ZIPKIN_OVER_COMPACT_UDP   = "zipkin_over_compact_udp";
     const JAEGER_OVER_BINARY_UDP    = "jaeger_over_binary_udp";
+    const JAEGER_OVER_COMPACT_UDP    = "jaeger_over_compact_udp";
     const JAEGER_OVER_BINARY_HTTP   = "jaeger_over_binary_http";
 
     const IPV6 = "IPv6";
@@ -35,7 +36,12 @@ class Config
      */
     public static function getAvailableDispatchModes()
     {
-        return [self::ZIPKIN_OVER_COMPACT_UDP, self::JAEGER_OVER_BINARY_UDP, self::JAEGER_OVER_BINARY_HTTP];
+        return [
+            self::ZIPKIN_OVER_COMPACT_UDP,
+            self::JAEGER_OVER_BINARY_UDP,
+            self::JAEGER_OVER_BINARY_HTTP,
+            self::JAEGER_OVER_COMPACT_UDP,
+        ];
     }
 
     /**
@@ -176,12 +182,21 @@ class Config
     }
 
     /**
+     * @return string
+     */
+    public function getDispatchMode(): string
+    {
+        return $this->config['dispatch_mode'];
+    }
+
+    /**
      * @return ReporterInterface
      */
     private function getReporter(): ReporterInterface
     {
         switch ($this->config["dispatch_mode"]) {
             case self::JAEGER_OVER_BINARY_UDP:
+            case self::JAEGER_OVER_COMPACT_UDP:
                 $reporter = (new JaegerReporterFactory($this))->createReporter();
                 break;
             case self::ZIPKIN_OVER_COMPACT_UDP:
@@ -270,6 +285,9 @@ class Config
             switch ($this->config['dispatch_mode']) {
                 case self::JAEGER_OVER_BINARY_UDP:
                     $port = DEFAULT_JAEGER_UDP_BINARY_REPORTING_PORT;
+                    break;
+                case self::JAEGER_OVER_COMPACT_UDP:
+                    $port = DEFAULT_JAEGER_UDP_COMPACT_REPORTING_PORT;
                     break;
                 case self::JAEGER_OVER_BINARY_HTTP:
                     $port = DEFAULT_JAEGER_HTTP_BINARY_REPORTING_PORT;

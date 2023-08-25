@@ -2,7 +2,7 @@
 
 namespace Jaeger\ReporterFactory;
 
-use Jaeger\AgentClient\HttpAgentClient;
+use Jaeger\Config;
 use Jaeger\Reporter\JaegerReporter;
 use Jaeger\Reporter\ReporterInterface;
 use Jaeger\Sender\JaegerSender;
@@ -10,11 +10,12 @@ use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\ThriftUdpTransport;
 use Thrift\Exception\TTransportException;
 use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Protocol\TCompactProtocol;
 use Thrift\Transport\TBufferedTransport;
 
 class JaegerReporterFactory extends AbstractReporterFactory implements ReporterFactoryInterface
 {
-    public function createReporter() : ReporterInterface
+    public function createReporter(): ReporterInterface
     {
         $udp = new ThriftUdpTransport(
             $this->config->getLocalAgentReportingHost(),
@@ -34,7 +35,8 @@ class JaegerReporterFactory extends AbstractReporterFactory implements ReporterF
         } catch (TTransportException $e) {
             $this->config->getLogger()->warning($e->getMessage());
         }
-        $protocol = new TBinaryProtocol($transport);
+        $protocol = $this->config->getDispatchMode() === Config::JAEGER_OVER_COMPACT_UDP ?
+            new TCompactProtocol($transport) : new TBinaryProtocol($transport);
         $client = new AgentClient($protocol);
         $this->config->getLogger()->debug('Initializing UDP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
         $sender = new JaegerSender($client, $this->config->getLogger());

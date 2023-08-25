@@ -90,14 +90,14 @@ class TextCodec implements CodecInterface
         $baggage = null;
         $debugId = null;
 
-        foreach ($carrier as $key => $value) {
+        foreach ((array)$carrier as $key => $value) {
             $ucKey = strtolower($key);
 
             if ($ucKey === $this->traceIdHeader) {
                 if ($this->urlEncoding) {
                     $value = urldecode($value);
                 }
-                list($traceId, $spanId, $parentId, $flags) =
+                [$traceId, $spanId, $parentId, $flags] =
                     $this->spanContextFromString($value);
             } elseif ($this->startsWith($ucKey, $this->baggagePrefix)) {
                 if ($this->urlEncoding) {
@@ -143,7 +143,10 @@ class TextCodec implements CodecInterface
     private function spanContextToString($traceId, $spanId, $parentId, $flags)
     {
         $parentId = $parentId ?? 0;
-        return sprintf('%x:%x:%x:%x', $traceId, $spanId, $parentId, $flags);
+        if (is_int($traceId)) {
+            $traceId = sprintf('%016x', $traceId);
+        }
+        return sprintf('%s:%x:%x:%x', $traceId, $spanId, $parentId, $flags);
     }
 
     /**
@@ -163,7 +166,7 @@ class TextCodec implements CodecInterface
         }
 
         return [
-            CodecUtility::hexToInt64($parts[0]),
+            $parts[0],
             CodecUtility::hexToInt64($parts[1]),
             CodecUtility::hexToInt64($parts[2]),
             $parts[3],
