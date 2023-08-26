@@ -185,7 +185,7 @@ class TracerTest extends TestCase
         $this->tracer->inject($spanContext, TEXT_MAP, $carrier);
 
         $this->assertCount(1, $carrier);
-        $this->assertEquals('0:0:0:0', $carrier[TRACE_ID_HEADER]);
+        $this->assertEquals('0000000000000000:0:0:0', $carrier[TRACE_ID_HEADER]);
     }
 
     /** @test */

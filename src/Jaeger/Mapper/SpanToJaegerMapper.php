@@ -2,6 +2,7 @@
 
 namespace Jaeger\Mapper;
 
+use Jaeger\Codec\CodecUtility;
 use Jaeger\Span;
 use Jaeger\Thrift\Agent\Zipkin\AnnotationType;
 use Jaeger\Thrift\Agent\Zipkin\BinaryAnnotation;
@@ -155,9 +156,11 @@ class SpanToJaegerMapper
             ]);
         }
 
+        [$low, $high] = $this->extractTraceIdFromString($span->getContext()->getTraceId());
+
         return new JaegerThriftSpan([
-            "traceIdLow" => (int)$span->getContext()->getTraceId(),
-            "traceIdHigh" => 0,
+            "traceIdLow" => $low,
+            "traceIdHigh" => $high,
             "spanId" => (int)$span->getContext()->getSpanId(),
             "parentSpanId" => (int)$span->getContext()->getParentId(),
             "operationName" => $span->getOperationName(),
@@ -167,5 +170,22 @@ class SpanToJaegerMapper
             "tags" => $tags,
             "logs" => $logs
         ]);
+    }
+
+    private function extractTraceIdFromString(?string $id): array
+    {
+        if ($id === null) {
+            return [0, 0];
+        }
+
+        if (strlen($id) > 16) {
+            $traceIdLow = CodecUtility::hexToInt64(substr($id, -16, 16));
+            $traceIdHigh = CodecUtility::hexToInt64(substr($id, 0, 16));
+        } else {
+            $traceIdLow = (int) CodecUtility::hexToInt64($id);
+            $traceIdHigh = 0;
+        }
+
+        return [$traceIdLow, $traceIdHigh];
     }
 }

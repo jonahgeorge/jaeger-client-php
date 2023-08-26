@@ -34,7 +34,7 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
     public function setUp(): void
     {
         $this->tracer = new Tracer($this->serviceName, new NullReporter, new ConstSampler);
-        $this->context = new SpanContext(0, 0, 0, SAMPLED_FLAG);
+        $this->context = new SpanContext('5f2c2ea76d359a165f2c2ea76d35b26b', 0, 0, SAMPLED_FLAG);
     }
 
     /**
@@ -60,6 +60,9 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
 
         $mapper = new SpanToJaegerMapper();
         $thriftSpan = $mapper->mapSpanToJaeger($span);
+
+        $this->assertSame(6857907629205068310, $thriftSpan->traceIdHigh);
+        $this->assertSame(6857907629205074539, $thriftSpan->traceIdLow);
 
         $index = 0;
         $this->assertEquals($thriftSpan->tags[$index]->key, "component");

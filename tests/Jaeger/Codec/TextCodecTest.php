@@ -29,6 +29,16 @@ class TextCodecTest extends TestCase
 
         $this->assertCount(1 , $carrier);
         $this->assertArrayHasKey(TRACE_ID_HEADER, $carrier);
+        $this->assertSame('trace-id:0:0:0', $carrier[TRACE_ID_HEADER]);
+    }
+
+    public function testTraceIdConvertToHex(): void
+    {
+        $context = new SpanContext(3003082921159205154, 'span-id', null, null);
+        $carrier = [];
+
+        $this->textCodec->inject($context, $carrier);
+        $this->assertSame('29ad18017abca122:0:0:0', $carrier[TRACE_ID_HEADER]);
     }
 
     /**
@@ -95,7 +105,7 @@ class TextCodecTest extends TestCase
                 [
                     TRACE_ID_HEADER => '32834e4115071776:f7802330248418d:f123456789012345:1'
                 ],
-                "3639838965278119798",
+                "32834e4115071776",
                 "1114643325879075213",
                 "-1070935975401544891",
                 1,
@@ -107,7 +117,7 @@ class TextCodecTest extends TestCase
                     TRACE_ID_HEADER => '32834e4115071776:f7802330248418d:f123456789012345:1',
                     BAGGAGE_HEADER_PREFIX . 'baggage-1' => 'https://testdomain.sk',
                 ],
-                "3639838965278119798",
+                "32834e4115071776",
                 "1114643325879075213",
                 "-1070935975401544891",
                 1,
@@ -119,7 +129,7 @@ class TextCodecTest extends TestCase
                     TRACE_ID_HEADER => '32834e4115071776:f7802330248418d:f123456789012345:1',
                     BAGGAGE_HEADER_PREFIX . 'baggage-1' => 'https%3A%2F%2Ftestdomain.sk',
                 ],
-                "3639838965278119798",
+                "32834e4115071776",
                 "1114643325879075213",
                 "-1070935975401544891",
                 1,
