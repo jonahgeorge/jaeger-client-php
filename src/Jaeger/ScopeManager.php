@@ -38,7 +38,7 @@ class ScopeManager implements OTScopeManager
      * Sets the scope as active.
      * @param OTScope|null $scope
      */
-    public function setActive(OTScope $scope = null)
+    public function setActive(?OTScope $scope = null)
     {
         $this->active = $scope;
     }

@@ -87,9 +87,9 @@ class Config
      */
     public function __construct(
         array $config,
-        string $serviceName = null,
-        LoggerInterface $logger = null,
-        CacheItemPoolInterface $cache = null
+        ?string $serviceName = null,
+        ?LoggerInterface $logger = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $this->config = $config;
 

@@ -66,8 +66,8 @@ class JaegerSender implements SenderInterface
      */
     public function __construct(
         AgentIf $agentClient,
-        LoggerInterface $logger = null,
-        SpanToJaegerMapper $mapper = null
+        ?LoggerInterface $logger = null,
+        ?SpanToJaegerMapper $mapper = null
     ) {
         $this->agentClient = $agentClient;
         $this->logger = $logger ?? new NullLogger();

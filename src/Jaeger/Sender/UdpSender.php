@@ -62,7 +62,7 @@ class UdpSender
     public function __construct(
         AgentClient $client,
         int $maxBufferLength,
-        LoggerInterface $logger = null
+        ?LoggerInterface $logger = null
     ) {
         $this->client = $client;
         $this->maxBufferLength = $maxBufferLength;

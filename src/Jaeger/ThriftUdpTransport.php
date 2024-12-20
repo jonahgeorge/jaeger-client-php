@@ -36,7 +36,7 @@ class ThriftUdpTransport extends TTransport
      * @param int $port
      * @param LoggerInterface $logger
      */
-    public function __construct(string $host, int $port, LoggerInterface $logger = null, Config $config = null)
+    public function __construct(string $host, int $port, ?LoggerInterface $logger = null, ?Config $config = null)
     {
         $this->setLogger($logger);
 
