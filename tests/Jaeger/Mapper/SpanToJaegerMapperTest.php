@@ -169,4 +169,54 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider traceIdProvider
+     * @param string $traceId
+     * @param int $expectedTraceIdHigh
+     * @param int $expectedTraceIdLow
+     * @return void
+     */
+    public function testShouldCalculateTraceIdHighAndTraceIdLowCorrectly(
+        string $traceId,
+        int $expectedTraceIdHigh,
+        int $expectedTraceIdLow,
+    ): void
+    {
+        $spanContext = new SpanContext($traceId, 0, 0, SAMPLED_FLAG);
+
+        $span = new Span($spanContext, $this->tracer, 'test-operation');
+
+        $mapper = new SpanToJaegerMapper();
+        $thriftSpan = $mapper->mapSpanToJaeger($span);
+
+        $this->assertSame($expectedTraceIdHigh, $thriftSpan->traceIdHigh);
+        $this->assertSame($expectedTraceIdLow, $thriftSpan->traceIdLow);
+    }
+
+    public function traceIdProvider(): array
+    {
+        return [
+            '32 characters: common' => [
+                'traceId' => '5f2c2ea76d359a165f2c2ea76d35b26b',
+                'expectedTraceIdHigh' => 6857907629205068310,
+                'expectedTraceIdLow' => 6857907629205074539,
+            ],
+            '31 characters: with leading zero' => [
+                'traceId' => '069c546b712128195ba747583accf42c',
+                'expectedTraceIdHigh' => 476348481030662169,
+                'expectedTraceIdLow' => 6604325822831326252,
+            ],
+            '31 characters: short' => [
+                'traceId' => '69c546b712128195ba747583accf42c',
+                'expectedTraceIdHigh' => 476348481030662169,
+                'expectedTraceIdLow' => 6604325822831326252,
+            ],
+            '16 characters: common' => [
+                'traceId' => '5ba747583accf42c',
+                'expectedTraceIdHigh' => 0,
+                'expectedTraceIdLow' => 6604325822831326252,
+            ],
+        ];
+    }
 }
