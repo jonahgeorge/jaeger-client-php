@@ -180,7 +180,7 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
     public function testShouldCalculateTraceIdHighAndTraceIdLowCorrectly(
         string $traceId,
         int $expectedTraceIdHigh,
-        int $expectedTraceIdLow,
+        int $expectedTraceIdLow
     ): void
     {
         $spanContext = new SpanContext($traceId, 0, 0, SAMPLED_FLAG);
