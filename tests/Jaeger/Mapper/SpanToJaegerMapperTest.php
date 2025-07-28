@@ -173,15 +173,11 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider traceIdProvider
      * @param string $traceId
-     * @param int $expectedTraceIdHigh
-     * @param int $expectedTraceIdLow
+     * @param int $high
+     * @param int $low
      * @return void
      */
-    public function testShouldCalculateTraceIdHighAndTraceIdLowCorrectly(
-        string $traceId,
-        int $expectedTraceIdHigh,
-        int $expectedTraceIdLow
-    ): void
+    public function testShouldCalculateTraceIdHighAndLow(string $traceId, int $high, int $low): void
     {
         $spanContext = new SpanContext($traceId, 0, 0, SAMPLED_FLAG);
 
@@ -190,8 +186,8 @@ class SpanToJaegerMapperTest extends \PHPUnit\Framework\TestCase
         $mapper = new SpanToJaegerMapper();
         $thriftSpan = $mapper->mapSpanToJaeger($span);
 
-        $this->assertSame($expectedTraceIdHigh, $thriftSpan->traceIdHigh);
-        $this->assertSame($expectedTraceIdLow, $thriftSpan->traceIdLow);
+        $this->assertSame($high, $thriftSpan->traceIdHigh);
+        $this->assertSame($low, $thriftSpan->traceIdLow);
     }
 
     public function traceIdProvider(): array
